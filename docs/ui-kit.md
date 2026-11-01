@@ -132,18 +132,18 @@ phrase, such as "Dağların qoynunda _yeni ev_".
 Fluid between 320 px and 1440 px viewports. Each step is a Tailwind `--text-*`
 token with its line height, tracking and weight.
 
-| Token        | Size                                                        | Line height | Tracking | Weight | Use                             |
-| ------------ | ----------------------------------------------------------- | ----------- | -------- | ------ | ------------------------------- |
-| `display-xl` | `clamp(3rem, 1.86rem + 5.71vw, 7rem)`                       | 0.95        | -0.025em | 300    | Hero headline                   |
-| `display`    | `clamp(2.25rem, 1.71rem + 2.68vw, 4.125rem)`                | 1.05        | -0.02em  | 300    | Section headings (h2)           |
-| `heading`    | `clamp(1.5rem, 1.29rem + 1.07vw, 2.25rem)`                  | 1.15        | -0.01em  | 300    | Sub-headings (h3), card titles  |
-| `title`      | `clamp(1.125rem, 1.05rem + 0.36vw, 1.375rem)`               | 1.3         | 0        | 400    | Small headings (h4), list items |
-| `stat`       | `clamp(2.5rem, 2.07rem + 2.14vw, 4rem)`                     | 1           | -0.02em  | 300    | `Stat` numerals                 |
-| `body-lg`    | `clamp(1.125rem, 1.09rem + 0.18vw, 1.25rem)`                | 1.6         | 0        | 400    | Lead paragraphs                 |
-| `body`       | `1.0625rem` (17 px)                                         | 1.6         | 0        | 400    | Body text                       |
-| `small`      | `0.9375rem` (15 px)                                         | 1.5         | 0        | 400    | Captions, meta, helper text     |
-| `eyebrow`    | `0.8125rem` (13 px)                                         | 1.4         | 0.14em   | 500    | Eyebrows, uppercase             |
-| `wordmark`   | `min(calc((100vw - 2 * var(--spacing-gutter)) / 6), 15rem)` | 0.9         | -0.03em  | 300    | Footer wordmark, fits the width |
+| Token        | Size                                          | Line height | Tracking | Weight | Use                             |
+| ------------ | --------------------------------------------- | ----------- | -------- | ------ | ------------------------------- |
+| `display-xl` | `clamp(3rem, 1.86rem + 5.71vw, 7rem)`         | 0.95        | -0.025em | 300    | Hero headline                   |
+| `display`    | `clamp(2.25rem, 1.71rem + 2.68vw, 4.125rem)`  | 1.05        | -0.02em  | 300    | Section headings (h2)           |
+| `heading`    | `clamp(1.5rem, 1.29rem + 1.07vw, 2.25rem)`    | 1.15        | -0.01em  | 300    | Sub-headings (h3), card titles  |
+| `title`      | `clamp(1.125rem, 1.05rem + 0.36vw, 1.375rem)` | 1.3         | 0        | 400    | Small headings (h4), list items |
+| `stat`       | `clamp(2.5rem, 2.07rem + 2.14vw, 4rem)`       | 1           | -0.02em  | 300    | `Stat` numerals                 |
+| `body-lg`    | `clamp(1.125rem, 1.09rem + 0.18vw, 1.25rem)`  | 1.6         | 0        | 400    | Lead paragraphs                 |
+| `body`       | `1.0625rem` (17 px)                           | 1.6         | 0        | 400    | Body text                       |
+| `small`      | `0.9375rem` (15 px)                           | 1.5         | 0        | 400    | Captions, meta, helper text     |
+| `eyebrow`    | `0.8125rem` (13 px)                           | 1.4         | 0.14em   | 500    | Eyebrows, uppercase             |
+| `wordmark`   | `min(100cqi / 6, 15rem)`                      | 0.9         | -0.03em  | 300    | Footer wordmark, fits the width |
 
 Rules:
 
@@ -154,8 +154,10 @@ Rules:
   lists so the units line up; never fake lining figures with another font
 - The wordmark size is derived from a measurement: "Kalbajar City" in Alethia
   Next Light at -0.03em tracking is 5.91 em wide, so dividing the available
-  width by 6 fits it with about 1.5 % to spare, scrollbar included. Re-measure
-  when the text or the logo changes
+  width by 6 fits it with about 1.5 % to spare. The width is the `Wordmark`
+  wrapper's (`100cqi`, an inline-size container), not the viewport's: `100vw`
+  counts a classic scrollbar, and at 320 px that overflowed the container by
+  10 px (measured 2026-11-01). Re-measure when the text or the logo changes
 - Azerbaijani text is set with `lang="az"` so `İ`/`i` and `I`/`ı` case
   correctly under `uppercase`. Eyebrows in Russian keep the same tracking
 

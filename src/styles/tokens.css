@@ -105,7 +105,8 @@
   --text-eyebrow--letter-spacing: 0.14em;
   --text-eyebrow--font-weight: 500;
 
-  --text-wordmark: min(calc((100vw - 2 * var(--spacing-gutter)) / 6), 15rem);
+  /* 100cqi: the Wordmark component's wrapper is an inline-size container. */
+  --text-wordmark: min(100cqi / 6, 15rem);
   --text-wordmark--line-height: 0.9;
   --text-wordmark--letter-spacing: -0.03em;
   --text-wordmark--font-weight: 300;
@@ -168,8 +169,10 @@
   }
 }
 
-/* Dark set for a section and its subtree. Components never branch on tone. */
-[data-tone="night"] {
+/* Dark set for a section and its subtree. Components never branch on tone.
+   The header uses it too while it is transparent over a hero (shell.css). */
+[data-tone="night"],
+html:has([data-header-overlay]) [data-site-header]:not([data-solid]) {
   --color-surface: var(--color-night);
   --color-surface-alt: var(--color-basalt);
   --color-surface-raised: var(--color-basalt);

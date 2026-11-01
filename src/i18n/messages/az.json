@@ -39,5 +39,40 @@
     "title": "Səhifə tapılmadı",
     "body": "Axtardığınız səhifə yoxdur və ya köçürülüb.",
     "home": "Ana səhifəyə qayıt"
+  },
+  "Navigation": {
+    "label": "Əsas menyu",
+    "footer": "Saytın xəritəsi",
+    "apartments": "Mənzillər",
+    "complex": "Kompleks",
+    "about": "Haqqımızda",
+    "location": "Yerləşmə",
+    "construction": "Tikinti",
+    "gallery": "Qalereya",
+    "news": "Xəbərlər",
+    "contact": "Əlaqə",
+    "privacy": "Məxfilik siyasəti"
+  },
+  "Shell": {
+    "brand": "Kalbajar City",
+    "home": "Kalbajar City, ana səhifə",
+    "skip": "Əsas məzmuna keç",
+    "call": "Zəng edin",
+    "whatsapp": "WhatsApp",
+    "openMenu": "Menyunu aç",
+    "closeMenu": "Menyunu bağla",
+    "menu": "Menyu",
+    "quickContact": "Tez əlaqə",
+    "contacts": "Əlaqə",
+    "phone": "Telefon",
+    "instagram": "Instagram",
+    "columnComplex": "Kompleks",
+    "columnUpdates": "Yeniliklər",
+    "place": "Kəlbəcər, Azərbaycan",
+    "developer": "Tikinti şirkəti: {developer}",
+    "rights": "© {year} Kalbajar City"
+  },
+  "Placeholder": {
+    "body": "Bu səhifə hazırlanır."
   }
 }

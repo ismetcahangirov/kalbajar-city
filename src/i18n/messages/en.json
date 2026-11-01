@@ -39,5 +39,40 @@
     "title": "Page not found",
     "body": "The page you are looking for does not exist or has moved.",
     "home": "Back to the home page"
+  },
+  "Navigation": {
+    "label": "Main menu",
+    "footer": "Site map",
+    "apartments": "Apartments",
+    "complex": "The complex",
+    "about": "About",
+    "location": "Location",
+    "construction": "Construction",
+    "gallery": "Gallery",
+    "news": "News",
+    "contact": "Contact",
+    "privacy": "Privacy policy"
+  },
+  "Shell": {
+    "brand": "Kalbajar City",
+    "home": "Kalbajar City, home page",
+    "skip": "Skip to content",
+    "call": "Call us",
+    "whatsapp": "WhatsApp",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menu": "Menu",
+    "quickContact": "Quick contact",
+    "contacts": "Contact",
+    "phone": "Phone",
+    "instagram": "Instagram",
+    "columnComplex": "The complex",
+    "columnUpdates": "Updates",
+    "place": "Kalbajar, Azerbaijan",
+    "developer": "Developer: {developer}",
+    "rights": "© {year} Kalbajar City"
+  },
+  "Placeholder": {
+    "body": "This page is being prepared."
   }
 }

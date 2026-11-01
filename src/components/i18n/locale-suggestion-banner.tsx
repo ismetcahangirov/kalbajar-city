@@ -64,7 +64,7 @@ export function LocaleSuggestionBanner({ copy }: { copy: SuggestionCopy }) {
     <aside
       lang={suggested}
       aria-label={text.message}
-      className="fixed inset-x-gutter bottom-gutter z-50 mx-auto flex max-w-(--container-prose) items-center gap-4 rounded-md bg-surface-raised py-2 ps-4 pe-2 text-small text-text shadow-raised"
+      className="fixed inset-x-gutter bottom-(--floating-bottom) z-50 mx-auto flex max-w-(--container-prose) items-center gap-4 rounded-md bg-surface-raised py-2 ps-4 pe-2 text-small text-text shadow-raised"
     >
       <p className="flex-1">
         {text.message}{" "}
