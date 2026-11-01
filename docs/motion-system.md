@@ -168,8 +168,10 @@ An entry hides content, so a failure to run it must not hide content forever.
   provider on public routes that use them; the console never loads them
 - Budget: motion JS under 40 KB gzip on the routes that load it (#16).
   Estimate, to be measured in #16: GSAP core ≈ 27 KB, ScrollTrigger ≈ 12 KB,
-  Lenis ≈ 4 KB, which is already at the limit, so `LineReveal` uses a small
-  in-house line splitter instead of SplitText unless the measurement shows room
+  Lenis ≈ 4 KB, about 43 KB together, so slightly over before any of our own
+  code. #16 measures the real figure and either trims (tree-shaken imports, a
+  small in-house line splitter for `LineReveal` instead of SplitText) or brings
+  the evidence for a higher budget
 - `FadeUp` and `ImageReveal` targets are registered with `ScrollTrigger.batch`,
   not one trigger per element
 - `will-change` is set only while an animation runs and removed after
