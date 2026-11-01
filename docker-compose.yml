@@ -1,0 +1,59 @@
+# Local services. Ports are offset from the defaults so this project runs next to
+# other local projects (Mebline uses 5432/9000/1025, IdeaNest 5433).
+name: kalbajar-city
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: kalbajar
+      POSTGRES_PASSWORD: kalbajar
+      POSTGRES_DB: kalbajar
+    ports:
+      - "${POSTGRES_PORT:-5442}:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kalbajar -d kalbajar"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  storage:
+    image: rustfs/rustfs:1.0.3
+    environment:
+      RUSTFS_ACCESS_KEY: kalbajar
+      RUSTFS_SECRET_KEY: kalbajar-secret
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "${STORAGE_PORT:-9010}:9000"
+      - "${STORAGE_CONSOLE_PORT:-9011}:9001"
+    volumes:
+      - storage:/data
+
+  storage-setup:
+    image: amazon/aws-cli:2.38.2
+    depends_on:
+      - storage
+    environment:
+      AWS_ACCESS_KEY_ID: kalbajar
+      AWS_SECRET_ACCESS_KEY: kalbajar-secret
+      AWS_DEFAULT_REGION: eu-central
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        for i in $$(seq 1 30); do aws --endpoint-url http://storage:9000 s3 ls >/dev/null 2>&1 && break; sleep 1; done
+        aws --endpoint-url http://storage:9000 s3 mb s3://kalbajar 2>/dev/null || true
+        aws --endpoint-url http://storage:9000 s3api put-bucket-cors --bucket kalbajar --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:3010"],"AllowedMethods":["PUT"],"AllowedHeaders":["content-type"],"MaxAgeSeconds":3600}]}'
+        aws --endpoint-url http://storage:9000 s3api put-bucket-policy --bucket kalbajar --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::kalbajar/*"}]}'
+        echo "bucket kalbajar ready"
+
+  mailpit:
+    image: axllent/mailpit:v1.31
+    ports:
+      - "${SMTP_PORT:-1035}:1025"
+      - "${MAILPIT_UI_PORT:-8035}:8025"
+
+volumes:
+  postgres:
+  storage:

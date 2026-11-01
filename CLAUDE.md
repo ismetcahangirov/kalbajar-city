@@ -36,15 +36,15 @@ gh pr create --base main --title "..." --body "..."
 
 `<type>/<kebab-case-description>`
 
-| Type | Use for |
-|---|---|
-| `feat/` | New capability |
-| `fix/` | Bug fix |
-| `chore/` | Tooling, config, dependencies |
-| `docs/` | Documentation only |
+| Type        | Use for                                |
+| ----------- | -------------------------------------- |
+| `feat/`     | New capability                         |
+| `fix/`      | Bug fix                                |
+| `chore/`    | Tooling, config, dependencies          |
+| `docs/`     | Documentation only                     |
 | `refactor/` | Restructuring with no behaviour change |
-| `test/` | Test coverage |
-| `perf/` | Performance work |
+| `test/`     | Test coverage                          |
+| `perf/`     | Performance work                       |
 
 Good: `feat/apartment-catalogue-filters`, `fix/hero-video-cls`
 Bad: `new-stuff`, `ismet-branch`, `fix2`, `patch-1`
@@ -204,13 +204,13 @@ in the design-system epic).
 
 ## 5. Performance budgets
 
-| Metric | Budget |
-|---|---|
-| Lighthouse Performance (local, median of 3) | 93+ |
-| LCP (live, mobile) | < 2.5 s |
-| CLS | < 0.05 |
-| JS per public route (gzip) | < 160 KB |
-| Hero video | never the LCP element; poster image is |
+| Metric                                      | Budget                                 |
+| ------------------------------------------- | -------------------------------------- |
+| Lighthouse Performance (local, median of 3) | 93+                                    |
+| LCP (live, mobile)                          | < 2.5 s                                |
+| CLS                                         | < 0.05                                 |
+| JS per public route (gzip)                  | < 160 KB                               |
+| Hero video                                  | never the LCP element; poster image is |
 
 A change that breaks a budget fixes it in the same pull request or does not
 merge.

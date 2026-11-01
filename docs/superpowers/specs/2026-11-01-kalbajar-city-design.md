@@ -19,16 +19,16 @@ and page it came from.
 
 ### Facts known today (from kalbajarcity.com and Instagram, 2026-11-01)
 
-| | |
-|---|---|
-| Total area | 22,634 m² on 1.13 ha |
-| Residential / non-residential | 14,192 m² / 3,603 m² |
-| Apartments | 143, in 6 buildings (9 blocks) |
-| Layouts | 9 types: 1-room 62.09 m², 2-room 74.4–102.17 m², 3-room 104.33–121.92 m², 4-room 142.79–186.9 m² |
-| Parking | 160 underground spaces |
-| Amenities | 24/7 security and CCTV, fire safety systems, playground, insulated aluminium windows, gas, lobby, closed perimeter |
-| Contacts | +994 12 434 32 32, +994 50 553 55 55 |
-| Developer | InCity Projects (@incityprojects) |
+|                               |                                                                                                                    |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Total area                    | 22,634 m² on 1.13 ha                                                                                               |
+| Residential / non-residential | 14,192 m² / 3,603 m²                                                                                               |
+| Apartments                    | 143, in 6 buildings (9 blocks)                                                                                     |
+| Layouts                       | 9 types: 1-room 62.09 m², 2-room 74.4–102.17 m², 3-room 104.33–121.92 m², 4-room 142.79–186.9 m²                   |
+| Parking                       | 160 underground spaces                                                                                             |
+| Amenities                     | 24/7 security and CCTV, fire safety systems, playground, insulated aluminium windows, gas, lobby, closed perimeter |
+| Contacts                      | +994 12 434 32 32, +994 50 553 55 55                                                                               |
+| Developer                     | InCity Projects (@incityprojects)                                                                                  |
 
 These are seed data, not constants. Everything is editable in the console.
 
@@ -36,22 +36,22 @@ These are seed data, not constants. Everything is editable in the console.
 
 The same stack as Mebline, which is in production and whose pitfalls are known.
 
-| Concern | Choice |
-|---|---|
-| Framework | Next.js 16 App Router, React 19, TypeScript `strict` + `noUncheckedIndexedAccess` |
-| Public rendering | React Server Components; HTML complete on first response (no streamed shell), data through `"use cache"` + `cacheTag`, invalidated on admin writes |
-| Client state | Redux Toolkit for UI state; RTK Query for every client-side data call (admin console, catalogue filters, forms) |
-| Backend | Next.js route handlers under `/api/v1/*`, zod validation at the boundary, one error shape |
-| Database | PostgreSQL 17 + Drizzle ORM, versioned migrations |
-| Auth | Better Auth, roles `owner`, `admin`, `editor`, `sales` |
-| Media | S3-compatible object storage, presigned uploads, `sharp` variants and blur placeholders |
-| i18n | next-intl; `az` is the default and unprefixed, `en` and `ru` are prefixed (`/en/...`, `/ru/...`) |
-| URLs | Route segments are Azerbaijani in every locale (`/menziller`, `/en/menziller`, `/ru/menziller`); slugs of content are Azerbaijani too. API paths stay English (`/api/v1/*`) |
-| Styling | Tailwind CSS v4 with design tokens; shadcn/ui inside the console only |
-| Motion | GSAP + ScrollTrigger, Lenis smooth scroll; `prefers-reduced-motion` mandatory |
-| Typeface | Alethia Next (Pepper Type), self-hosted WOFF2, subset to Latin, Latin Extended and Cyrillic |
-| Tests | Vitest (unit, route handlers), Playwright (E2E, responsive), Lighthouse CI |
-| Hosting | Coolify on Hetzner, Docker standalone build, nightly `pg_dump` — owner decision pending |
+| Concern          | Choice                                                                                                                                                                      |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework        | Next.js 16 App Router, React 19, TypeScript `strict` + `noUncheckedIndexedAccess`                                                                                           |
+| Public rendering | React Server Components; HTML complete on first response (no streamed shell), data through `"use cache"` + `cacheTag`, invalidated on admin writes                          |
+| Client state     | Redux Toolkit for UI state; RTK Query for every client-side data call (admin console, catalogue filters, forms)                                                             |
+| Backend          | Next.js route handlers under `/api/v1/*`, zod validation at the boundary, one error shape                                                                                   |
+| Database         | PostgreSQL 17 + Drizzle ORM, versioned migrations                                                                                                                           |
+| Auth             | Better Auth, roles `owner`, `admin`, `editor`, `sales`                                                                                                                      |
+| Media            | S3-compatible object storage, presigned uploads, `sharp` variants and blur placeholders                                                                                     |
+| i18n             | next-intl; `az` is the default and unprefixed, `en` and `ru` are prefixed (`/en/...`, `/ru/...`)                                                                            |
+| URLs             | Route segments are Azerbaijani in every locale (`/menziller`, `/en/menziller`, `/ru/menziller`); slugs of content are Azerbaijani too. API paths stay English (`/api/v1/*`) |
+| Styling          | Tailwind CSS v4 with design tokens; shadcn/ui inside the console only                                                                                                       |
+| Motion           | GSAP + ScrollTrigger, Lenis smooth scroll; `prefers-reduced-motion` mandatory                                                                                               |
+| Typeface         | Alethia Next (Pepper Type), self-hosted WOFF2, subset to Latin, Latin Extended and Cyrillic                                                                                 |
+| Tests            | Vitest (unit, route handlers), Playwright (E2E, responsive), Lighthouse CI                                                                                                  |
+| Hosting          | Coolify on Hetzner, Docker standalone build, nightly `pg_dump` — owner decision pending                                                                                     |
 
 ### Typeface
 
@@ -94,19 +94,19 @@ animate; every effect has a reduced-motion fallback.
 Azerbaijani is served without a prefix; English and Russian add `/en` or
 `/ru` in front of the same Azerbaijani segments.
 
-| Route | Content |
-|---|---|
-| `/` | Hero, stats, about, featured layouts, amenities, card-zoom section, location, construction progress, process, FAQ, CTA |
-| `/menziller` | Catalogue filterable by rooms, area, block, floor, status; filters live in the URL |
-| `/menziller/[slug]` | Plan, area breakdown, gallery, status, price (if enabled), inquiry form, similar apartments |
-| `/kompleks` | Interactive selector: building → block → floor → apartment, over a facade image with SVG hotspots |
-| `/haqqimizda` | The complex, amenities, developer |
-| `/yerlesme` | Map, coordinates, distances, how to get there |
-| `/tikinti` | Progress timeline by month with photos and video |
-| `/qalereya` | Categorised gallery with lightbox |
-| `/xeberler`, `/xeberler/[slug]` | Articles for search and announcements |
-| `/elaqe` | Contacts, map, call-back and viewing forms |
-| `/mexfilik-siyaseti` | Privacy notice |
+| Route                           | Content                                                                                                                |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `/`                             | Hero, stats, about, featured layouts, amenities, card-zoom section, location, construction progress, process, FAQ, CTA |
+| `/menziller`                    | Catalogue filterable by rooms, area, block, floor, status; filters live in the URL                                     |
+| `/menziller/[slug]`             | Plan, area breakdown, gallery, status, price (if enabled), inquiry form, similar apartments                            |
+| `/kompleks`                     | Interactive selector: building → block → floor → apartment, over a facade image with SVG hotspots                      |
+| `/haqqimizda`                   | The complex, amenities, developer                                                                                      |
+| `/yerlesme`                     | Map, coordinates, distances, how to get there                                                                          |
+| `/tikinti`                      | Progress timeline by month with photos and video                                                                       |
+| `/qalereya`                     | Categorised gallery with lightbox                                                                                      |
+| `/xeberler`, `/xeberler/[slug]` | Articles for search and announcements                                                                                  |
+| `/elaqe`                        | Contacts, map, call-back and viewing forms                                                                             |
+| `/mexfilik-siyaseti`            | Privacy notice                                                                                                         |
 
 Lead forms: inquiry, viewing booking, call-back. Server-validated, rate-limited,
 honeypot plus time-trap against spam, stored with UTM, locale and source page,
@@ -118,16 +118,16 @@ mobile.
 The console is in Azerbaijani and its routes are Azerbaijani too
 (`/admin/menziller`, `/admin/muracietler`, `/admin/xeberler`, `/admin/ayarlar`).
 
-| Module | Capabilities |
-|---|---|
-| Dashboard | Leads this week by source, availability by status, recent activity |
-| Inventory | Buildings, blocks, floors, layout types, apartments; bulk status and price edits; CSV import and export |
-| Content | News (rich text), construction updates, gallery, FAQ, home sections and hero media; az/en/ru tabs per entity |
-| Media library | Upload, crop focus point, alt text per locale, usage tracking |
-| Leads | List and filters, status pipeline (new → contacted → viewing → reserved → closed / lost), notes, assignee, CSV export |
-| Settings | Contacts, socials, price visibility, analytics IDs |
-| SEO | Per-page title, description, OG image overrides; redirects |
-| Users | Invite, roles, deactivate; audit log of every privileged write |
+| Module        | Capabilities                                                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Dashboard     | Leads this week by source, availability by status, recent activity                                                    |
+| Inventory     | Buildings, blocks, floors, layout types, apartments; bulk status and price edits; CSV import and export               |
+| Content       | News (rich text), construction updates, gallery, FAQ, home sections and hero media; az/en/ru tabs per entity          |
+| Media library | Upload, crop focus point, alt text per locale, usage tracking                                                         |
+| Leads         | List and filters, status pipeline (new → contacted → viewing → reserved → closed / lost), notes, assignee, CSV export |
+| Settings      | Contacts, socials, price visibility, analytics IDs                                                                    |
+| SEO           | Per-page title, description, OG image overrides; redirects                                                            |
+| Users         | Invite, roles, deactivate; audit log of every privileged write                                                        |
 
 Fully usable on a phone: the sales team works leads from mobile.
 

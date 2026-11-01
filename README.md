@@ -10,9 +10,43 @@ residential complex in Kalbajar, Azerbaijan, developed by InCity Projects.
 
 ## Documentation
 
-| File | Contents |
-|---|---|
-| `CLAUDE.md` | Contribution rules: git workflow, issues, design, code, budgets |
-| `docs/superpowers/specs/2026-11-01-kalbajar-city-design.md` | Product and architecture specification |
+| File                                                        | Contents                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| `CLAUDE.md`                                                 | Contribution rules: git workflow, issues, design, code, budgets |
+| `docs/superpowers/specs/2026-11-01-kalbajar-city-design.md` | Product and architecture specification                          |
 
-Setup and scripts are added with the project scaffold.
+## Setup
+
+Requirements: Node.js 24, pnpm 11, Docker.
+
+```bash
+pnpm install
+cp .env.example .env
+docker compose up -d     # Postgres, object storage, Mailpit
+pnpm dev                 # http://localhost:3010
+```
+
+Local ports are offset so the project runs next to others:
+
+| Service                           | Port        |
+| --------------------------------- | ----------- |
+| Next.js dev server                | 3010        |
+| E2E server (production build)     | 3011        |
+| PostgreSQL                        | 5442        |
+| Object storage (RustFS) / console | 9010 / 9011 |
+| Mailpit SMTP / UI                 | 1035 / 8035 |
+
+## Scripts
+
+| Script                         | Does                                                                |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `pnpm dev`                     | Development server                                                  |
+| `pnpm build`                   | Production build, then copies static assets into `.next/standalone` |
+| `pnpm start`                   | Runs the standalone build                                           |
+| `pnpm lint`                    | ESLint, zero warnings allowed                                       |
+| `pnpm format` / `format:check` | Prettier                                                            |
+| `pnpm typecheck`               | Route types, then `tsc --noEmit`                                    |
+| `pnpm test`                    | Vitest unit tests                                                   |
+| `pnpm test:e2e`                | Playwright against the production build (run `pnpm build` first)    |
+
+Do not run `pnpm build` while `pnpm dev` is running in the same checkout.
