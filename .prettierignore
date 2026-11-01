@@ -7,3 +7,5 @@ test-results/
 next-env.d.ts
 AGENTS.md
 *.d.json.ts
+# Written by drizzle-kit; the CI drift check compares them byte for byte.
+drizzle/meta/
