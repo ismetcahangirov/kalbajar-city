@@ -144,7 +144,7 @@
 
 :root {
   /* Durations and motion distances (motion-system.md). Mirrored in
-     src/lib/motion/tokens.ts by the motion issue. */
+     src/lib/motion/tokens.ts (a unit test keeps them in step). */
   --duration-fast: 200ms;
   --duration-base: 400ms;
   --duration-crossfade: 600ms;
@@ -155,6 +155,7 @@
   --motion-rise: 24px;
   --motion-stagger: 80ms;
   --motion-stagger-image: 120ms;
+  --motion-parallax-scale: 1.16;
 
   --focus-ring-width: 2px;
   --focus-ring-offset: 3px;

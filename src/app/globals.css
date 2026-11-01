@@ -2,6 +2,7 @@
 @import "../styles/tokens.css";
 @import "../styles/font-fallback.css";
 @import "../styles/shell.css";
+@import "../styles/motion.css";
 
 @layer base {
   html {

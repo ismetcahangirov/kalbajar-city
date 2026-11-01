@@ -17,7 +17,7 @@ scroll and one pinned moment per page that carries the drama.
 | `CLAUDE.md` → Product constraints (Design, Imagery, Responsiveness, Accessibility) | Wins every conflict                                                  |
 | [`docs/ui-kit.md`](../../../docs/ui-kit.md)                                        | Canonical: colour, type, spacing, shape, imagery, components         |
 | [`docs/motion-system.md`](../../../docs/motion-system.md)                          | Canonical: motion rules, tokens, primitives, budgets, reduced motion |
-| [`references/motion-recipes.md`](references/motion-recipes.md)                     | How to implement each primitive with GSAP and Lenis                  |
+| [`references/motion-recipes.md`](references/motion-recipes.md)                     | How each primitive is built: Web Animations API, sticky pin, Lenis   |
 | [`references/reference-pin.md`](references/reference-pin.md)                       | The measured Pinterest reference and the take/leave table            |
 | The Pinterest pin itself                                                           | Vocabulary only. Never open it to copy colours, copy or proportions  |
 

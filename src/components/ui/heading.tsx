@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type { ComponentProps } from "react";
 
 import { cx } from "@/lib/cx";
 
@@ -11,7 +11,7 @@ const sizeClass: Record<HeadingSize, string> = {
   title: "text-title",
 };
 
-type HeadingProps = ComponentPropsWithoutRef<"h2"> & {
+type HeadingProps = ComponentProps<"h2"> & {
   /** Document level. Independent of the visual size. */
   as: "h1" | "h2" | "h3" | "h4";
   size: HeadingSize;

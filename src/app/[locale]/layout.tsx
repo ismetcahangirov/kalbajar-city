@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { LocaleSuggestion } from "@/components/i18n/locale-suggestion";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { Footer } from "@/components/shell/footer";
 import { Header } from "@/components/shell/header";
 import { MobileActionBar } from "@/components/shell/mobile-action-bar";
@@ -47,6 +48,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <Footer />
           <MobileActionBar />
           <LocaleSuggestion />
+          <SmoothScroll />
         </NextIntlClientProvider>
       </body>
     </html>

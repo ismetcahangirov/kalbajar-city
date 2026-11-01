@@ -1,0 +1,164 @@
+/*
+ * Layout for the motion primitives (src/components/motion) and Lenis.
+ * Nothing here hides content: the primitives hide what is below the viewport
+ * from script, so without script or with reduced motion everything shows.
+ * Values come from tokens.css; the rules are in docs/motion-system.md.
+ */
+
+/* Lenis (from lenis/dist/lenis.css, the rules this setup uses). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+@layer components {
+  /* LineReveal: each line clips its rising copy. The padding leaves room for
+     diacritics above and descenders below (Ü, ç, ş, у); the negative margin
+     keeps the heading's height unchanged. */
+  [data-line] {
+    display: block;
+    overflow: clip;
+    padding-block: 0.12em;
+    margin-block: -0.12em;
+  }
+
+  [data-line-inner] {
+    display: block;
+  }
+
+  /* Parallax: media fills the frame; on desktop it is pre-scaled so its
+     edges never show while it drifts. */
+  [data-parallax-media] > * {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    [data-motion="parallax"][data-variant="inline"] > [data-parallax-media] {
+      scale: var(--motion-parallax-scale);
+    }
+  }
+
+  /* PinnedCardZoom, as a list: the server rendering, reduced motion and
+     no JavaScript. */
+  [data-pinned-list] {
+    display: grid;
+    gap: var(--spacing-block);
+    padding-inline: max(var(--spacing-gutter), env(safe-area-inset-left));
+  }
+
+  [data-scene-layer] {
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    aspect-ratio: var(--aspect-hero-mobile);
+  }
+
+  [data-scene-layer] > * {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  [data-scene-card] {
+    display: none;
+  }
+
+  [data-scene-caption] {
+    margin-top: calc(var(--spacing) * 4);
+  }
+
+  @media (width >= 48rem) {
+    [data-scene-layer] {
+      aspect-ratio: var(--aspect-hero);
+    }
+  }
+
+  /* PinnedCardZoom, pinned: a track one viewport tall per scene, with a
+     sticky stage on which the scenes are stacked. */
+  [data-motion="pinned"][data-pinned] {
+    height: calc(var(--scene-count) * 100svh);
+  }
+
+  [data-pinned] [data-pinned-stage] {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+  }
+
+  [data-pinned] [data-pinned-list] {
+    display: block;
+    padding-inline: 0;
+    position: relative;
+    height: 100%;
+  }
+
+  [data-pinned] [data-scene] {
+    position: absolute;
+    inset: 0;
+  }
+
+  [data-pinned] [data-scene-layer] {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  /* The card the next scene grows from: 28 vw, at least 15 rem, 4:5 on
+     phones and 16:10 from md. The scene's clip is measured from it. */
+  [data-pinned] [data-scene-card] {
+    --card-width: max(28vw, 15rem);
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: var(--card-width);
+    height: calc(var(--card-width) * 5 / 4);
+    margin: auto;
+    pointer-events: none;
+  }
+
+  /* ImageFrame (ui-kit.md): a chalk border around the card. The outer radius
+     adds the border, so the inside matches the card's clip radius. */
+  [data-scene-frame] {
+    --frame-width: calc(var(--spacing) * 2.5);
+    position: absolute;
+    inset: calc(var(--frame-width) * -1);
+    border: var(--frame-width) solid var(--color-chalk);
+    border-radius: calc(var(--radius-md) + var(--frame-width));
+    box-shadow: var(--shadow-frame);
+  }
+
+  [data-pinned] [data-scene-caption] {
+    position: absolute;
+    inset-inline-start: var(--spacing-gutter);
+    /* Clear of the mobile action bar (shell.css). */
+    bottom: calc(var(--action-bar-space) + var(--spacing-gutter));
+    max-width: min(calc(100% - 2 * var(--spacing-gutter)), var(--container-prose));
+    margin: 0;
+    padding: calc(var(--spacing) * 5) calc(var(--spacing) * 6);
+    border-radius: var(--radius-md);
+  }
+
+  @media (width >= 48rem) {
+    [data-pinned] [data-scene-card] {
+      height: calc(var(--card-width) * 10 / 16);
+    }
+  }
+
+  @media (width >= 64rem) {
+    [data-scene-frame] {
+      --frame-width: calc(var(--spacing) * 3);
+    }
+  }
+}

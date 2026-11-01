@@ -13,6 +13,20 @@ export const formats = {
 
 const NBSP = " ";
 
+// Building an Intl.NumberFormat costs far more than using one, and CountUp
+// formats on every frame.
+const numberFormats = new Map<string, Intl.NumberFormat>();
+
+function numberFormat(locale: Locale, options: Intl.NumberFormatOptions): Intl.NumberFormat {
+  const key = `${locale}${JSON.stringify(options)}`;
+  let format = numberFormats.get(key);
+  if (!format) {
+    format = new Intl.NumberFormat(locale, options);
+    numberFormats.set(key, format);
+  }
+  return format;
+}
+
 /**
  * Formats a number for the locale. Azerbaijani groups thousands with a
  * no-break space (`22 634`), as the owner's material does, not with the dot
@@ -24,7 +38,7 @@ export function formatNumber(
   locale: Locale,
   options: Intl.NumberFormatOptions = {},
 ): string {
-  const parts = new Intl.NumberFormat(locale, options).formatToParts(value);
+  const parts = numberFormat(locale, options).formatToParts(value);
   return parts
     .map((part) => (part.type === "group" && locale !== "en" ? NBSP : part.value))
     .join("");
