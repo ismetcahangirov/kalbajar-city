@@ -1,5 +1,6 @@
 import { ArrowRight, Phone } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -129,7 +130,7 @@ export default function PrimitivesPage() {
                   id={`${tone}-consent`}
                   label={
                     <>
-                      I agree to the <a href="/primitivler">privacy policy</a>
+                      I agree to the <Link href="/primitivler">privacy policy</Link>
                     </>
                   }
                 />

@@ -1,9 +1,10 @@
+import { formatNumber } from "@/i18n/format";
+import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 
 type StatProps = {
   value: number;
-  /** BCP 47 locale for number formatting (`az`, `en`, `ru`). */
-  locale: string;
+  locale: Locale;
   unit?: string;
   label: string;
   maximumFractionDigits?: number;
@@ -24,7 +25,7 @@ export function Stat({
   maximumFractionDigits = 0,
   className,
 }: StatProps) {
-  const formatted = new Intl.NumberFormat(locale, { maximumFractionDigits }).format(value);
+  const formatted = formatNumber(value, locale, { maximumFractionDigits });
   return (
     <div className={cx("flex flex-col-reverse gap-2", className)}>
       <dt className="text-small text-text-muted">{label}</dt>
