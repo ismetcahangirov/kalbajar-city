@@ -139,8 +139,11 @@ Work is tracked as epics with native sub-issues.
 
 ### Design
 
-Read `docs/ui-kit.md` and `docs/motion-system.md` before touching UI (created
-in the design-system epic).
+Public-site design is based on the **`kalbajar-design`** skill
+(`.claude/skills/kalbajar-design/SKILL.md`): use it for any UI or motion work.
+It links the two canonical documents, `docs/ui-kit.md` (colour, type, spacing,
+components) and `docs/motion-system.md` (motion rules, primitives, budgets).
+Read both before touching UI.
 
 - **Every colour, radius, shadow and duration comes from a token.** A hex
   literal in a component is a review failure
