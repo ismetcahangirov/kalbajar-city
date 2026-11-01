@@ -1,0 +1,45 @@
+/*
+ * Home page transitions that are not primitives (motion-system.md → UI
+ * transitions). Only transform-family properties and opacity move; reduced
+ * motion cuts every duration to nothing (globals.css).
+ */
+
+@layer components {
+  /* Hero media: visible from first paint, settling from a slight zoom. */
+  [data-hero-media] > :is(img, video) {
+    animation: hero-settle var(--duration-settle) var(--ease-out) both;
+  }
+
+  @keyframes hero-settle {
+    from {
+      scale: 1.06;
+    }
+  }
+
+  /* The film fades in over its poster once it can play through. */
+  [data-hero-video] {
+    opacity: 0;
+    transition: opacity var(--duration-crossfade) var(--ease-in-out);
+  }
+
+  [data-hero-video][data-ready] {
+    opacity: 1;
+  }
+
+  /* Accordion: the panel opens instantly, the plus turns into a cross. */
+  [data-accordion-icon] {
+    transition: rotate var(--duration-fast) var(--ease-standard);
+  }
+
+  details[open] > summary [data-accordion-icon] {
+    rotate: 45deg;
+  }
+
+  details > summary {
+    list-style: none;
+  }
+
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+}

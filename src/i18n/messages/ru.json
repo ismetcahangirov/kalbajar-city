@@ -5,7 +5,32 @@
   },
   "Home": {
     "title": "Kalbajar City",
-    "tagline": "Первый частный жилой комплекс в Кельбаджаре"
+    "tagline": "Первый частный жилой комплекс в Кельбаджаре",
+    "hero": {
+      "apartments": "Смотреть квартиры",
+      "viewing": "Записаться на просмотр",
+      "chips": "Коротко",
+      "chipApartments": "{count, plural, one {# квартира} few {# квартиры} many {# квартир} other {# квартиры}}",
+      "chipRooms": "{min}–{max} комнаты",
+      "chipArea": "от {area}"
+    },
+    "stats": {
+      "label": "Kalbajar City в цифрах"
+    },
+    "layouts": {
+      "rooms": "{rooms}-комнатные квартиры",
+      "plans": "{count, plural, one {# планировка} few {# планировки} many {# планировок} other {# планировки}}",
+      "all": "Все квартиры"
+    },
+    "construction": {
+      "progress": "Готовность {percent}",
+      "asOf": "Состояние: {month}",
+      "more": "Все обновления"
+    },
+    "location": {
+      "minutes": "{minutes} мин",
+      "more": "Подробнее о расположении"
+    }
   },
   "Apartments": {
     "title": "Квартиры",
