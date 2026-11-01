@@ -13,3 +13,9 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+build/
+*.pem
+.pnpm-store/
+.playwright-mcp/
+/blob-report/
+/playwright/.cache/
