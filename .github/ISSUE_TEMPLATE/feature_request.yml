@@ -1,0 +1,46 @@
+name: Feature
+description: A new capability or an improvement to an existing one
+labels: ['type: feature']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is difficult or impossible today. Describe the problem, not the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Small sub-tasks go here as a checklist. Do not open separate issues for them.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: Observable conditions a reviewer can check.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Web
+        - Admin
+        - API
+        - Design system
+        - Content
+        - SEO
+        - Performance
+        - Accessibility
+        - Security
+        - Infrastructure
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and open questions
