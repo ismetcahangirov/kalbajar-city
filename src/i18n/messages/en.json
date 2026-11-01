@@ -1,0 +1,43 @@
+{
+  "Metadata": {
+    "title": "Kalbajar City",
+    "description": "The first private residential complex in Kalbajar"
+  },
+  "Home": {
+    "title": "Kalbajar City",
+    "tagline": "The first private residential complex in Kalbajar"
+  },
+  "Apartments": {
+    "title": "Apartments",
+    "count": "{count, plural, one {# apartment} other {# apartments}}",
+    "placeholder": "The apartment catalogue is being prepared."
+  },
+  "Apartment": {
+    "title": "Apartment {slug}",
+    "placeholder": "The apartment page is being prepared."
+  },
+  "Status": {
+    "available": "Available",
+    "reserved": "Reserved",
+    "sold": "Sold"
+  },
+  "Media": {
+    "illustrative": "Illustrative"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "az": "Azərbaycanca",
+    "en": "English",
+    "ru": "Русский"
+  },
+  "LocaleSuggestion": {
+    "message": "This page is also available in English.",
+    "action": "Read in English",
+    "dismiss": "Dismiss"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "body": "The page you are looking for does not exist or has moved.",
+    "home": "Back to the home page"
+  }
+}

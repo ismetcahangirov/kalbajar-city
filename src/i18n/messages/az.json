@@ -1,0 +1,43 @@
+{
+  "Metadata": {
+    "title": "Kalbajar City",
+    "description": "Kəlbəcərin ilk özəl yaşayış kompleksi"
+  },
+  "Home": {
+    "title": "Kalbajar City",
+    "tagline": "Kəlbəcərin ilk özəl yaşayış kompleksi"
+  },
+  "Apartments": {
+    "title": "Mənzillər",
+    "count": "{count, plural, one {# mənzil} other {# mənzil}}",
+    "placeholder": "Mənzil kataloqu hazırlanır."
+  },
+  "Apartment": {
+    "title": "Mənzil {slug}",
+    "placeholder": "Mənzil səhifəsi hazırlanır."
+  },
+  "Status": {
+    "available": "Satışda",
+    "reserved": "Rezerv",
+    "sold": "Satılıb"
+  },
+  "Media": {
+    "illustrative": "İllüstrativ"
+  },
+  "LocaleSwitcher": {
+    "label": "Dil",
+    "az": "Azərbaycanca",
+    "en": "English",
+    "ru": "Русский"
+  },
+  "LocaleSuggestion": {
+    "message": "Bu səhifə Azərbaycan dilində də var.",
+    "action": "Azərbaycanca oxu",
+    "dismiss": "Bağla"
+  },
+  "NotFound": {
+    "title": "Səhifə tapılmadı",
+    "body": "Axtardığınız səhifə yoxdur və ya köçürülüb.",
+    "home": "Ana səhifəyə qayıt"
+  }
+}

@@ -52,6 +52,8 @@ export function buttonClass({
 /**
  * Pill button. Renders a link when given `href`: an internal path uses
  * next/link, anything with a scheme (tel:, https:, mailto:) a plain anchor.
+ * Internal paths must already be localised: build them with `getPathname`
+ * from `@/i18n/navigation`, never by concatenating strings.
  */
 export function Button(props: ButtonProps) {
   const { variant, size, leadingIcon, trailingIcon, className, children, ...rest } = props;
