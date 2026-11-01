@@ -96,8 +96,15 @@ always runs, waits for the rest, and fails if any job that had work to do did
 not succeed. Anyone adding a job that should block a merge adds it to
 `ci-complete`'s `needs` **and** to the list its script checks.
 
-Branch protection requires zero approving reviews while there is a single
-maintainer. Restore it to one as soon as a second person can review.
+**`main` has no branch protection.** The repository is private on a free
+GitHub plan, where protection and rulesets are unavailable (HTTP 403), and it
+must stay private because it carries a commercially licensed typeface. Until
+the owner moves it to GitHub Pro, the rules above are enforced by discipline:
+nobody pushes to `main`, and nobody merges without a green `CI complete`.
+Squash-only merging and branch deletion on merge are set in the repository
+settings. When protection becomes available, require `CI complete`, an
+up-to-date branch and resolved conversations, with zero approving reviews
+while there is a single maintainer.
 
 ---
 
