@@ -157,6 +157,11 @@ Recorded as `status: needs-decision`. None of them blocks the build.
 3. Rights to the photos, renders and video taken from Instagram and the old site
 4. Webfont licence for Alethia Next
 5. Map coordinates and the exact postal address
+6. The apartment inventory: which apartment is on which block and floor, its
+   layout and its status (until then the seed generates a demo set marked as such)
+7. The logo as vector artwork, and the sales inbox for lead notifications
+
+All of them are tracked in one issue, not one issue each.
 
 ## 8. Delivery
 
