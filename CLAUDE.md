@@ -136,6 +136,13 @@ Work is tracked as epics with native sub-issues.
 - No user-facing string is hard-coded. It comes from the message catalogue or
   from a translatable database field with `az`, `en` and `ru` values
 - Missing `en`/`ru` content falls back to `az` and is flagged in the console
+- Public links use `Link`, `redirect` and `getPathname` from
+  `@/i18n/navigation`, never `next/link` with a hand-built path. A new public
+  route is added to `pathnames` in `src/i18n/routing.ts`; a unit test fails
+  until it is
+- Numbers, areas and phone numbers are formatted with `@/i18n/format`
+  (Azerbaijani groups thousands with a space: `22 634 m²`); dates use
+  next-intl's formatter with the presets defined there
 
 ### Design
 
@@ -198,6 +205,9 @@ Read both before touching UI.
   HTML arrives complete; do not stream the main content behind `<Suspense>`
 - A component that reads the database starts with `await connection()`, so the
   build never needs a database
+- A page that needs request-time data (route params without
+  `generateStaticParams`, the database) exports `instant = false`, so it
+  renders per request and is sent complete instead of streaming
 - Client-side data goes through RTK Query. No ad-hoc `fetch` in components
 - Admin writes invalidate both the RTK Query tags and the server `cacheTag`s
   they affect

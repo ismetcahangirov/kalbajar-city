@@ -9,7 +9,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
-  use: { baseURL, trace: "retain-on-failure" },
+  // An Azerbaijani browser by default, so the locale suggestion stays hidden
+  // unless a test asks for another language.
+  use: { baseURL, trace: "retain-on-failure", locale: "az-AZ" },
   projects: [
     {
       name: "desktop",
