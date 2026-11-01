@@ -1,0 +1,51 @@
+import { Check } from "lucide-react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
+
+import { cx } from "@/lib/cx";
+
+type CheckboxProps = Omit<ComponentPropsWithoutRef<"input">, "type" | "id"> & {
+  id: string;
+  /** May contain a link, such as the consent text. */
+  label: ReactNode;
+  error?: string;
+};
+
+/** 24 px box inside a 44 px hit area, label to the right. */
+export function Checkbox({ id, label, error, className, ...props }: CheckboxProps) {
+  return (
+    <div className={cx("flex flex-col gap-1", className)}>
+      <div className="flex items-start gap-3">
+        <span className="relative grid size-target shrink-0 place-items-center">
+          <input
+            id={id}
+            type="checkbox"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${id}-error` : undefined}
+            className="peer absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+            {...props}
+          />
+          <span
+            aria-hidden
+            className={cx(
+              "grid size-6 place-items-center rounded-sm border border-border-strong bg-surface-raised text-transparent",
+              "peer-checked:border-action peer-checked:bg-action peer-checked:text-action-text",
+              "peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-offset-(--focus-ring-offset) peer-focus-visible:outline-focus peer-focus-visible:outline-solid",
+              "peer-aria-invalid:border-2 peer-aria-invalid:border-error",
+              "peer-disabled:opacity-(--opacity-disabled)",
+            )}
+          >
+            <Check width={16} height={16} strokeWidth={2} aria-hidden focusable={false} />
+          </span>
+        </span>
+        <label htmlFor={id} className="cursor-pointer py-2.5 text-body text-text">
+          {label}
+        </label>
+      </div>
+      {error && (
+        <p id={`${id}-error`} className="ps-14 text-small text-error">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
