@@ -38,8 +38,8 @@ reduce`, every primitive renders its end state, Lenis does not start, video
 ## Tokens
 
 CSS custom properties in `src/styles/tokens.css` (#15) and the same values as
-constants in `src/lib/motion/tokens.ts` (#16), so CSS transitions and GSAP
-read one source.
+constants in `src/lib/motion/tokens.ts` (#16), so CSS transitions and the
+primitives read one source. `tests/unit/motion.test.ts` keeps the two in step.
 
 ### Durations
 
@@ -55,24 +55,29 @@ read one source.
 
 ### Easings
 
-| Token             | Value                            | GSAP equivalent | Use                              |
-| ----------------- | -------------------------------- | --------------- | -------------------------------- |
-| `--ease-out`      | `cubic-bezier(0.16, 1, 0.3, 1)`  | `expo.out`      | Entries, settles, `CountUp`      |
-| `--ease-in-out`   | `cubic-bezier(0.65, 0, 0.35, 1)` | `power3.inOut`  | Wipes, crossfades, menu          |
-| `--ease-standard` | `cubic-bezier(0.2, 0, 0, 1)`     | `power2.out`    | Hover, press, small UI           |
-| (scrubbed)        | linear progress                  | `none`          | Anything tied to scroll position |
+| Token             | Value                            | Use                              |
+| ----------------- | -------------------------------- | -------------------------------- |
+| `--ease-out`      | `cubic-bezier(0.16, 1, 0.3, 1)`  | Entries, settles, `CountUp`      |
+| `--ease-in-out`   | `cubic-bezier(0.65, 0, 0.35, 1)` | Wipes, crossfades, menu          |
+| `--ease-standard` | `cubic-bezier(0.2, 0, 0, 1)`     | Hover, press, small UI           |
+| (scrubbed)        | linear progress                  | Anything tied to scroll position |
+
+The primitives pass these strings to the Web Animations API unchanged;
+`CountUp`, which animates a number, evaluates the same curve in script
+(`src/lib/motion/bezier.ts`).
 
 No spring or overshoot anywhere: stone does not bounce.
 
 ### Distances and pacing
 
-| Token                    | Value   | Use                                                                        |
-| ------------------------ | ------- | -------------------------------------------------------------------------- |
-| `--motion-rise`          | `24px`  | `FadeUp` start offset                                                      |
-| `--motion-stagger`       | `80ms`  | Between siblings in a group (`FadeUp`, `LineReveal`)                       |
-| `--motion-stagger-image` | `120ms` | Between images in a grid (`ImageReveal`)                                   |
-| `--motion-stagger-max`   | `6`     | Items after the sixth enter with the sixth                                 |
-| `--motion-trigger`       | `85%`   | An entry starts when the element's top crosses 85 % of the viewport height |
+| Token                     | Value   | Use                                                                        |
+| ------------------------- | ------- | -------------------------------------------------------------------------- |
+| `--motion-rise`           | `24px`  | `FadeUp` start offset                                                      |
+| `--motion-stagger`        | `80ms`  | Between siblings in a group (`FadeUp`, `LineReveal`)                       |
+| `--motion-stagger-image`  | `120ms` | Between images in a grid (`ImageReveal`)                                   |
+| `--motion-parallax-scale` | `1.16`  | `Parallax` pre-scale, so the media's edges never show                      |
+| `--motion-stagger-max`    | `6`     | Items after the sixth enter with the sixth                                 |
+| `--motion-trigger`        | `85%`   | An entry starts when the element's top crosses 85 % of the viewport height |
 
 The reference's own fades last about 100–500 ms (counted from a 30 fps
 recording, see the reference file). Ours are longer by choice: a calmer,
@@ -110,10 +115,13 @@ UI transitions that are not primitives (CSS only, no GSAP):
 
 Lenis, on public routes only, and only when `(pointer: fine)` matches and
 reduced motion is off. Touch devices keep native scrolling. Settings:
-`lerp: 0.1`, `wheelMultiplier: 1`, `smoothWheel: true`. Lenis drives
-ScrollTrigger through one shared `requestAnimationFrame` (GSAP's ticker), never
-two loops. Anchor links and `scrollIntoView` go through Lenis so the fixed
-header offset (`--header-height`) is respected.
+`lerp: 0.1`, `wheelMultiplier: 1`, `smoothWheel: true`. Lenis and every
+scrubbed primitive share one `requestAnimationFrame` loop
+(`src/lib/motion/frame.ts`), never two. Same-page anchor clicks glide through
+Lenis with the fixed header's offset (`scroll-padding-top`); a keyboard
+activation keeps the native jump, which also moves focus (the skip link relies
+on it). Lenis is imported dynamically by `SmoothScroll` in the public layout,
+only when it will run.
 
 ## Per-surface motion budget
 
@@ -125,16 +133,17 @@ header offset (`--header-height`) is respected.
 | Selector `/kompleks`                     | Hotspot highlight by opacity (`--duration-fast`)                                                                                       | Camera moves, zooms, pinned scroll                |
 | About, location, progress, gallery, news | `FadeUp`, `LineReveal`, `ImageReveal`; one `Parallax` per page                                                                         | Pinned sections                                   |
 | Contact `/elaqe`, privacy                | `FadeUp` on the page head                                                                                                              | Anything on the forms                             |
-| Console `/admin`                         | shadcn/ui defaults limited to opacity and transform                                                                                    | GSAP, Lenis, scroll effects                       |
+| Console `/admin`                         | shadcn/ui defaults limited to opacity and transform                                                                                    | Motion primitives, Lenis, scroll effects          |
 
 On every page: at most one pinned section and two parallax layers, and no
 more than one entry group running at a time in the viewport.
 
 ## Reduced motion
 
-`gsap.matchMedia()` with `(prefers-reduced-motion: no-preference)` creates the
-animations; the `reduce` branch creates none. In CSS, the hidden-until-ready
-styles apply only under `no-preference`.
+Every primitive checks `(prefers-reduced-motion: reduce)` before it touches
+the DOM and does nothing when it matches. Turning it on mid-visit shows every
+waiting entry, finishes running ones, stops the scrubbed primitives and Lenis,
+and unpins `PinnedCardZoom`.
 
 | Primitive        | Reduced-motion rendering                                                    |
 | ---------------- | --------------------------------------------------------------------------- |
@@ -152,29 +161,43 @@ content is in its final state (#16).
 
 ## Hidden-until-ready
 
-An entry hides content, so a failure to run it must not hide content forever.
+An entry hides content, so a failure to run it must not hide content forever,
+and hiding must never touch what a visitor can already see (rule 3).
 
-1. Server HTML has no hidden styles
-2. An inline script in `<head>` adds `js-motion` to `<html>` before first paint,
-   only when reduced motion is off
-3. CSS hides entry targets only under `html.js-motion` and
-   `(prefers-reduced-motion: no-preference)`, and never above the fold (rule 3)
-4. If the motion bundle has not initialised 3 s after `DOMContentLoaded`, the
-   class is removed and everything shows
+1. Server HTML has no hidden styles, and no CSS hides an entry target
+2. After hydration, each primitive measures its element once. Only an element
+   still entirely below the viewport is hidden, with inline styles, and
+   registered for its entry; anything in or above the viewport (including
+   after a restored scroll position) keeps its final state
+3. Hidden elements are below the viewport, so hiding them never shows as a
+   flash, and it cannot happen before the script that will reveal them runs
+4. An element near the end of the page that can never reach the trigger line
+   enters when the page is scrolled to its end
+
+This replaces the planned `js-motion` class with a 3 s fallback: CSS that runs
+before layout cannot know where the fold is, so it would either hide content
+above the fold or need a timer to undo itself.
 
 ## Performance
 
-- GSAP, ScrollTrigger and Lenis are imported dynamically by the motion
-  provider on public routes that use them; the console never loads them
-- Budget: motion JS under 40 KB gzip on the routes that load it (#16).
-  Estimate, to be measured in #16: GSAP core ≈ 27 KB, ScrollTrigger ≈ 12 KB,
-  Lenis ≈ 4 KB, about 43 KB together, so slightly over before any of our own
-  code. #16 measures the real figure and either trims (tree-shaken imports, a
-  small in-house line splitter for `LineReveal` instead of SplitText) or brings
-  the evidence for a higher budget
-- `FadeUp` and `ImageReveal` targets are registered with `ScrollTrigger.batch`,
-  not one trigger per element
-- `will-change` is set only while an animation runs and removed after
+- No animation library. Entries use the Web Animations API, which runs
+  `opacity`, `translate`, `scale` and `clip-path` keyframes with the CSS
+  easing tokens; `Parallax` and `PinnedCardZoom` write `translate`,
+  `clip-path` and `opacity` from the shared frame loop, from geometry measured
+  on resize (no layout reads per frame); the pin is CSS `position: sticky`
+- Budget: motion JS under 40 KB gzip on the routes that load it. Measured in
+  #16 (2026-11-01, `gzip -9`): the planned GSAP 3.15 core (28.3 KB) +
+  ScrollTrigger (18.0 KB) + Lenis 1.3 (5.4 KB) came to 51.7 KB before any of
+  our code, so GSAP was dropped. Now: all primitives 5.5 KB (4.1 KB as the
+  playground's route chunk), `SmoothScroll` and the frame loop about 1 KB in
+  the layout, Lenis 5.4 KB loaded only for fine pointers. About 11 KB in all
+- `FadeUp`, `LineReveal`, `ImageReveal` and `CountUp` share one
+  `IntersectionObserver`; elements entering in the same frame stagger together
+- Primitives are client components imported where they are used, so a route
+  without them does not load them. `Stat` takes a `CountUp` through its
+  `numeral` slot rather than importing it, for the same reason
+- No `will-change`: the browser promotes Web Animations of `opacity`,
+  `translate`, `scale` and `clip-path` for their duration
 - Images and video inside animated frames are sized by aspect-ratio CSS, so no
   animation causes layout shift; CLS budget stays under 0.05
 - Verify with a Performance trace while scrolling the home page at 4× CPU
