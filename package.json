@@ -6,7 +6,8 @@
     "dev": "next dev --port 3010",
     "build": "next build && node scripts/prepare-standalone.mjs",
     "start": "node .next/standalone/server.js",
-    "lint": "eslint --max-warnings=0",
+    "lint": "eslint --max-warnings=0 && pnpm lint:tokens",
+    "lint:tokens": "node scripts/check-tokens.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -15,6 +16,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "lucide-react": "^1.66.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0"

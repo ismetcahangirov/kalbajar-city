@@ -113,8 +113,15 @@ public pages:
 | `--font-weight-medium` | `AlethiaNext-Medium`  | 500    | Eyebrows, buttons, labels, emphasis |
 | (italic)               | `AlethiaNext-Italic`  | 400 i  | One emphasised phrase in a heading  |
 
-`--font-sans` is Alethia Next with a size-adjusted local fallback (#15), so the
-swap causes no layout shift. The console uses `--font-system`.
+`--font-sans` is Alethia Next with a metric-matched Arial fallback
+(`src/styles/font-fallback.css`), so the swap does not move text vertically;
+centred text may move by a few pixels sideways (measured CLS 0.0002 with the
+font files delayed by 800 ms). Italic is its own family, `--font-italic`,
+applied to `<em>`, and is not preloaded. The console uses `--font-system`.
+
+The font has no manat sign (`₼`): prices show the currency code `AZN`, or the
+sign falls back to the system font. Use `max-w-(--container-prose)` for the
+prose measure; Tailwind's `max-w-prose` is a fixed 65ch and ignores the token.
 
 The reference pairs a serif with a sans. We do not: contrast comes from size
 and weight (Light display against Regular body) and from Italic for one

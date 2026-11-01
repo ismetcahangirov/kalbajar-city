@@ -21,7 +21,8 @@ export default defineConfig({
   webServer: {
     command: "pnpm start",
     url: `${baseURL}/api/health`,
-    env: { PORT: String(port), HOSTNAME: "0.0.0.0" },
+    // ENABLE_PRIMITIVES serves the /primitivler fixture, which is a 404 in real production.
+    env: { PORT: String(port), HOSTNAME: "0.0.0.0", ENABLE_PRIMITIVES: "1" },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },
