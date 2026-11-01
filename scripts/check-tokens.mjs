@@ -16,6 +16,15 @@ const rules = [
   },
   { name: "colour function", pattern: /\b(?:rgba?|hsla?|hwb|oklch|oklab|lab|lch|color)\(/g },
   { name: "easing curve", pattern: /\bcubic-bezier\(/g },
+  // `--spacing-block` makes Tailwind emit an `inline-<spacing>` size utility
+  // named `inline-block` (inline-size: 4rem) next to the display utility, so
+  // the class squeezes its element to 64 px. Use `inline-grid` or
+  // `inline-flex` (found in #17: the stat numerals overlapped their unit).
+  {
+    name: "inline-block class, collides with --spacing-block",
+    // Not after a colon: `display: inline-block` in CSS is fine.
+    pattern: /(?<![\w-])(?<!:\s*)inline-block(?![\w-])/g,
+  },
 ];
 
 function* walk(dir) {
