@@ -24,13 +24,18 @@ and page it came from.
 | Total area                    | 22,634 m² on 1.13 ha                                                                                               |
 | Residential / non-residential | 14,192 m² / 3,603 m²                                                                                               |
 | Apartments                    | 143, in 6 buildings (9 blocks)                                                                                     |
-| Layouts                       | 9 types: 1-room 62.09 m², 2-room 74.4–102.17 m², 3-room 104.33–121.92 m², 4-room 142.79–186.9 m²                   |
+| Layouts                       | 10 plans: 1-room 62.09 m², 2-room 74.4–102.17 m², 3-room 104.33–121.92 m², 4-room 142.79–186.9 m² (see below)      |
 | Parking                       | 160 underground spaces                                                                                             |
 | Amenities                     | 24/7 security and CCTV, fire safety systems, playground, insulated aluminium windows, gas, lobby, closed perimeter |
 | Contacts                      | +994 12 434 32 32, +994 50 553 55 55                                                                               |
 | Developer                     | InCity Projects (@incityprojects)                                                                                  |
 
 These are seed data, not constants. Everything is editable in the console.
+
+The layout count was first recorded as nine. kalbajarcity.com's "Öz mənzilini
+seç" section lists ten plans with a room-by-room breakdown (checked
+2026-11-02): one 1-room, two 2-room, four 3-room and three 4-room. The seed
+uses those ten; the owner confirms the list with the inventory (#7).
 
 ## 2. Stack
 
