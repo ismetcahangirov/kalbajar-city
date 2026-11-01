@@ -67,7 +67,8 @@ Reference: Pinterest pin 959477895690277539, a luxury real-estate site shown
 on a laptop. Its vocabulary is kept, its look is not copied:
 
 - Full-bleed cinematic hero (drone video with a poster frame, never blocking LCP)
-- Warm off-white surfaces, large light-weight serif headlines, generous whitespace
+- Warm off-white surfaces, large light-weight headlines, generous whitespace
+  (the pin pairs a serif with a sans; ours is Alethia Next, a sans, alone)
 - A stat row (area, apartments, parking, blocks)
 - Image grids that reveal on scroll with a clip-path wipe
 - A pinned "spaces made to be lived in" section where a framed card zooms into
