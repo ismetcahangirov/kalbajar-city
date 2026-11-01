@@ -8,10 +8,17 @@
  * size-adjust. size-adjust is the advance width of a mixed az/en/ru sample
  * in Alethia relative to Arial (Light 109.26 %, Regular 109.29 %, Medium
  * 109.24 %: one value serves all three). Recompute when the font changes.
+ *
+ * Liberation Sans (most Linux systems, and the CI runner) and Arimo
+ * (ChromeOS) share Arial's metrics, so the same overrides hold for them.
+ * Without them a machine with no Arial fell through to an unmatched face
+ * and a multi-line headline re-wrapped on swap (#17: CLS 0.0017 in CI).
  */
 @font-face {
   font-family: "Alethia Fallback";
-  src: local("Arial"), local("ArialMT");
+  src:
+    local("Arial"), local("ArialMT"), local("Liberation Sans"), local("LiberationSans"),
+    local("Arimo");
   font-style: normal;
   size-adjust: 109.27%;
   ascent-override: 77.79%;
@@ -21,7 +28,9 @@
 
 @font-face {
   font-family: "Alethia Italic Fallback";
-  src: local("Arial Italic"), local("Arial-ItalicMT");
+  src:
+    local("Arial Italic"), local("Arial-ItalicMT"), local("Liberation Sans Italic"),
+    local("LiberationSans-Italic"), local("Arimo Italic");
   font-style: italic;
   size-adjust: 107.43%;
   ascent-override: 79.12%;

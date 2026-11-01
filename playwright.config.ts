@@ -1,4 +1,9 @@
+import { existsSync } from "node:fs";
+
 import { defineConfig, devices } from "@playwright/test";
+
+// The server reads DATABASE_URL; pages such as home render from the database.
+if (existsSync(".env")) process.loadEnvFile(".env");
 
 const port = Number(process.env.E2E_PORT ?? 3011);
 const baseURL = `http://localhost:${port}`;

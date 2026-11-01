@@ -3,6 +3,7 @@
 @import "../styles/font-fallback.css";
 @import "../styles/shell.css";
 @import "../styles/motion.css";
+@import "../styles/home.css";
 
 @layer base {
   html {

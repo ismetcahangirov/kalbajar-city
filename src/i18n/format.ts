@@ -45,11 +45,28 @@ export function formatNumber(
 }
 
 // Typographic unit symbols (like a currency code), not translatable copy.
-const squareMetre: Record<Locale, string> = { az: "m²", en: "m²", ru: "м²" };
+const units = {
+  m2: { az: "m²", en: "m²", ru: "м²" },
+  ha: { az: "ha", en: "ha", ru: "га" },
+} satisfies Record<string, Record<Locale, string>>;
+
+export type Unit = keyof typeof units;
+
+const squareMetre = units.m2;
+
+/** A unit symbol in the locale's script: `m²`, `м²`, `ha`, `га`. */
+export function unitSymbol(unit: Unit, locale: Locale): string {
+  return units[unit][locale];
+}
 
 /** An area in square metres with up to two decimals: `62,09 m²`. */
 export function formatArea(value: number, locale: Locale): string {
   return `${formatNumber(value, locale, { maximumFractionDigits: 2 })}${NBSP}${squareMetre[locale]}`;
+}
+
+/** A whole percentage from 0–100: `40%` (en), `40 %` (ru), per the locale's pattern. */
+export function formatPercent(value: number, locale: Locale): string {
+  return numberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(value / 100);
 }
 
 /**

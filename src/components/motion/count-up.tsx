@@ -66,7 +66,7 @@ export function CountUp({ value, locale, maximumFractionDigits = 0 }: CountUpPro
   }, [value, locale, maximumFractionDigits]);
 
   return (
-    <span data-motion="count-up" className="relative inline-block">
+    <span data-motion="count-up" className="relative inline-grid">
       <span ref={finalRef}>{formatNumber(value, locale, { maximumFractionDigits })}</span>
       <span
         ref={liveRef}
