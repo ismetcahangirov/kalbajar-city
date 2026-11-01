@@ -56,11 +56,13 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Exact key only. Restoring another commit's Turbopack cache built CSS
+      # without a newly imported stylesheet (src/styles/shell.css in #39), so
+      # E2E tested something production would not ship.
       - uses: actions/cache@v4
         with:
           path: .next/cache
           key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
-          restore-keys: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e

@@ -1,0 +1,69 @@
+/*
+ * The site shell: fixed header, mobile menu and mobile action bar
+ * (src/components/shell). Values come from tokens.css.
+ */
+
+/* Page side padding that also clears a notch in landscape (viewport-fit=cover). */
+@utility px-page {
+  padding-left: max(var(--spacing-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--spacing-gutter), env(safe-area-inset-right));
+}
+
+:root {
+  /* Space under the action bar: the home indicator, or a small gap. */
+  --action-bar-inset: max(calc(var(--spacing) * 3), env(safe-area-inset-bottom));
+  /* What the action bar covers at the bottom of the viewport. */
+  --action-bar-space: calc(var(--spacing-control-lg) + var(--action-bar-inset));
+  /* Where other floating UI (the locale suggestion) sits: above the bar. */
+  --floating-bottom: calc(var(--action-bar-space) + var(--spacing) * 3);
+}
+
+@media (width >= 64rem) {
+  :root {
+    --action-bar-space: 0px;
+    --floating-bottom: var(--spacing-gutter);
+  }
+}
+
+@layer base {
+  /* Content starts below the fixed header, except under a hero, which runs
+     beneath the transparent header. */
+  [data-site-main] {
+    padding-top: var(--header-height);
+  }
+
+  html:has([data-header-overlay]) [data-site-main] {
+    padding-top: 0;
+  }
+
+  /* Over the hero: no background layer, and the night set of tokens (paper
+     text) from tokens.css. The layer fades in when the hero has passed. */
+  html:has([data-header-overlay]) [data-site-header]:not([data-solid]) [data-header-layer] {
+    opacity: 0;
+  }
+
+  /* The open menu covers the page; the page behind it does not scroll. */
+  html:has([data-mobile-menu][open]) {
+    overflow: hidden;
+  }
+
+  /* The menu wipes down from the top (motion-system.md → UI transitions).
+     Browsers without @starting-style open it instantly. */
+  [data-mobile-menu] {
+    clip-path: inset(0 0 100% 0);
+    transition-property: clip-path, display, overlay;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-in-out);
+    transition-behavior: allow-discrete;
+  }
+
+  [data-mobile-menu][open] {
+    clip-path: inset(0);
+  }
+
+  @starting-style {
+    [data-mobile-menu][open] {
+      clip-path: inset(0 0 100% 0);
+    }
+  }
+}

@@ -17,7 +17,7 @@ export function Container<T extends ElementType = "div">({
   return (
     <Tag
       className={cx(
-        "mx-auto w-full px-gutter",
+        "mx-auto w-full px-page",
         size === "page"
           ? "max-w-[calc(var(--container-page)+2*var(--spacing-gutter))]"
           : "max-w-[calc(var(--container-prose)+2*var(--spacing-gutter))]",

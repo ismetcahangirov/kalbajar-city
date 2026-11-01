@@ -39,5 +39,40 @@
     "title": "Страница не найдена",
     "body": "Страница, которую вы ищете, не существует или была перемещена.",
     "home": "На главную"
+  },
+  "Navigation": {
+    "label": "Главное меню",
+    "footer": "Карта сайта",
+    "apartments": "Квартиры",
+    "complex": "Комплекс",
+    "about": "О нас",
+    "location": "Расположение",
+    "construction": "Строительство",
+    "gallery": "Галерея",
+    "news": "Новости",
+    "contact": "Контакты",
+    "privacy": "Политика конфиденциальности"
+  },
+  "Shell": {
+    "brand": "Kalbajar City",
+    "home": "Kalbajar City, главная страница",
+    "skip": "Перейти к содержанию",
+    "call": "Позвонить",
+    "whatsapp": "WhatsApp",
+    "openMenu": "Открыть меню",
+    "closeMenu": "Закрыть меню",
+    "menu": "Меню",
+    "quickContact": "Быстрая связь",
+    "contacts": "Контакты",
+    "phone": "Телефон",
+    "instagram": "Instagram",
+    "columnComplex": "Комплекс",
+    "columnUpdates": "Обновления",
+    "place": "Кельбаджар, Азербайджан",
+    "developer": "Застройщик: {developer}",
+    "rights": "© {year} Kalbajar City"
+  },
+  "Placeholder": {
+    "body": "Страница готовится."
   }
 }

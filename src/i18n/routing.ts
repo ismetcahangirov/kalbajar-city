@@ -14,6 +14,14 @@ export const pathnames = {
   "/": "/",
   "/menziller": "/menziller",
   "/menziller/[slug]": "/menziller/[slug]",
+  "/kompleks": "/kompleks",
+  "/haqqimizda": "/haqqimizda",
+  "/yerlesme": "/yerlesme",
+  "/tikinti": "/tikinti",
+  "/qalereya": "/qalereya",
+  "/xeberler": "/xeberler",
+  "/elaqe": "/elaqe",
+  "/mexfilik-siyaseti": "/mexfilik-siyaseti",
   "/primitivler": "/primitivler",
 } as const;
 

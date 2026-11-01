@@ -28,7 +28,10 @@ function block(selector: RegExp): string {
 }
 
 const light = declarations(block(/@theme static \{([\s\S]*?)\n\}/));
-const night = new Map([...light, ...declarations(block(/\[data-tone="night"\] \{([\s\S]*?)\n\}/))]);
+const night = new Map([
+  ...light,
+  ...declarations(block(/\[data-tone="night"\][^{]*\{([\s\S]*?)\n\}/)),
+]);
 
 function resolve(tokens: Map<string, string>, name: string, depth = 0): string {
   const value = tokens.get(name);

@@ -33,7 +33,20 @@ export default function PrimitivesPage() {
   }
 
   return (
-    <main>
+    <>
+      {/* A stand-in hero, so the header's transparent state can be reviewed
+          until the home page (#17) has the real one. */}
+      <div
+        data-header-overlay=""
+        data-tone="night"
+        className="flex min-h-[70svh] items-end pt-(--header-height) pb-block"
+      >
+        <Container>
+          <Heading as="h1" size="display-xl">
+            Header over a hero
+          </Heading>
+        </Container>
+      </div>
       {tones.map((tone) => (
         <Section key={tone} tone={tone} aria-labelledby={`tone-${tone}`}>
           <Container className="flex flex-col gap-block">
@@ -139,6 +152,6 @@ export default function PrimitivesPage() {
           </Container>
         </Section>
       ))}
-    </main>
+    </>
   );
 }

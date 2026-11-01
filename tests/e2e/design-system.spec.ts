@@ -39,6 +39,8 @@ test("primitives render at 320 px without horizontal scroll", async ({ page }) =
 
 test("every control shows a focus ring from the keyboard", async ({ page }) => {
   await page.goto("/primitivler");
+  // Start inside the content, past the header (covered in shell.spec.ts).
+  await page.locator("#main").focus();
   await page.keyboard.press("Tab");
   for (let i = 0; i < 12; i += 1) {
     const outline = await page.evaluate(() => {

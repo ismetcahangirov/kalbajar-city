@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { waitForHydration } from "./hydration";
+
 const pages = [
   { path: "/", lang: "az", heading: "Kalbajar City" },
   { path: "/en", lang: "en", heading: "Kalbajar City" },
@@ -24,11 +26,15 @@ test("the Azerbaijani prefix redirects to the unprefixed URL", async ({ page }) 
   await expect(page.locator("html")).toHaveAttribute("lang", "az");
 });
 
-test("switching language keeps the apartment and the query", async ({ page }) => {
+test("switching language keeps the apartment and the query", async ({ page, isMobile }) => {
   await page.goto("/ru/menziller/a-12?otaq=2");
+  await waitForHydration(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Квартира a-12");
 
-  const english = page.getByRole("navigation", { name: "Язык" }).getByRole("link", {
+  // Below lg the switcher lives in the menu.
+  const scope = isMobile ? page.getByRole("dialog", { name: "Меню" }) : page.getByRole("banner");
+  if (isMobile) await page.getByRole("button", { name: "Открыть меню" }).click();
+  const english = scope.getByRole("navigation", { name: "Язык" }).getByRole("link", {
     name: "English",
   });
   await expect(english).toHaveAttribute("href", "/en/menziller/a-12?otaq=2");
@@ -67,16 +73,19 @@ test.describe("with a Russian browser", () => {
 
     await suggestion.getByRole("button", { name: "Закрыть" }).click();
     await expect(suggestion).toBeHidden();
-    await page.reload({ waitUntil: "networkidle" });
+    await page.reload();
+    await waitForHydration(page);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mənzillər");
-    // Hydrated and the effect has run; the dismissal is remembered.
-    await expect(page.getByRole("navigation", { name: "Dil" })).toBeVisible();
+    // Hydrated, so the effect has run; the dismissal is remembered.
     await expect(suggestion).toBeHidden();
   });
 
   test("no suggestion on a page already in the browser's language", async ({ page }) => {
-    await page.goto("/ru/menziller", { waitUntil: "networkidle" });
+    await page.goto("/ru/menziller");
+    await waitForHydration(page);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Квартиры");
-    await expect(page.getByRole("complementary")).toHaveCount(0);
+    await expect(
+      page.getByRole("complementary", { name: "Эта страница есть и на русском языке." }),
+    ).toHaveCount(0);
   });
 });
