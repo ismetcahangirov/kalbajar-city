@@ -86,10 +86,25 @@ jobs:
         run: pnpm db:seed
       - run: pnpm test:db
 
-  # Builds without a database on purpose: the build must never need one.
+  # Builds without DATABASE_URL on purpose: the build must never need a
+  # database. E2E then runs the build against a migrated, seeded one.
   build-e2e:
     name: Build and E2E
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: kalbajar
+          POSTGRES_PASSWORD: kalbajar
+          POSTGRES_DB: kalbajar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kalbajar -d kalbajar"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -106,8 +121,14 @@ jobs:
           path: .next/cache
           key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
       - run: pnpm build
+      - name: Migrate and seed the E2E database
+        env:
+          DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+        run: pnpm db:migrate && pnpm db:seed
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+        env:
+          DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

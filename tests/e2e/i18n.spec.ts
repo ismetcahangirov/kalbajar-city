@@ -3,9 +3,9 @@ import { expect, test } from "@playwright/test";
 import { waitForHydration } from "./hydration";
 
 const pages = [
-  { path: "/", lang: "az", heading: "Kalbajar City" },
-  { path: "/en", lang: "en", heading: "Kalbajar City" },
-  { path: "/ru", lang: "ru", heading: "Kalbajar City" },
+  { path: "/", lang: "az", heading: "Sizin də dağ mənzərəli mənziliniz olsun!" },
+  { path: "/en", lang: "en", heading: "A home with a view of the mountains" },
+  { path: "/ru", lang: "ru", heading: "Квартира с видом на горы" },
   { path: "/menziller", lang: "az", heading: "Mənzillər" },
   { path: "/en/menziller", lang: "en", heading: "Apartments" },
   { path: "/ru/menziller", lang: "ru", heading: "Квартиры" },
