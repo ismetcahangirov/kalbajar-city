@@ -1,0 +1,30 @@
+/*
+ * Metric-matched fallbacks for Alethia Next, so the swap from Arial to the
+ * web font moves nothing (CLS 0).
+ *
+ * next/font's automatic fallback reads the hhea metrics (1080 / -380), but
+ * Alethia sets USE_TYPO_METRICS, so browsers lay it out with the typo
+ * metrics (850 / -150 / 230). The overrides below use those, divided by
+ * size-adjust. size-adjust is the advance width of a mixed az/en/ru sample
+ * in Alethia relative to Arial (Light 109.26 %, Regular 109.29 %, Medium
+ * 109.24 %: one value serves all three). Recompute when the font changes.
+ */
+@font-face {
+  font-family: "Alethia Fallback";
+  src: local("Arial"), local("ArialMT");
+  font-style: normal;
+  size-adjust: 109.27%;
+  ascent-override: 77.79%;
+  descent-override: 13.73%;
+  line-gap-override: 21.05%;
+}
+
+@font-face {
+  font-family: "Alethia Italic Fallback";
+  src: local("Arial Italic"), local("Arial-ItalicMT");
+  font-style: italic;
+  size-adjust: 107.43%;
+  ascent-override: 79.12%;
+  descent-override: 13.96%;
+  line-gap-override: 21.41%;
+}
