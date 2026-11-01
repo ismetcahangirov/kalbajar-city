@@ -44,6 +44,48 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
+  # Applies every migration to an empty database, twice, then seeds twice:
+  # both must succeed and the second runs must change nothing.
+  database:
+    name: Database
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: kalbajar
+          POSTGRES_PASSWORD: kalbajar
+          POSTGRES_DB: kalbajar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kalbajar -d kalbajar"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Schema and migrations are in sync
+        run: |
+          pnpm db:generate
+          git diff --exit-code -- drizzle
+          test -z "$(git status --porcelain -- drizzle)"
+      - run: pnpm db:migrate
+      - name: Migrations are idempotent
+        run: pnpm db:migrate
+      - run: pnpm db:seed
+      - name: Seed is idempotent
+        run: pnpm db:seed
+      - run: pnpm test:db
+
   # Builds without a database on purpose: the build must never need one.
   build-e2e:
     name: Build and E2E
@@ -76,7 +118,7 @@ jobs:
   ci-complete:
     name: CI complete
     if: always()
-    needs: [checks, unit, build-e2e]
+    needs: [checks, unit, database, build-e2e]
     runs-on: ubuntu-latest
     steps:
       - name: Every job that ran succeeded
@@ -84,7 +126,7 @@ jobs:
           RESULTS: ${{ toJSON(needs) }}
         run: |
           echo "$RESULTS"
-          for job in checks unit build-e2e; do
+          for job in checks unit database build-e2e; do
             echo "$RESULTS" | jq -e --arg j "$job" 'has($j)' > /dev/null || { echo "missing job: $job"; exit 1; }
           done
           failed=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | .key')
