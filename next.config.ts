@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+import { legacyRedirects } from "./src/config/legacy-redirects";
+
 const isDev = process.env.NODE_ENV === "development";
 const isHttps = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
 
@@ -72,6 +74,15 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+  },
+  // The old site's indexed URLs (src/config/legacy-redirects.ts). A 301, not
+  // the 308 `permanent: true` gives, which every crawler and client knows.
+  async redirects() {
+    return legacyRedirects.map(({ from, to }) => ({
+      source: from,
+      destination: to,
+      statusCode: 301 as const,
+    }));
   },
   async headers() {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
