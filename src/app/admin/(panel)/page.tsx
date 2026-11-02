@@ -79,6 +79,13 @@ export default async function DashboardPage() {
                     value: leads.byStatus[status],
                   }))}
                 />
+                <Counts
+                  title={t("dashboard.bySource")}
+                  rows={leads.bySource.map(({ source, total }) => ({
+                    label: <span className="break-all">{source}</span>,
+                    value: total,
+                  }))}
+                />
               </div>
             )}
           </DashboardCard>

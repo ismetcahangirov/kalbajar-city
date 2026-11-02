@@ -1,6 +1,6 @@
 import "server-only";
 
-import { count, desc, eq, gte } from "drizzle-orm";
+import { asc, count, desc, eq, gte } from "drizzle-orm";
 
 import type { Executor } from "@/db/client";
 import {
@@ -26,6 +26,7 @@ import { locales, type Locale } from "@/i18n/routing";
 import { apartmentStatuses, type ApartmentStatus } from "@/shared/inventory";
 import { leadStatuses, leadTypes, type LeadStatus, type LeadType } from "@/shared/leads";
 
+import { leadSource } from "./leads";
 import { translatablesIn } from "./translatables";
 import { weekStart } from "./week";
 
@@ -38,21 +39,36 @@ export type LeadsThisWeek = {
   total: number;
   byType: Record<LeadType, number>;
   byStatus: Record<LeadStatus, number>;
+  /** The most frequent sources (`utm_source`, else the page), most leads first. */
+  bySource: Array<{ source: string; total: number }>;
 };
+
+/** How many sources the dashboard lists before it stops. */
+const topSources = 5;
 
 /** Leads created since Monday 00:00 (Baku) of the week `now` falls in. */
 export async function leadsThisWeek(db: Executor, now = new Date()): Promise<LeadsThisWeek> {
   const since = weekStart(now);
-  const rows = await db
-    .select({ type: leads.type, status: leads.status, total: count() })
-    .from(leads)
-    .where(gte(leads.createdAt, since))
-    .groupBy(leads.type, leads.status);
+  const [rows, sources] = await Promise.all([
+    db
+      .select({ type: leads.type, status: leads.status, total: count() })
+      .from(leads)
+      .where(gte(leads.createdAt, since))
+      .groupBy(leads.type, leads.status),
+    db
+      .select({ source: leadSource, total: count() })
+      .from(leads)
+      .where(gte(leads.createdAt, since))
+      .groupBy(leadSource)
+      .orderBy(desc(count()), asc(leadSource))
+      .limit(topSources),
+  ]);
   const result: LeadsThisWeek = {
     since,
     total: 0,
     byType: zeroed(leadTypes),
     byStatus: zeroed(leadStatuses),
+    bySource: sources,
   };
   for (const row of rows) {
     result.total += row.total;

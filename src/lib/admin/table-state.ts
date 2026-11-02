@@ -8,12 +8,18 @@
 export const pageKey = "sehife";
 export const sortKey = "sira";
 
+/**
+ * The values a filter accepts: a list (several may be chosen), or a test for
+ * a free value such as a date, of which the URL keeps one.
+ */
+export type FilterValues = readonly string[] | ((value: string) => boolean);
+
 export type TableUrlSpec = {
   /** API sort fields the list accepts; `-field` sorts descending. */
   sortFields: readonly string[];
   defaultSort: string;
   /** Filter URL keys and the values each accepts. */
-  filters: Readonly<Record<string, readonly string[]>>;
+  filters: Readonly<Record<string, FilterValues>>;
 };
 
 export type TableState = {
@@ -52,7 +58,13 @@ export function readTableState(params: URLSearchParams, spec: TableUrlSpec): Tab
   const page = Number(params.get(pageKey));
   const filters: Record<string, string[]> = {};
   for (const [key, allowed] of Object.entries(spec.filters)) {
-    const values = [...new Set(valuesOf(params, key))].filter((value) => allowed.includes(value));
+    const given = [...new Set(valuesOf(params, key))];
+    if (typeof allowed === "function") {
+      const value = given.find(allowed);
+      if (value) filters[key] = [value];
+      continue;
+    }
+    const values = given.filter((value) => allowed.includes(value));
     if (values.length)
       filters[key] = values.sort((a, b) => allowed.indexOf(a) - allowed.indexOf(b));
   }
@@ -108,4 +120,11 @@ export function withPage(state: TableState, page: number): TableState {
 
 export function hasFilters(state: TableState): boolean {
   return Object.keys(state.filters).length > 0;
+}
+
+/** A calendar day as a date input gives it, `2026-11-02`. */
+export function isDay(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 }

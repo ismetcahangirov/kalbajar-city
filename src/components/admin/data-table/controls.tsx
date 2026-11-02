@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 
 import { Badge } from "@/components/admin/ui/badge";
+import { Input } from "@/components/admin/ui/input";
 import { Button } from "@/components/admin/ui/button";
 import {
   DropdownMenu,
@@ -27,6 +28,43 @@ export type DataTableFilter = {
   label: string;
   options: Array<{ value: string; label: string }>;
 };
+
+/** One day, e.g. either end of a date range (`?tarixden=2026-11-01`). */
+export type DataTableDateFilter = {
+  key: string;
+  label: string;
+  kind: "date";
+};
+
+export type DataTableAnyFilter = DataTableFilter | DataTableDateFilter;
+
+export function isDateFilter(filter: DataTableAnyFilter): filter is DataTableDateFilter {
+  return "kind" in filter && filter.kind === "date";
+}
+
+/** A labelled date input; clearing it removes the filter. */
+export function DateFilter({
+  filter,
+  value,
+  onChange,
+}: {
+  filter: DataTableDateFilter;
+  value: string | undefined;
+  onChange: (value: string | null) => void;
+}) {
+  return (
+    <label className="text-sm flex items-center gap-2">
+      <span className="text-muted-foreground">{filter.label}</span>
+      <Input
+        type="date"
+        className="w-auto"
+        data-filter={filter.key}
+        value={value ?? ""}
+        onChange={(event) => onChange(event.target.value || null)}
+      />
+    </label>
+  );
+}
 
 /** A multi-select filter: a menu of checkboxes that stays open while ticking. */
 export function FilterMenu({

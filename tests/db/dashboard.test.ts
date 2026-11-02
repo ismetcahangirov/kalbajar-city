@@ -18,13 +18,19 @@ const lead = {
 } as const;
 
 describe("the console dashboard", () => {
-  it("counts this week's leads by type and status, from Monday in Baku", async () => {
+  it("counts this week's leads by type, status and source, from Monday in Baku", async () => {
     await inRollback(async (tx) => {
       // Wednesday 4 November 2026; the week began Sunday 1 November 20:00 UTC.
       const now = new Date("2026-11-04T12:00:00Z");
       await tx.insert(s.leads).values([
         { ...lead, type: "callback", createdAt: new Date("2026-11-01T20:00:00Z") },
-        { ...lead, type: "callback", status: "contacted", createdAt: now },
+        {
+          ...lead,
+          type: "callback",
+          status: "contacted",
+          utm: { source: "instagram" },
+          createdAt: now,
+        },
         { ...lead, type: "viewing", createdAt: now },
         { ...lead, type: "inquiry", createdAt: new Date("2026-11-01T19:59:59Z") },
       ]);
@@ -40,6 +46,11 @@ describe("the console dashboard", () => {
         closed: 0,
         lost: 0,
       });
+      // The UTM source when the visit had one, else the page.
+      expect(week.bySource).toEqual([
+        { source: "/elaqe", total: 2 },
+        { source: "instagram", total: 1 },
+      ]);
     });
   });
 

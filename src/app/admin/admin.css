@@ -120,6 +120,14 @@
       min-width: var(--spacing-target);
     }
 
+    [data-slot="dialog-close"] {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: var(--spacing-target);
+      min-height: var(--spacing-target);
+    }
+
     [data-slot="breadcrumb-link"] {
       display: inline-flex;
       align-items: center;
