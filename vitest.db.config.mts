@@ -7,6 +7,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // Server modules (getDb, getAuth) are tested directly, outside React.
+      "server-only": fileURLToPath(new URL("./tests/db/server-only.ts", import.meta.url)),
     },
   },
   test: {

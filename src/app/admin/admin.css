@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "../../styles/tokens.css";
+
+/* The console: semantic colour tokens and the focus ring from the public
+   site, the system font stack instead of Alethia Next (docs/ui-kit.md). */
+@layer base {
+  html {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-system);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+}

@@ -212,7 +212,12 @@ Read both before touching UI.
 - Admin writes invalidate both the RTK Query tags and the server `cacheTag`s
   they affect
 - Every schema change is a versioned migration
-- Every privileged write is audited
+- Every privileged write is audited: `audit()` from `@/lib/audit`, in the
+  transaction that makes the write
+- Console pages call `requireUser(permission)` and `/api/v1/admin/*` handlers
+  `authorize(request, permission)` from `@/lib/auth/session`. `proxy.ts` only
+  checks that a session cookie exists; it is not the access check. Roles and
+  their permissions live in one matrix, `src/lib/auth/permissions.ts`
 
 ### Money and area
 

@@ -8,6 +8,13 @@
       "when": 1793564925434,
       "tag": "0000_data_model",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793609744757,
+      "tag": "0001_auth",
+      "breakpoints": true
     }
   ]
 }

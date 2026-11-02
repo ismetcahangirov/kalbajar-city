@@ -29,7 +29,13 @@ export default defineConfig({
     command: "pnpm start",
     url: `${baseURL}/api/health`,
     // ENABLE_PRIMITIVES serves the /primitivler fixture, which is a 404 in real production.
-    env: { PORT: String(port), HOSTNAME: "0.0.0.0", ENABLE_PRIMITIVES: "1" },
+    // Better Auth checks the request origin against BETTER_AUTH_URL.
+    env: {
+      PORT: String(port),
+      HOSTNAME: "0.0.0.0",
+      ENABLE_PRIMITIVES: "1",
+      BETTER_AUTH_URL: baseURL,
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
   },
