@@ -6,7 +6,8 @@
 
 @layer components {
   /* Hero media: visible from first paint, settling from a slight zoom. */
-  [data-hero-media] > :is(img, video) {
+  [data-hero-media] > picture > img,
+  [data-hero-media] > video {
     animation: hero-settle var(--duration-settle) var(--ease-out) both;
   }
 
