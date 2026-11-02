@@ -1,8 +1,10 @@
 "use client";
 
 import { SlidersHorizontal, X } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
+  useCallback,
   useEffect,
   useId,
   useMemo,
@@ -19,8 +21,6 @@ import type { Localized as LocalizedValue } from "@/i18n/content";
 import { formatNumber } from "@/i18n/format";
 import { getPathname, Link, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { useApartmentsQuery } from "@/store/endpoints/apartments";
-import { StoreProvider } from "@/store/provider";
 import { publicApartmentStatuses } from "@/shared/apartments";
 import {
   activeGroups,
@@ -29,7 +29,6 @@ import {
   parseCatalogueParams,
   priceSorts,
   statusWord,
-  toApartmentListParams,
   toCatalogueQuery,
   withoutHiddenPrices,
   type CatalogueQuery,
@@ -73,13 +72,16 @@ const FOCUSABLE = "a[href], button:not([disabled]), input:not([disabled]), selec
  * JavaScript. With it, the result count for the choice being edited comes
  * from the API (debounced) before it is applied, and applying navigates to
  * the clean URL. Forms never animate.
+ *
+ * The count needs Redux and RTK Query, which would weigh more than the rest
+ * of the page's own script (CLAUDE.md §5), so `CatalogueCount` is imported
+ * only on the visitor's first interaction with the filters: focus, input or
+ * opening the drawer. Until it answers, the apply button reads "Show".
  */
+const CatalogueCount = dynamic(() => import("./catalogue-count"), { ssr: false });
+
 export function CatalogueFilters(props: Props) {
-  return (
-    <StoreProvider>
-      <Filters {...props} />
-    </StoreProvider>
-  );
+  return <Filters {...props} />;
 }
 
 /** The value after it has stopped changing for `delay` ms. */
@@ -125,21 +127,11 @@ function Filters({ facets, applied, total, locale }: Props) {
   );
   const draftKey = JSON.stringify(draftOf(filters, facets.pricesVisible));
   const settledKey = useDebounced(draftKey, 300);
-  const changed = settledKey !== appliedKey;
-  const params = useMemo(
-    () => toApartmentListParams(parseCatalogueParams(JSON.parse(settledKey) as CatalogueQuery)),
-    [settledKey],
-  );
-  const { currentData, isFetching } = useApartmentsQuery(
-    { ...params, pageSize: 1, locale },
-    { skip: !changed },
-  );
-  const count =
-    draftKey === appliedKey
-      ? total
-      : draftKey === settledKey && !isFetching
-        ? currentData?.total
-        : undefined;
+  const [engaged, setEngaged] = useState(false);
+  const [live, setLive] = useState<{ key: string; total: number }>();
+  const onCount = useCallback((result: { key: string; total: number }) => setLive(result), []);
+  const engage = () => setEngaged(true);
+  const count = draftKey === appliedKey ? total : live?.key === draftKey ? live.total : undefined;
 
   useEffect(() => {
     const desktop = window.matchMedia("(width >= 64rem)");
@@ -193,17 +185,27 @@ function Filters({ facets, applied, total, locale }: Props) {
       onSet={set}
       onToggle={toggle}
       onSubmit={submit}
+      onEngage={engage}
     />
   );
 
   return (
     <>
+      {engaged && (
+        <CatalogueCount
+          queryKey={settledKey}
+          skip={settledKey === appliedKey}
+          locale={locale}
+          onCount={onCount}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-4 lg:hidden" data-print-hidden="">
         <Button
           variant="secondary"
           onClick={() => {
             dialog.current?.showModal();
             setOpen(true);
+            engage();
           }}
           aria-haspopup="dialog"
           aria-expanded={open}
@@ -273,6 +275,8 @@ type FormProps = {
   onSet: (key: string, value: string | string[]) => void;
   onToggle: (key: string, value: string, on: boolean) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  /** The first focus or input: time to load the live count. */
+  onEngage: () => void;
 };
 
 function listOf(value: string | string[] | undefined): string[] {
@@ -302,6 +306,7 @@ function FilterForm({
   onSet,
   onToggle,
   onSubmit,
+  onEngage,
 }: FormProps) {
   const t = useTranslations("Catalogue.filters");
   const status = useTranslations("Status");
@@ -367,6 +372,9 @@ function FilterForm({
       method="get"
       action={getPathname({ href: "/menziller", locale })}
       onSubmit={onSubmit}
+      onFocus={onEngage}
+      onInput={onEngage}
+      onPointerDown={onEngage}
       className={drawer ? "flex flex-1 flex-col" : "flex flex-col gap-8"}
     >
       <div className={drawer ? "flex flex-col gap-8 py-block px-page" : "contents"}>
