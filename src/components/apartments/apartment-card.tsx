@@ -1,7 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { MediaImage } from "@/components/home/media-image";
-import { Card } from "@/components/ui";
+import { Card, Picture } from "@/components/ui";
 import { formatArea, formatNumber, formatPrice } from "@/i18n/format";
 import { getPathname, Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -68,7 +67,7 @@ export function ApartmentCard({ apartment, locale, pricesVisible, titleAs = "h3"
       media={
         apartment.plan ? (
           <div className="size-full bg-surface-raised p-4 [&_img]:object-contain!">
-            <MediaImage
+            <Picture
               image={apartment.plan}
               sizes="(min-width: 80rem) 22vw, (min-width: 40rem) 45vw, 100vw"
             />

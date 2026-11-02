@@ -12,7 +12,6 @@ import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
 import { StatusBadge } from "@/components/apartments/status-badge";
 import { Localized } from "@/components/home/localized";
-import { MediaImage } from "@/components/home/media-image";
 import { FadeUp, ImageReveal } from "@/components/motion";
 import {
   Button,
@@ -21,6 +20,7 @@ import {
   Eyebrow,
   Heading,
   Icon,
+  Picture,
   Section,
   Text,
   type Tone,
@@ -249,7 +249,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
             <ul className="grid gap-gutter sm:grid-cols-2">
               {apartment.gallery.map((image, i) => {
                 const frame = "relative aspect-grid overflow-hidden rounded-md";
-                const media = <MediaImage image={image} sizes="(min-width: 40rem) 50vw, 100vw" />;
+                const media = <Picture image={image} sizes="(min-width: 40rem) 50vw, 100vw" />;
                 return (
                   <li key={image.src} className={cx(i === 0 && "sm:col-span-2")}>
                     {/* Only the first image enters with the reveal (motion budget). */}

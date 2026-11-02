@@ -1,7 +1,6 @@
 "use client";
 
 import { Maximize2, Minus, Plus, RotateCcw, X } from "lucide-react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
   useCallback,
@@ -13,8 +12,7 @@ import {
   type PointerEvent,
 } from "react";
 
-import { MediaImage } from "@/components/home/media-image";
-import { Icon } from "@/components/ui";
+import { Icon, Picture } from "@/components/ui";
 import { formatPercent } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
@@ -196,7 +194,7 @@ export function PlanViewer({
         className="group relative block w-full overflow-hidden rounded-md bg-surface-raised"
         style={{ aspectRatio: `${image.width} / ${image.height}` }}
       >
-        <MediaImage image={image} sizes="(min-width: 64rem) 58vw, 100vw" priority />
+        <Picture image={image} sizes="(min-width: 64rem) 58vw, 100vw" priority />
         <span
           aria-hidden
           data-print-hidden=""
@@ -282,19 +280,29 @@ export function PlanViewer({
           >
             <div className="absolute inset-0 flex items-center justify-center p-4">
               {open && (
-                <Image
-                  ref={plan}
-                  src={image.src}
-                  width={image.width}
-                  height={image.height}
-                  alt={image.alt}
-                  unoptimized
-                  draggable={false}
-                  className="h-auto max-h-full w-auto max-w-full object-contain"
-                  style={{
-                    transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
-                  }}
-                />
+                // The widest variants: the plan is meant to be zoomed into.
+                <picture className="contents">
+                  {image.sources.map((source) => (
+                    <source
+                      key={source.type}
+                      type={source.type}
+                      srcSet={source.srcSet}
+                      sizes="200vw"
+                    />
+                  ))}
+                  <img
+                    ref={plan}
+                    src={image.src}
+                    width={image.width}
+                    height={image.height}
+                    alt={image.alt}
+                    draggable={false}
+                    className="h-auto max-h-full w-auto max-w-full object-contain"
+                    style={{
+                      transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+                    }}
+                  />
+                </picture>
               )}
             </div>
           </div>
