@@ -12,7 +12,8 @@ const aspectClass: Record<Aspect, string> = {
 };
 
 type CardProps = {
-  media: ReactNode;
+  /** Leave it out for a text-only card (an article without a cover). */
+  media?: ReactNode;
   aspect?: Aspect;
   title: string;
   /** Heading level of the title within the page outline. */
@@ -36,15 +37,17 @@ export function Card({
 }: CardProps) {
   return (
     <article className={cx("group relative flex flex-col gap-4", className)}>
-      <div
-        className={cx(
-          "relative overflow-hidden rounded-md bg-surface-alt",
-          "[&_img]:size-full [&_img]:object-cover",
-          aspectClass[aspect],
-        )}
-      >
-        {media}
-      </div>
+      {media && (
+        <div
+          className={cx(
+            "relative overflow-hidden rounded-md bg-surface-alt",
+            "[&_img]:size-full [&_img]:object-cover",
+            aspectClass[aspect],
+          )}
+        >
+          {media}
+        </div>
+      )}
       {chips && <div className="flex flex-wrap gap-2">{chips}</div>}
       <div className="flex flex-col gap-1">
         <Title className="text-title text-text">

@@ -33,10 +33,14 @@ const headings = {
 /**
  * Section headings by accessible name: LineReveal splits a heading into line
  * spans and keeps its text in `aria-label`, so `textContent` loses spaces.
+ *
+ * The construction teaser (`#tikinti`) is left out: the seed has no published
+ * update, and tests/e2e/content.spec.ts publishes one for a moment while
+ * these tests may be running.
  */
 function sectionHeadings(page: Page) {
   return page
-    .locator("main h2")
+    .locator("main h2:not(#tikinti)")
     .evaluateAll((list) =>
       list.map((h) => (h.getAttribute("aria-label") ?? h.textContent ?? "").trim()),
     );

@@ -20,6 +20,7 @@ export const pathnames = {
   "/tikinti": "/tikinti",
   "/qalereya": "/qalereya",
   "/xeberler": "/xeberler",
+  "/xeberler/[slug]": "/xeberler/[slug]",
   "/elaqe": "/elaqe",
   "/mexfilik-siyaseti": "/mexfilik-siyaseti",
   "/primitivler": "/primitivler",

@@ -93,6 +93,8 @@ describe("media", () => {
     expect(toPublicVideo({ ...row, kind: "video", mimeType: "video/mp4" })).toEqual({
       src: "https://cdn.example/home/hero%20poster.jpg",
       type: "video/mp4",
+      width: row.width,
+      height: row.height,
     });
   });
 });
