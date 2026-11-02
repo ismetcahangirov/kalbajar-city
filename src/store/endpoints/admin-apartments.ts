@@ -6,6 +6,7 @@ import type {
 } from "@/shared/apartments";
 
 import { baseApi, listTags } from "../api";
+import { undoOnFailure } from "../optimistic";
 
 /**
  * The console's apartments (#24). A successful write invalidates the item and
@@ -28,6 +29,28 @@ export const adminApartmentsApi = baseApi.injectEndpoints({
     }),
     updateApartment: build.mutation<AdminApartment, { id: string } & ApartmentUpdate>({
       query: ({ id, ...body }) => ({ url: `/admin/apartments/${id}`, method: "PATCH", body }),
+      // A status change shows at once in every cached list and the item, and
+      // is undone if the server refuses it. The price waits for the refetch.
+      async onQueryStarted({ id, status }, { dispatch, getState, queryFulfilled }): Promise<void> {
+        if (status === undefined) return;
+        const { util } = adminApartmentsApi;
+        const patches = [
+          dispatch(
+            util.updateQueryData("adminApartment", id, (draft) => {
+              draft.status = status;
+            }),
+          ),
+          ...util.selectCachedArgsForQuery(getState(), "adminApartments").map((args) =>
+            dispatch(
+              util.updateQueryData("adminApartments", args, (draft) => {
+                const item = draft.items.find((entry) => entry.id === id);
+                if (item) item.status = status;
+              }),
+            ),
+          ),
+        ];
+        await undoOnFailure(queryFulfilled, patches);
+      },
       invalidatesTags: (result, error, { id }) =>
         error
           ? []

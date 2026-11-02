@@ -41,22 +41,22 @@ uses those ten; the owner confirms the list with the inventory (#7).
 
 The same stack as Mebline, which is in production and whose pitfalls are known.
 
-| Concern          | Choice                                                                                                                                                                                   |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework        | Next.js 16 App Router, React 19, TypeScript `strict` + `noUncheckedIndexedAccess`                                                                                                        |
-| Public rendering | React Server Components; HTML complete on first response (no streamed shell), data through `"use cache"` + `cacheTag`, invalidated on admin writes                                       |
-| Client state     | Redux Toolkit for UI state; RTK Query for every client-side data call (admin console, catalogue filters, forms)                                                                          |
-| Backend          | Next.js route handlers under `/api/v1/*`, zod validation at the boundary, one error shape                                                                                                |
-| Database         | PostgreSQL 17 + Drizzle ORM, versioned migrations                                                                                                                                        |
-| Auth             | Better Auth, roles `owner`, `admin`, `editor`, `sales`                                                                                                                                   |
-| Media            | S3-compatible object storage, presigned uploads, `sharp` variants and blur placeholders                                                                                                  |
-| i18n             | next-intl; `az` is the default and unprefixed, `en` and `ru` are prefixed (`/en/...`, `/ru/...`)                                                                                         |
-| URLs             | Route segments are Azerbaijani in every locale (`/menziller`, `/en/menziller`, `/ru/menziller`); slugs of content are Azerbaijani too. API paths stay English (`/api/v1/*`)              |
-| Styling          | Tailwind CSS v4 with design tokens; shadcn/ui inside the console only                                                                                                                    |
-| Motion           | In-house primitives on the Web Animations API and CSS `sticky` (GSAP dropped for the 40 KB budget, see `docs/motion-system.md`), Lenis smooth scroll; `prefers-reduced-motion` mandatory |
-| Typeface         | Alethia Next (Pepper Type), self-hosted WOFF2, subset to Latin, Latin Extended and Cyrillic                                                                                              |
-| Tests            | Vitest (unit, route handlers), Playwright (E2E, responsive), Lighthouse CI                                                                                                               |
-| Hosting          | Coolify on Hetzner, Docker standalone build, nightly `pg_dump` — owner decision pending                                                                                                  |
+| Concern          | Choice                                                                                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework        | Next.js 16 App Router, React 19, TypeScript `strict` + `noUncheckedIndexedAccess`                                                                                                            |
+| Public rendering | React Server Components; HTML complete on first response (no streamed shell), data through `"use cache"` + `cacheTag`, invalidated on admin writes                                           |
+| Client state     | Redux Toolkit for UI state; RTK Query for every client-side data call (admin console, catalogue filters, forms)                                                                              |
+| Backend          | Next.js route handlers under `/api/v1/*`, zod validation at the boundary, one error shape                                                                                                    |
+| Database         | PostgreSQL 17 + Drizzle ORM, versioned migrations                                                                                                                                            |
+| Auth             | Better Auth, roles `owner`, `admin`, `editor`, `sales`                                                                                                                                       |
+| Media            | S3-compatible object storage, presigned uploads, `sharp` variants and blur placeholders                                                                                                      |
+| i18n             | next-intl; `az` is the default and unprefixed, `en` and `ru` are prefixed (`/en/...`, `/ru/...`)                                                                                             |
+| URLs             | Route segments are Azerbaijani in every locale (`/menziller`, `/en/menziller`, `/ru/menziller`); slugs of content are Azerbaijani too. API paths stay English (`/api/v1/*`)                  |
+| Styling          | Tailwind CSS v4 with design tokens; the console is built from shadcn/ui, navigation is its `Sidebar` (`collapsible="icon"`); on the public site shadcn only as restyled behaviour primitives |
+| Motion           | In-house primitives on the Web Animations API and CSS `sticky` (GSAP dropped for the 40 KB budget, see `docs/motion-system.md`), Lenis smooth scroll; `prefers-reduced-motion` mandatory     |
+| Typeface         | Alethia Next (Pepper Type), self-hosted WOFF2, subset to Latin, Latin Extended and Cyrillic                                                                                                  |
+| Tests            | Vitest (unit, route handlers), Playwright (E2E, responsive), Lighthouse CI                                                                                                                   |
+| Hosting          | Coolify on Hetzner, Docker standalone build, nightly `pg_dump` — owner decision pending                                                                                                      |
 
 ### Typeface
 

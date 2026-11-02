@@ -1,9 +1,92 @@
 @import "tailwindcss";
 @import "../../styles/tokens.css";
 
-/* The console: semantic colour tokens and the focus ring from the public
-   site, the system font stack instead of Alethia Next (docs/ui-kit.md). */
+/* The console is built from shadcn/ui (src/components/admin/ui). Its theme
+   variables are mapped here onto the project's semantic tokens, so there is
+   no colour literal and no second palette (docs/ui-kit.md → Console). The
+   console has no dark mode: `dark:` only matches inside a `.dark` element,
+   which nothing renders. */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: var(--color-surface);
+  --foreground: var(--color-text);
+  --card: var(--color-surface-raised);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-surface-raised);
+  --popover-foreground: var(--color-text);
+  --primary: var(--color-action);
+  --primary-foreground: var(--color-action-text);
+  --secondary: var(--color-surface-alt);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-surface-alt);
+  --muted-foreground: var(--color-text-muted);
+  /* shadcn's "accent" is a hover surface, not the public site's gold. */
+  --accent: var(--color-surface-alt);
+  --accent-foreground: var(--color-text);
+  --destructive: var(--color-error);
+  --input: var(--color-border-strong);
+  --ring: var(--color-focus);
+
+  --sidebar: var(--color-surface-alt);
+  --sidebar-foreground: var(--color-text);
+  --sidebar-primary: var(--color-action);
+  --sidebar-primary-foreground: var(--color-action-text);
+  --sidebar-accent: var(--color-surface-raised);
+  --sidebar-accent-foreground: var(--color-text);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--color-focus);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* shadcn's type, weight, radius and shadow names, on the project's scale. */
+  --text-xs: var(--text-eyebrow);
+  --text-xs--line-height: var(--text-eyebrow--line-height);
+  --text-sm: var(--text-small);
+  --text-sm--line-height: var(--text-small--line-height);
+  --text-base: var(--text-body);
+  --text-base--line-height: var(--text-body--line-height);
+  --text-lg: var(--text-title);
+  --text-lg--line-height: var(--text-title--line-height);
+  --font-weight-semibold: var(--font-weight-medium);
+  --radius-xl: var(--radius-lg);
+  --shadow-sm: var(--shadow-raised);
+  --shadow-md: var(--shadow-raised);
+  --shadow-lg: var(--shadow-raised);
+}
+
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
   html {
     background-color: var(--color-surface);
     color: var(--color-text);
@@ -17,8 +100,48 @@
     line-height: var(--text-body--line-height);
   }
 
-  :focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
+  /* shadcn's controls are 32–36 px tall; on phones and touch screens every
+     target is at least 44 × 44 px (CLAUDE.md → Responsiveness). */
+  @media (width < 48rem), (pointer: coarse) {
+    [data-slot="button"],
+    [data-slot="sidebar-trigger"],
+    [data-slot="sidebar-menu-button"],
+    [data-slot="select-trigger"],
+    [data-slot="select-item"],
+    [data-slot="input"],
+    [data-slot="tabs-trigger"],
+    [data-slot="dropdown-menu-item"],
+    [data-slot="dropdown-menu-checkbox-item"] {
+      min-height: var(--spacing-target);
+    }
+
+    [data-slot="button"][data-size^="icon"],
+    [data-slot="sidebar-trigger"] {
+      min-width: var(--spacing-target);
+    }
+
+    [data-slot="breadcrumb-link"] {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--spacing-target);
+    }
+  }
+}
+
+/* The shared focus ring on every interactive element. Unlayered on purpose:
+   it wins over the `outline-none` and `outline-hidden` utilities the shadcn
+   components carry, so no component can remove it. */
+:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* The sidebar's collapse and the sheet's slide are the console's only motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
   }
 }
