@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { SiteTracking } from "@/components/analytics/site-tracking";
 import { LocaleSuggestion } from "@/components/i18n/locale-suggestion";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { Footer } from "@/components/shell/footer";
@@ -49,6 +50,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <MobileActionBar />
           <LocaleSuggestion />
           <SmoothScroll />
+          <SiteTracking />
         </NextIntlClientProvider>
       </body>
     </html>

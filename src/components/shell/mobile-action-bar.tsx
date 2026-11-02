@@ -23,6 +23,7 @@ export function MobileActionBar() {
       <div className="flex rounded-full shadow-raised">
         <a
           href={telHref(mainPhone)}
+          data-track="click_call"
           className={cx(half, "rounded-s-full bg-action text-action-text")}
         >
           <Icon icon={Phone} />
@@ -30,6 +31,7 @@ export function MobileActionBar() {
         </a>
         <a
           href={whatsappHref(contacts.whatsapp)}
+          data-track="click_whatsapp"
           rel="noopener noreferrer"
           className={cx(half, "rounded-e-full bg-surface-raised text-text")}
         >

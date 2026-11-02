@@ -2,7 +2,7 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import { eq } from "drizzle-orm";
 
 import { connect, databaseUrl } from "@/db/client";
-import { leads } from "@/db/schema";
+import { leadEvents, leads } from "@/db/schema";
 import { setOwner } from "@/lib/auth/owner";
 
 const email = "e2e-api@test.kalbajarcity.com";
@@ -92,22 +92,35 @@ test("an admin write shows on the public API's next request, served from its cac
 });
 
 test("a lead from a public form is stored", async ({ request }) => {
+  const octet = Math.floor(Math.random() * 250) + 1;
   const response = await request.post("/api/v1/leads", {
+    headers: { "x-forwarded-for": `203.0.113.${octet}` },
     data: {
       type: "callback",
       name: "E2E Test",
       phone: "+994501234567",
       locale: "az",
       sourcePath: "/elaqe",
+      consent: true,
+      // As a person fills the form: it appeared twenty seconds before it was sent.
+      startedAt: Date.now() - 20_000,
+      sentAt: Date.now(),
     },
   });
   expect(response.status()).toBe(201);
   const { id } = (await response.json()) as { id: string };
   expect(id).toEqual(expect.any(String));
 
-  // Leave no test lead in a database the sales team might look at.
+  // Leave no test lead in a database the sales team might look at, once the
+  // sales e-mail (sent after the answer) has been recorded.
   const { db, close } = connect(databaseUrl());
   try {
+    await expect
+      .poll(async () => {
+        const events = await db.select().from(leadEvents).where(eq(leadEvents.leadId, id));
+        return events.map((event) => event.type);
+      })
+      .toContain("notified");
     const [row] = await db.delete(leads).where(eq(leads.id, id)).returning();
     expect(row).toMatchObject({ type: "callback", sourcePath: "/elaqe", locale: "az" });
   } finally {

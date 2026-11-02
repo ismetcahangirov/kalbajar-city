@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
+import { LeadForm } from "@/components/leads/lead-form";
 import { CountUp, FadeUp, ImageReveal, PinnedCardZoom } from "@/components/motion";
 import {
   Button,
@@ -396,30 +397,40 @@ export async function Cta({ title, body, tone }: Props<"cta">) {
   const shell = await getTranslations("Shell");
   return (
     <Section tone={tone} aria-labelledby="muraciet">
-      <Container className="flex flex-col items-center gap-block">
-        <SectionHead id="muraciet" title={title} lead={body} align="center" />
-        <FadeUp className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center">
-          <Button href={getPathname({ href: "/elaqe", locale })} size="lg">
-            {t("viewing")}
-          </Button>
-          <Button
-            href={telHref(mainPhone)}
-            size="lg"
-            variant="secondary"
-            leadingIcon={<Icon icon={Phone} />}
-          >
-            {shell("call")}
-          </Button>
-          <Button
-            href={whatsappHref(contacts.whatsapp)}
-            rel="noopener noreferrer"
-            size="lg"
-            variant="secondary"
-            leadingIcon={<Icon icon={MessageCircle} />}
-          >
-            {shell("whatsapp")}
-          </Button>
-        </FadeUp>
+      <Container className="grid gap-block lg:grid-cols-12 lg:gap-gutter">
+        <div className="flex flex-col gap-block lg:col-span-5">
+          <SectionHead id="muraciet" title={title} lead={body} align="start" />
+          <FadeUp className="flex flex-col items-start gap-3">
+            <Button
+              href={telHref(mainPhone)}
+              data-track="click_call"
+              variant="secondary"
+              leadingIcon={<Icon icon={Phone} />}
+            >
+              {shell("call")}
+            </Button>
+            <Button
+              href={whatsappHref(contacts.whatsapp)}
+              data-track="click_whatsapp"
+              rel="noopener noreferrer"
+              variant="secondary"
+              leadingIcon={<Icon icon={MessageCircle} />}
+            >
+              {shell("whatsapp")}
+            </Button>
+            <Button
+              href={`${getPathname({ href: "/elaqe", locale })}#baxis`}
+              variant="link"
+              trailingIcon={<Icon icon={ArrowRight} />}
+            >
+              {t("viewing")}
+            </Button>
+          </FadeUp>
+        </div>
+        {/* The inquiry form; forms never animate, so it is not wrapped in an entry. */}
+        <div className="rounded-md bg-surface-raised p-6 lg:col-span-7 lg:p-10">
+          <LeadForm type="inquiry" labelledBy="muraciet" />
+        </div>
       </Container>
     </Section>
   );

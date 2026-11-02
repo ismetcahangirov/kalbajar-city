@@ -99,5 +99,58 @@
   },
   "Placeholder": {
     "body": "Bu səhifə hazırlanır."
+  },
+  "LeadForm": {
+    "heading": {
+      "inquiry": "Sual verin",
+      "viewing": "Baxışa yazılın",
+      "callback": "Geri zəng sifariş edin"
+    },
+    "intro": {
+      "inquiry": "Sualınızı yazın, satış komandası sizə cavab verəcək.",
+      "viewing": "Rahat vaxtı seçin, satış komandası təsdiq üçün zəng edəcək.",
+      "callback": "Nömrənizi yazın, sizə zəng edək."
+    },
+    "apartment": "Mənzil {label} haqqında",
+    "name": "Adınız",
+    "phone": "Telefon",
+    "phoneHelper": "Məsələn, 050 123 45 67 və ya +994 50 123 45 67",
+    "email": "E-poçt (istəyə bağlı)",
+    "message": "Mesaj (istəyə bağlı)",
+    "preferredAt": "Baxış üçün tarix və saat",
+    "preferredAtHelper": "Bakı vaxtı ilə",
+    "consent": "<link>Məxfilik siyasəti</link> ilə tanış oldum və məlumatlarımın işlənməsinə razıyam.",
+    "consentLabel": "Razılıq",
+    "newTab": "(yeni pəncərədə açılır)",
+    "honeypot": "Bu xananı boş saxlayın",
+    "submit": {
+      "inquiry": "Göndər",
+      "viewing": "Baxışa yazıl",
+      "callback": "Zəng sifariş et"
+    },
+    "submitting": "Göndərilir…",
+    "error": {
+      "name": "Adınızı yazın.",
+      "phone": "Telefon nömrəsini düzgün yazın, məsələn 050 123 45 67.",
+      "email": "Düzgün e-poçt ünvanı yazın və ya xananı boş saxlayın.",
+      "preferredAt": "Baxış üçün tarix və saat seçin.",
+      "preferredAtRange": "Gələn bir il ərzində bir vaxt seçin.",
+      "message": "Mesaj ən çox 2 000 simvol ola bilər.",
+      "consent": "Göndərmək üçün razılığınızı təsdiqləyin.",
+      "summary": "{count, plural, one {# xana düzgün doldurulmayıb} other {# xana düzgün doldurulmayıb}}: {fields}.",
+      "network": "Göndərmək alınmadı. İnternet bağlantısını yoxlayıb yenidən cəhd edin; yazdıqlarınız yerində qalır.",
+      "rateLimited": "Çox sayda müraciət göndərildi. Bir neçə dəqiqə sonra yenidən cəhd edin və ya bizə zəng edin.",
+      "server": "Müraciət qəbul olunmadı. Məlumatları yoxlayıb yenidən cəhd edin və ya bizə zəng edin."
+    },
+    "success": {
+      "title": "Müraciətiniz qəbul edildi",
+      "body": "Satış komandası tezliklə sizinlə əlaqə saxlayacaq.",
+      "again": "Yeni müraciət göndər"
+    }
+  },
+  "Contact": {
+    "description": "Kalbajar City satış ofisi: baxışa yazılın, geri zəng sifariş edin və ya bizə zəng edin.",
+    "lead": "Baxışa yazılın və ya nömrənizi qoyun, satış komandası sizinlə əlaqə saxlasın.",
+    "direct": "Birbaşa əlaqə"
   }
 }

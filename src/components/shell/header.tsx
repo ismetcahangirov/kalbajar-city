@@ -30,6 +30,7 @@ export function Header() {
           <div className="hidden lg:block">
             <Button
               href={telHref(mainPhone)}
+              data-track="click_call"
               variant="secondary"
               leadingIcon={<Icon icon={Phone} />}
               className="px-3.5 xl:px-6"

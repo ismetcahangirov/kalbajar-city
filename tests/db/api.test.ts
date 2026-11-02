@@ -27,6 +27,11 @@ vi.mock("next/cache", () => ({
   revalidateTag: (tag: string, profile: unknown) => void cache.revalidated.push([tag, profile]),
 }));
 vi.mock("next/navigation", () => ({ unstable_rethrow: () => {} }));
+// The sales e-mail runs after the answer; tests/db/leads.test.ts covers it.
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: () => {},
+}));
 
 const publicList = await import("@/app/api/v1/apartments/route");
 const publicDetail = await import("@/app/api/v1/apartments/[slug]/route");
@@ -46,11 +51,17 @@ const slugOf = (name: string) => `t-${tag}-${name}`;
 const ids = { building: "", block: "", floors: [] as string[], layouts: [] as string[] };
 const apartmentIds: Record<string, string> = {};
 
+let client = 0;
+
 function request(
   path: string,
   init: { method?: string; body?: unknown; cookie?: string; contentType?: string } = {},
 ) {
-  const headers = new Headers({ "user-agent": "vitest" });
+  // A new client address per request, so the lead rate limit never decides a test.
+  const headers = new Headers({
+    "user-agent": "vitest",
+    "x-forwarded-for": `192.0.2.${(client++ % 250) + 1}`,
+  });
   if (init.cookie) headers.set("cookie", init.cookie);
   if (init.body !== undefined) headers.set("content-type", init.contentType ?? "application/json");
   return new Request(`${origin}/api/v1${path}`, {
@@ -268,6 +279,9 @@ describe("POST /api/v1/leads", () => {
     sourcePath: `/t-${tag}`,
     apartment: slugOf("m-101"),
     utm: { source: "instagram", medium: "" },
+    consent: true,
+    startedAt: Date.now() - 20_000,
+    sentAt: Date.now(),
   };
 
   it("stores the lead with its apartment, context and a created event", async () => {
@@ -291,7 +305,7 @@ describe("POST /api/v1/leads", () => {
   it("answers an invalid body with 422 and every invalid field, a viewing's date included", async () => {
     const response = await leadRoute.POST(
       request("/leads", {
-        body: { ...lead, type: "viewing", phone: "050 123 45 67", locale: "de", sourcePath: "x" },
+        body: { ...lead, type: "viewing", phone: "12345", locale: "de", sourcePath: "x" },
       }),
     );
     expect(response.status).toBe(422);

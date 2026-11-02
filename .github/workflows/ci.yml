@@ -105,6 +105,12 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      # Lead e-mails: the E2E tests read them back through Mailpit's API.
+      mailpit:
+        image: axllent/mailpit:v1.31
+        ports:
+          - 1025:1025
+          - 8025:8025
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -131,6 +137,10 @@ jobs:
       - run: pnpm test:e2e
         env:
           DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+          SMTP_HOST: localhost
+          SMTP_PORT: 1025
+          SMTP_FROM: Kalbajar City <no-reply@kalbajarcity.com>
+          MAILPIT_URL: http://localhost:8025
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
