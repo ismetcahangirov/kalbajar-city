@@ -7,7 +7,16 @@ import {
   type ColumnDef,
   type RowData,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  List,
+  RotateCw,
+} from "lucide-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, type ReactNode } from "react";
 
@@ -36,6 +45,7 @@ import {
   withoutFilters,
   withPage,
   withSort,
+  withView,
   type TableState,
   type TableUrlSpec,
 } from "@/lib/admin/table-state";
@@ -46,7 +56,9 @@ import {
   DateFilter,
   FilterMenu,
   isDateFilter,
+  isTextFilter,
   SortSelect,
+  TextFilter,
   type DataTableAnyFilter,
 } from "./controls";
 
@@ -93,6 +105,15 @@ export type DataTableProps<T, P> = {
   rowClassName?: (item: T) => string | undefined;
   /** Row selection, e.g. for bulk actions: a checkbox per row and one for the page. */
   selection?: DataTableSelection<T>;
+  /**
+   * Shows the items as a grid, e.g. thumbnails, by default; the table and
+   * cards become the "list" view (`?gorunus=siyahi`).
+   */
+  grid?: {
+    render: (items: T[]) => ReactNode;
+    /** Placeholders while the first page loads. */
+    skeleton: ReactNode;
+  };
 };
 
 /**
@@ -105,6 +126,9 @@ export type DataTableSelection<T> = {
   /** The row's name in its checkbox's accessible label, e.g. `A-101`. */
   label: (item: T) => string;
 };
+
+/** The views of a list with a grid; the first is the default. */
+const gridViews = ["sebeke", "siyahi"] as const;
 
 const skeletonRows = 6;
 
@@ -148,6 +172,7 @@ export function DataTable<T, P>({
   getRowId,
   rowClassName,
   selection,
+  grid,
 }: DataTableProps<T, P>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -164,11 +189,16 @@ export function DataTable<T, P>({
       filters: Object.fromEntries(
         filters.map((filter) => [
           filter.key,
-          isDateFilter(filter) ? isDay : filter.options.map((option) => option.value),
+          isDateFilter(filter)
+            ? isDay
+            : isTextFilter(filter)
+              ? "text"
+              : filter.options.map((option) => option.value),
         ]),
       ),
+      ...(grid ? { views: gridViews } : {}),
     }),
-    [columns, sortFields, defaultSort, filters],
+    [columns, sortFields, defaultSort, filters, grid],
   );
 
   const state = useMemo(
@@ -209,6 +239,7 @@ export function DataTable<T, P>({
   const rows = table.getRowModel().rows;
   const filtered = hasFilters(state);
   const pageCount = data?.pageCount ?? 0;
+  const showGrid = grid !== undefined && state.view === gridViews[0];
 
   const pageItems = data?.items ?? [];
   const selectedOnPage = pageItems.filter((item) => selection?.selected.has(getRowId(item)));
@@ -271,7 +302,14 @@ export function DataTable<T, P>({
     <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         {filters.map((filter) =>
-          isDateFilter(filter) ? (
+          isTextFilter(filter) ? (
+            <TextFilter
+              key={filter.key}
+              filter={filter}
+              value={state.filters[filter.key]?.[0]}
+              onChange={(value) => navigate(withFilter(state, filter.key, value ? [value] : []))}
+            />
+          ) : isDateFilter(filter) ? (
             <DateFilter
               key={filter.key}
               filter={filter}
@@ -306,6 +344,25 @@ export function DataTable<T, P>({
             onChange={(value) => navigate(withSort(state, value))}
           />
         ) : null}
+        {grid ? (
+          <div role="group" aria-label={t("table.view")} className="flex gap-1">
+            {gridViews.map((view) => {
+              const Icon = view === "sebeke" ? LayoutGrid : List;
+              return (
+                <Button
+                  key={view}
+                  type="button"
+                  variant={state.view === view ? "secondary" : "ghost"}
+                  aria-pressed={state.view === view}
+                  onClick={() => navigate(withView(state, view))}
+                >
+                  <Icon aria-hidden />
+                  {t(`table.view.${view}`)}
+                </Button>
+              );
+            })}
+          </div>
+        ) : null}
         <p role="status" className="text-sm text-muted-foreground ml-auto">
           {status}
         </p>
@@ -332,6 +389,13 @@ export function DataTable<T, P>({
               {t("table.clearFilters")}
             </Button>
           ) : null}
+        </div>
+      ) : grid && showGrid ? (
+        <div
+          aria-busy={isFetching}
+          className={cn(isFetching && !isLoading && "opacity-60 motion-safe:transition-opacity")}
+        >
+          {isLoading ? grid.skeleton : grid.render(data?.items ?? [])}
         </div>
       ) : (
         <div

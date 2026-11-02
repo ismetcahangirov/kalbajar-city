@@ -1,5 +1,3 @@
-import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-
 import type { Page } from "@/shared/api";
 import type {
   AdminMedia,
@@ -7,13 +5,11 @@ import type {
   MediaCreate,
   MediaListParams,
   MediaUpdate,
+  UploadRequest,
   UploadTicket,
 } from "@/shared/media";
 
 import { baseApi, listTags } from "../api";
-
-/** What `uploadMedia` takes: the file, and everything `POST /admin/media` takes but its key. */
-export type MediaUploadArgs = { file: File } & Omit<MediaCreate, "key">;
 
 /**
  * The console's media library (#25). Writes invalidate the item and every
@@ -34,34 +30,16 @@ export const adminMediaApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Media", id }],
     }),
     /**
-     * The whole upload: a presigned PUT from the server, the file straight to
-     * the bucket, then processing. The middle step goes to the bucket's origin,
-     * outside `/api/v1`, which is why this is a `queryFn`.
+     * Step one of an upload: a presigned PUT. The file then goes straight to
+     * the bucket (`putFile` in `@/lib/admin/upload`, for its progress events),
+     * and step two is `createMedia`.
      */
-    uploadMedia: build.mutation<AdminMedia, MediaUploadArgs>({
-      async queryFn({ file, ...fields }, _api, _options, baseQuery) {
-        const ticket = await baseQuery({
-          url: "/admin/media/uploads",
-          method: "POST",
-          body: { filename: file.name, mimeType: file.type, size: file.size },
-        });
-        if (ticket.error) return { error: ticket.error };
-        const { key, url, method, headers } = ticket.data as UploadTicket;
-
-        try {
-          const sent = await fetch(url, { method, headers, body: file });
-          if (!sent.ok) return { error: { status: sent.status, data: null } };
-        } catch (error) {
-          return { error: { status: "FETCH_ERROR", error: String(error) } as FetchBaseQueryError };
-        }
-
-        const created = await baseQuery({
-          url: "/admin/media",
-          method: "POST",
-          body: { ...fields, key },
-        });
-        return created.error ? { error: created.error } : { data: created.data as AdminMedia };
-      },
+    requestMediaUpload: build.mutation<UploadTicket, UploadRequest>({
+      query: (body) => ({ url: "/admin/media/uploads", method: "POST", body }),
+    }),
+    /** Step two: the server checks and processes the uploaded file. */
+    createMedia: build.mutation<AdminMedia, MediaCreate>({
+      query: (body) => ({ url: "/admin/media", method: "POST", body }),
       invalidatesTags: (_result, error) => (error ? [] : [{ type: "Media", id: "LIST" }]),
     }),
     updateMedia: build.mutation<AdminMedia, { id: string } & MediaUpdate>({
@@ -91,7 +69,8 @@ export const adminMediaApi = baseApi.injectEndpoints({
 export const {
   useAdminMediaListQuery,
   useAdminMediaQuery,
-  useUploadMediaMutation,
+  useRequestMediaUploadMutation,
+  useCreateMediaMutation,
   useUpdateMediaMutation,
   useDeleteMediaMutation,
 } = adminMediaApi;

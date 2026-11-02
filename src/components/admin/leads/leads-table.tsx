@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import { useMemo } from "react";
 
-import { isDateFilter, type DataTableAnyFilter } from "@/components/admin/data-table/controls";
+import type { DataTableAnyFilter } from "@/components/admin/data-table/controls";
 import { DataTable } from "@/components/admin/data-table/data-table";
 import { formatPhone } from "@/i18n/format";
 import { adminDateTime } from "@/lib/admin/format";
@@ -161,7 +161,7 @@ export function LeadsTable({ sources, apartments, assignees }: LeadsTableOptions
           { key: leadFilterKeys.from, label: t("leads.from"), kind: "date" },
           { key: leadFilterKeys.to, label: t("leads.to"), kind: "date" },
         ] satisfies DataTableAnyFilter[]
-      ).filter((filter: DataTableAnyFilter) => isDateFilter(filter) || filter.options.length > 0),
+      ).filter((filter: DataTableAnyFilter) => !("options" in filter) || filter.options.length > 0),
     [sources, apartments, assignees],
   );
 

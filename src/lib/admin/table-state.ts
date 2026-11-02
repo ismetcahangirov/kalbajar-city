@@ -7,12 +7,18 @@
 
 export const pageKey = "sehife";
 export const sortKey = "sira";
+/** How a list that has a grid shows its items (`?gorunus=siyahi`). */
+export const viewKey = "gorunus";
+
+/** The longest search text the URL keeps. */
+export const searchTextMax = 100;
 
 /**
- * The values a filter accepts: a list (several may be chosen), or a test for
- * a free value such as a date, of which the URL keeps one.
+ * The values a filter accepts: a list (several may be chosen), a test for a
+ * free value such as a date, of which the URL keeps one, or `"text"`: a search,
+ * kept whole, commas and all.
  */
-export type FilterValues = readonly string[] | ((value: string) => boolean);
+export type FilterValues = readonly string[] | ((value: string) => boolean) | "text";
 
 export type TableUrlSpec = {
   /** API sort fields the list accepts; `-field` sorts descending. */
@@ -20,12 +26,16 @@ export type TableUrlSpec = {
   defaultSort: string;
   /** Filter URL keys and the values each accepts. */
   filters: Readonly<Record<string, FilterValues>>;
+  /** The ways the list can be shown, the default first. */
+  views?: readonly string[];
 };
 
 export type TableState = {
   page: number;
   sort: string;
   filters: Record<string, string[]>;
+  /** One of the spec's `views`, when it has any. */
+  view?: string;
 };
 
 export type SortDirection = "asc" | "desc";
@@ -58,6 +68,11 @@ export function readTableState(params: URLSearchParams, spec: TableUrlSpec): Tab
   const page = Number(params.get(pageKey));
   const filters: Record<string, string[]> = {};
   for (const [key, allowed] of Object.entries(spec.filters)) {
+    if (allowed === "text") {
+      const text = params.get(key)?.trim().slice(0, searchTextMax);
+      if (text) filters[key] = [text];
+      continue;
+    }
     const given = [...new Set(valuesOf(params, key))];
     if (typeof allowed === "function") {
       const value = given.find(allowed);
@@ -68,10 +83,14 @@ export function readTableState(params: URLSearchParams, spec: TableUrlSpec): Tab
     if (values.length)
       filters[key] = values.sort((a, b) => allowed.indexOf(a) - allowed.indexOf(b));
   }
+  const view = params.get(viewKey);
   return {
     page: Number.isInteger(page) && page > 1 ? page : 1,
     sort: validSort(params.get(sortKey), spec),
     filters,
+    ...(spec.views?.length
+      ? { view: view && spec.views.includes(view) ? view : spec.views[0] }
+      : {}),
   };
 }
 
@@ -84,6 +103,9 @@ export function tableSearch(state: TableState, spec: TableUrlSpec): string {
   }
   if (state.sort !== spec.defaultSort) params.set(sortKey, state.sort);
   if (state.page > 1) params.set(pageKey, String(state.page));
+  if (state.view && spec.views?.includes(state.view) && state.view !== spec.views[0]) {
+    params.set(viewKey, state.view);
+  }
   const search = params.toString();
   return search ? `?${search}` : "";
 }
@@ -112,6 +134,11 @@ export function withSort(state: TableState, sort: string): TableState {
 export function nextSort(current: string, field: string): string {
   const { field: currentField, direction } = parseSort(current);
   return currentField === field && direction === "asc" ? `-${field}` : field;
+}
+
+/** Another view keeps the page: the same items, shown differently. */
+export function withView(state: TableState, view: string): TableState {
+  return { ...state, view };
 }
 
 export function withPage(state: TableState, page: number): TableState {
