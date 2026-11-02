@@ -43,6 +43,8 @@ export const settingsSchemas = {
     whatsapp: phoneSchema.nullable(),
     email: z.email().nullable(),
     address: translatableSchema.nullable(),
+    /** Office hours as free text per locale ("Mon–Sat, 10:00–19:00"); shown only when set. */
+    hours: translatableSchema.nullish(),
     /** Null until the owner confirms them (#7). */
     coordinates: z
       .object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) })
@@ -89,3 +91,15 @@ export type SettingsKey = keyof typeof settingsSchemas;
 export const settingsKeys = Object.keys(settingsSchemas) as SettingsKey[];
 
 export type SettingsValue<K extends SettingsKey> = z.infer<(typeof settingsSchemas)[K]>;
+
+/** `/api/v1/admin/settings/:key`: an unknown key is a 404. */
+export const settingsKeyParamsSchema = z.object({
+  key: z.enum(settingsKeys as [SettingsKey, ...SettingsKey[]]),
+});
+
+/** A settings row as the console reads it. */
+export type AdminSetting<K extends SettingsKey = SettingsKey> = {
+  key: K;
+  value: SettingsValue<K>;
+  updatedAt: string;
+};
