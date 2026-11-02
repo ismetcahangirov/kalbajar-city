@@ -10,7 +10,7 @@ import {
 } from "@/lib/admin/media-list";
 import { readTableState, tableSearch, withFilter, withView } from "@/lib/admin/table-state";
 import { checkUpload, posterFileName, uploadProblemOf } from "@/lib/admin/upload";
-import { posterTime } from "@/lib/admin/video-frame";
+import { corsUrl, posterTime } from "@/lib/admin/video-frame";
 import { consoleContentSecurityPolicy, contentSecurityPolicy, originOf } from "@/lib/security/csp";
 import { mediaListQuerySchema } from "@/shared/media";
 
@@ -90,6 +90,14 @@ describe("upload checks", () => {
     expect(posterFileName("kənd yolu.mp4")).toBe("kənd yolu-poster.jpg");
     expect(posterFileName(null)).toBe("video-poster.jpg");
     expect(posterFileName(".mp4")).toBe("video-poster.jpg");
+  });
+
+  it("loads stored videos for a frame in a cache entry of their own", () => {
+    expect(corsUrl("http://localhost:9010/b/media/1/video.mp4")).toBe(
+      "http://localhost:9010/b/media/1/video.mp4?frame=1",
+    );
+    expect(corsUrl("https://cdn.example/v.mp4?x=1")).toBe("https://cdn.example/v.mp4?x=1&frame=1");
+    expect(corsUrl("blob:http://localhost/abc")).toBe("blob:http://localhost/abc");
   });
 
   it("takes the poster 1 s in, or 10 % into a shorter video", () => {

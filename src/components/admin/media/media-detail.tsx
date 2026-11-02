@@ -44,6 +44,7 @@ import {
 } from "@/lib/admin/media-list";
 import { t } from "@/lib/admin/messages";
 import { cn } from "@/lib/admin/utils";
+import { corsUrl } from "@/lib/admin/video-frame";
 import {
   mediaSources,
   type AdminMedia,
@@ -376,11 +377,11 @@ function VideoPoster({ item, permissions }: { item: AdminMedia; permissions: Med
   };
 
   const capture = async () => {
-    if (!item.previewUrl) return;
+    if (!video.current) return;
     setBusy(true);
     setProblem(null);
     try {
-      await capturePoster(item, item.previewUrl, video.current?.currentTime ?? undefined);
+      await capturePoster(item, video.current);
       toast.success(t("media.posterSaved"));
     } catch (error) {
       console.warn("media: capturing the poster failed", error);
@@ -395,11 +396,13 @@ function VideoPoster({ item, permissions }: { item: AdminMedia; permissions: Med
       {item.previewUrl ? (
         <video
           ref={video}
-          src={item.previewUrl}
+          // Loaded with CORS, so the frame on screen can be drawn on a canvas.
+          src={corsUrl(item.previewUrl)}
+          crossOrigin="anonymous"
           controls
           muted
           playsInline
-          preload="metadata"
+          preload="auto"
           aria-label={t("media.videoLabel", { name: mediaName(item) })}
           className="bg-muted w-full max-w-xl rounded-md"
           style={

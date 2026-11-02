@@ -12,9 +12,12 @@ import { paragraphs } from "@/shared/rich-text";
 import { playableH264Mp4 } from "../fixtures/h264";
 import { ensureAccount, signIn, waitForShell } from "./console";
 
-/** An editor of this project's own, signed in on the page. */
-async function signInEditor(page: Page, project: string, baseURL: string) {
-  const email = `e2e-media-library-${project}@test.kalbajarcity.com`;
+/**
+ * An editor of this test's own, signed in on the page: setting an account up
+ * signs its other sessions out, so tests running at once never share one.
+ */
+async function signInEditor(page: Page, key: string, baseURL: string) {
+  const email = `e2e-media-library-${key}@test.kalbajarcity.com`;
   await ensureAccount("editor", email, "E2E Media Editor");
   await signIn(page, email, baseURL);
 }
@@ -88,7 +91,7 @@ test("an editor uploads a JPEG with progress, writes alt text in three languages
   const tag = randomUUID().slice(0, 8);
   const name = `e2e-dag-${info.project.name}-${tag}.jpg`;
   await sizeFor(page, isMobile);
-  await signInEditor(page, info.project.name, baseURL!);
+  await signInEditor(page, `jpeg-${info.project.name}`, baseURL!);
   const created: string[] = [];
 
   try {
@@ -181,7 +184,7 @@ test("a video uploaded through the browser gets a poster frame captured from it"
   test.setTimeout(120_000);
   const name = `e2e-kend-${info.project.name}-${randomUUID().slice(0, 8)}.mp4`;
   await sizeFor(page, isMobile);
-  await signInEditor(page, info.project.name, baseURL!);
+  await signInEditor(page, `video-${info.project.name}`, baseURL!);
   const created: string[] = [];
 
   try {
@@ -219,6 +222,10 @@ test("a video uploaded through the browser gets a poster frame captured from it"
     // The video's page shows the poster and can capture another frame.
     await page.goto(`/admin/media/${video.id}`);
     await expect(page.locator(`[data-poster="${video.poster!.id}"]`)).toBeVisible();
+    // Scrub to another moment, as an editor would, and capture what is on screen.
+    await page
+      .getByLabel(`Video: ${name}`)
+      .evaluate((element: HTMLVideoElement) => (element.currentTime = 0.6));
     await page.getByRole("button", { name: "Bu kadrı poster et" }).click();
     await expect(page.getByText("Poster yeniləndi")).toBeVisible();
     const recaptured = (await (
@@ -239,7 +246,7 @@ test("deleting an image in use shows where it is used", async ({
   test.setTimeout(90_000);
   const tag = `${info.project.name}-${randomUUID().slice(0, 8)}`;
   await sizeFor(page, isMobile);
-  await signInEditor(page, info.project.name, baseURL!);
+  await signInEditor(page, `delete-${info.project.name}`, baseURL!);
 
   // An image through the API's presigned flow, then a draft article using it.
   const jpeg = await sharp({

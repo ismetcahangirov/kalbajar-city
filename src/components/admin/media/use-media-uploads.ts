@@ -10,7 +10,7 @@ import {
   uploadProblemOf,
   type UploadProblem,
 } from "@/lib/admin/upload";
-import { captureFrame } from "@/lib/admin/video-frame";
+import { captureFrame, frameToJpeg } from "@/lib/admin/video-frame";
 import type { AdminMedia, MediaSource, UploadMimeType } from "@/shared/media";
 import {
   useCreateMediaMutation,
@@ -65,15 +65,17 @@ export function useSendFile(): SendFile {
 }
 
 /**
- * Captures a video's poster frame and links it (#25). The frame is a still of
- * the video, so it is decorative: the video's own alt text names it.
+ * Captures a video's poster frame and links it (#25): from a file's URL (the
+ * automatic frame), or the frame a player shows now (the editor's choice).
+ * The frame is a still of the video, so it is decorative: the video's own
+ * alt text names it.
  */
 export function useCapturePoster() {
   const send = useSendFile();
   const [update] = useUpdateMediaMutation();
   return useCallback(
-    async (video: AdminMedia, src: string, time?: number): Promise<AdminMedia> => {
-      const frame = await captureFrame(src, { time });
+    async (video: AdminMedia, from: string | HTMLVideoElement): Promise<AdminMedia> => {
+      const frame = typeof from === "string" ? await captureFrame(from) : await frameToJpeg(from);
       const poster = await send(frame, {
         name: posterFileName(video.originalName),
         source: video.source,
