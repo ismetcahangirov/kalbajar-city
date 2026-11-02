@@ -30,6 +30,8 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  // The coordinates are database data: never read while the build prerenders.
+  await connection();
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Metadata");
   const { coordinates } = await getSiteContacts(locale);
