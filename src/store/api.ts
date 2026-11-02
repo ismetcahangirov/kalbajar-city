@@ -3,7 +3,10 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 /** One tag type per entity; features add endpoints with `injectEndpoints`. */
 export const tagTypes = [
   "Apartment",
+  "Block",
+  "Building",
   "ConstructionUpdate",
+  "Floor",
   "LayoutType",
   "Lead",
   "Media",

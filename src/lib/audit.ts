@@ -82,3 +82,31 @@ export async function audit(db: Executor, entry: AuditEntry): Promise<void> {
     userAgent: entry.headers?.get("user-agent") ?? null,
   });
 }
+
+/**
+ * Records many writes in one insert, e.g. one entry per apartment of a bulk
+ * change or an import. Entries that changed nothing are left out, as in
+ * `audit()`.
+ */
+export async function auditMany(db: Executor, entries: AuditEntry[]): Promise<void> {
+  const rows = entries.flatMap((entry) => {
+    const changes = diff(entry.before, entry.after);
+    if (entry.before && entry.after && Object.keys(changes.after ?? {}).length === 0) return [];
+    return [
+      {
+        actorId: entry.actorId,
+        action: entry.action,
+        entityType: entry.entityType,
+        entityId: entry.entityId ?? null,
+        before: changes.before,
+        after: changes.after,
+        ip: clientIp(entry.headers),
+        userAgent: entry.headers?.get("user-agent") ?? null,
+      },
+    ];
+  });
+  // Postgres takes at most 65 535 parameters per statement; 8 per row.
+  for (let start = 0; start < rows.length; start += 1000) {
+    await db.insert(auditLog).values(rows.slice(start, start + 1000));
+  }
+}
