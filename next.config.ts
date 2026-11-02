@@ -60,6 +60,8 @@ const nextConfig: NextConfig = {
     "/api/v1/admin/media": [sharpNativeFiles],
     "/api/v1/admin/media/*": [sharpNativeFiles],
     "/api/v1/admin/media/*/*": [sharpNativeFiles],
+    // The Open Graph cards read their fonts and colours from disk (src/lib/seo/og.tsx).
+    "/**/opengraph-image*": ["./src/fonts/alethia-next/og/*.otf", "./src/styles/tokens.css"],
   },
   experimental: {
     // The root layout sits under [locale], so unmatched URLs need a 404 that
