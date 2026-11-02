@@ -17,21 +17,9 @@ import {
 import { alias } from "drizzle-orm/pg-core";
 
 import type { Executor } from "@/db/client";
-import {
-  apartments,
-  blocks,
-  floors,
-  leadEvents,
-  leadNotes,
-  leads,
-  settings,
-  users,
-} from "@/db/schema";
+import { apartments, blocks, floors, leadEvents, leadNotes, leads, users } from "@/db/schema";
 import { forbiddenError, invalidField, notFound } from "@/lib/api/errors";
 import { audit } from "@/lib/audit";
-import { revalidatePublic } from "@/lib/cache/revalidate";
-import { publicTags } from "@/lib/cache/tags";
-import type { LeadSettings } from "@/lib/leads/settings";
 import { can, userRoles } from "@/lib/auth/permissions";
 import type { SessionUser } from "@/lib/auth/session";
 import { offsetOf, toPage, type Page } from "@/shared/api";
@@ -483,42 +471,3 @@ export async function exportLeadRows(db: Executor, query: Filters, user: Actor) 
 }
 
 export type LeadExportRow = Awaited<ReturnType<typeof exportLeadRows>>[number];
-
-/** Saves the leads settings, audited in the same transaction. */
-export async function updateLeadSettings(
-  db: Executor,
-  {
-    input,
-    user,
-    headers,
-  }: { input: LeadSettings; user: Pick<SessionUser, "id">; headers?: Headers | null },
-): Promise<LeadSettings> {
-  const value: LeadSettings = {
-    // One address once, in the order given.
-    recipients: [...new Set(input.recipients.map((email) => email.trim().toLowerCase()))],
-    retentionMonths: input.retentionMonths,
-  };
-  await db.transaction(async (tx) => {
-    const [before] = await tx
-      .select({ value: settings.value })
-      .from(settings)
-      .where(eq(settings.key, "leads"))
-      .for("update");
-    await tx
-      .insert(settings)
-      .values({ key: "leads", value, updatedBy: user.id })
-      .onConflictDoUpdate({ target: settings.key, set: { value, updatedBy: user.id } });
-    await audit(tx, {
-      actorId: user.id,
-      action: "settings.update",
-      entityType: "settings",
-      entityId: "leads",
-      before: (before?.value as Record<string, unknown> | undefined) ?? null,
-      after: value,
-      headers,
-    });
-  });
-  // The privacy notice quotes the retention period.
-  revalidatePublic(publicTags.settings);
-  return value;
-}

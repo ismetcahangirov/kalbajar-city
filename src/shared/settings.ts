@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { privacy } from "@/config/privacy";
+
 import { areaSchema } from "./inventory";
 import { phoneSchema } from "./phone";
 import { translatableSchema } from "./translatable";
@@ -96,8 +98,11 @@ export const settingsSchemas = {
   }),
 } satisfies Record<string, z.ZodType>;
 
-/** The leads settings until the row is seeded: no recipients, 24 months (#26). */
-export const defaultLeadSettings: SettingsValue<"leads"> = { recipients: [], retentionMonths: 24 };
+/** The leads settings until the row is seeded: no recipients, the privacy notice's period (#26). */
+export const defaultLeadSettings: SettingsValue<"leads"> = {
+  recipients: [],
+  retentionMonths: privacy.retentionMonths,
+};
 
 export type SettingsKey = keyof typeof settingsSchemas;
 

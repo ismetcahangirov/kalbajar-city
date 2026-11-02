@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { contacts as fallbackContacts } from "@/config/contacts";
+import { privacy } from "@/config/privacy";
 import { getDb } from "@/db";
 import type { Executor } from "@/db/client";
 import { homeSections, media, settings } from "@/db/schema";
@@ -151,6 +152,20 @@ export async function getLocationPage(locale: Locale): Promise<LocationPage> {
       minutes: d.minutes,
     })),
   };
+}
+
+/**
+ * How many months the privacy notice says leads are kept: the period the
+ * retention job applies (`settings.leads`, set in the console), or the
+ * notice's own figure until that row exists.
+ */
+export async function getLeadRetentionMonths(): Promise<number> {
+  "use cache";
+  cacheTag(publicTags.settings);
+  cacheLife("days");
+
+  const leads = await readSetting(getDb(), "leads");
+  return leads?.retentionMonths ?? privacy.retentionMonths;
 }
 
 /** A settings value, or null when the row is missing or no longer matches its schema. */

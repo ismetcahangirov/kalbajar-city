@@ -61,8 +61,11 @@ export function LeadSettingsForm({ initial }: { initial: LeadSettings }) {
         onSubmit={form.handleSubmit(async (values) => {
           resetError();
           try {
-            const saved = await save({
-              recipients: splitRecipients(values.recipients),
+            const { value: saved } = await save({
+              // One address once, as typed apart from the case.
+              recipients: [
+                ...new Set(splitRecipients(values.recipients).map((email) => email.toLowerCase())),
+              ],
               retentionMonths: values.retentionMonths,
             }).unwrap();
             form.reset({

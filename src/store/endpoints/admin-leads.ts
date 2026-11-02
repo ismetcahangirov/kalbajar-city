@@ -8,7 +8,7 @@ import type {
   LeadSummary,
   LeadUpdate,
 } from "@/shared/leads";
-import type { SettingsValue } from "@/shared/settings";
+import type { AdminSetting, SettingsValue } from "@/shared/settings";
 
 import { baseApi, listTags } from "../api";
 import { undoOnFailure } from "../optimistic";
@@ -80,12 +80,13 @@ export const adminLeadsApi = baseApi.injectEndpoints({
               { type: "Lead", id: "LIST" },
             ],
     }),
-    leadSettings: build.query<SettingsValue<"leads">, void>({
-      query: () => "/admin/leads/settings",
+    /** The generic settings endpoint (`/admin/settings/:key`) with the `leads` key. */
+    leadSettings: build.query<AdminSetting<"leads">, void>({
+      query: () => "/admin/settings/leads",
       providesTags: [{ type: "Settings", id: "leads" }],
     }),
-    updateLeadSettings: build.mutation<SettingsValue<"leads">, SettingsValue<"leads">>({
-      query: (body) => ({ url: "/admin/leads/settings", method: "PUT", body }),
+    updateLeadSettings: build.mutation<AdminSetting<"leads">, SettingsValue<"leads">>({
+      query: (body) => ({ url: "/admin/settings/leads", method: "PUT", body }),
       invalidatesTags: (_result, error) => (error ? [] : [{ type: "Settings", id: "leads" }]),
     }),
   }),

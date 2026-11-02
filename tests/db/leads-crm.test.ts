@@ -23,7 +23,8 @@ const itemRoute = await import("@/app/api/v1/admin/leads/[id]/route");
 const notesRoute = await import("@/app/api/v1/admin/leads/[id]/notes/route");
 const exportRoute = await import("@/app/api/v1/admin/leads/export.csv/route");
 const summaryRoute = await import("@/app/api/v1/admin/leads/summary/route");
-const settingsRoute = await import("@/app/api/v1/admin/leads/settings/route");
+const settingsRoute = await import("@/app/api/v1/admin/settings/[key]/route");
+const { getLeadRetentionMonths } = await import("@/lib/public/site");
 const { anonymiseStaleLeads, monthsBefore } = await import("@/lib/leads/retention");
 
 const { db, close } = connect(inject("databaseUrl"));
@@ -368,40 +369,41 @@ describe("the CSV export", () => {
 });
 
 describe("settings", () => {
-  it("are saved by owner and admin only, audited, and revalidate the settings tag", async () => {
+  const key = context({ key: "leads" });
+
+  it("are saved through the settings endpoint by owner and admin only, and the privacy notice follows", async () => {
     const put = (user: TestUser, body: unknown) =>
       settingsRoute.PUT(
-        request("/admin/leads/settings", { method: "PUT", body, cookie: user.cookie }),
+        request("/admin/settings/leads", { method: "PUT", body, cookie: user.cookie }),
+        key,
       );
     expect((await put(sales, { recipients: [], retentionMonths: 24 })).status).toBe(403);
     expect((await put(owner, { recipients: ["x"], retentionMonths: 24 })).status).toBe(422);
     expect((await put(owner, { recipients: [], retentionMonths: 3 })).status).toBe(422);
+    expect(await getLeadRetentionMonths()).toBe(24);
 
     cache.revalidated.length = 0;
-    const saved = await put(owner, {
-      recipients: [
-        "Sales@Test.KalbajarCity.com",
-        "sales@test.kalbajarcity.com",
-        "boss@test.kalbajarcity.com",
-      ],
-      retentionMonths: 36,
-    });
+    const value = { recipients: ["sales@test.kalbajarcity.com"], retentionMonths: 36 };
+    const saved = await put(admin, value);
     expect(saved.status).toBe(200);
-    expect(await saved.json()).toEqual({
-      recipients: ["sales@test.kalbajarcity.com", "boss@test.kalbajarcity.com"],
-      retentionMonths: 36,
-    });
+    expect(await saved.json()).toMatchObject({ key: "leads", value });
     expect(cache.revalidated).toContain("settings");
     const [entry] = await db
       .select()
       .from(auditLog)
       .where(and(eq(auditLog.action, "settings.update"), eq(auditLog.entityId, "leads")));
-    expect(entry).toMatchObject({ actorId: owner.id, after: { retentionMonths: 36 } });
+    expect(entry).toMatchObject({ actorId: admin.id, after: { value: { retentionMonths: 36 } } });
+    expect(await getLeadRetentionMonths()).toBe(36);
 
     const read = await settingsRoute.GET(
-      request("/admin/leads/settings", { cookie: admin.cookie }),
+      request("/admin/settings/leads", { cookie: owner.cookie }),
+      key,
     );
-    expect(await read.json()).toMatchObject({ retentionMonths: 36 });
+    expect(await read.json()).toMatchObject({ value: { retentionMonths: 36 } });
+
+    // The retention job reads the same period.
+    const report = await anonymiseStaleLeads(db, { dryRun: true });
+    expect(report.retentionMonths).toBe(36);
     await db.delete(settings).where(eq(settings.key, "leads"));
   });
 });
