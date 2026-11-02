@@ -8,10 +8,12 @@ import { PageHead } from "@/components/content/page-head";
 import { Pagination } from "@/components/content/pagination";
 import { FadeUp } from "@/components/motion";
 import { NewsCard } from "@/components/news/news-card";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Container, Section } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getNewsPage } from "@/lib/public/news";
 import { pageParam } from "@/lib/public/query";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // The page number is in the query string and the data in the database:
 // rendered per request and sent complete (CLAUDE.md → Data and state).
@@ -20,13 +22,18 @@ export const instant = false;
 export async function generateMetadata({
   searchParams,
 }: PageProps<"/[locale]/xeberler">): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
   const t = await getTranslations("News");
   const pages = await getTranslations("Pagination");
   const page = pageParam((await searchParams).sehife);
-  return {
+  // Later pages are views of the list: noindex, follow, canonical to page one.
+  return pageMetadata({
+    locale,
+    href: "/xeberler",
     title: page > 1 ? `${t("title")} · ${pages("page", { page: String(page) })}` : t("title"),
     description: t("description"),
-  };
+    indexable: page === 1,
+  });
 }
 
 /** `/xeberler` (#21): published articles, newest first, twelve to a page (`?sehife=`). */
@@ -68,6 +75,10 @@ export default async function NewsPage({ searchParams }: PageProps<"/[locale]/xe
           </>
         )}
       </Container>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/xeberler" }])]}
+      />
     </Section>
   );
 }

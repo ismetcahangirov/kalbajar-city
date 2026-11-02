@@ -93,6 +93,15 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
   };
 }
 
+/** The developer, for the `Organization` every page publishes as structured data. */
+export async function getDeveloper(): Promise<SettingsValue<"developer">> {
+  "use cache";
+  cacheTag(publicTags.settings);
+  cacheLife("days");
+
+  return (await readSetting(getDb(), "developer")) ?? fallbackDeveloper;
+}
+
 /** The about page: the home about copy, the amenities, the facts and the developer. */
 export async function getAboutPage(locale: Locale): Promise<AboutPage> {
   "use cache";

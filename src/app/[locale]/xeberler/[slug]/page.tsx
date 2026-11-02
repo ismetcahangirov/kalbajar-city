@@ -9,10 +9,15 @@ import { ShareButton } from "@/components/content/share-button";
 import { Localized } from "@/components/home/localized";
 import { FadeUp, LineReveal } from "@/components/motion";
 import { NewsCard } from "@/components/news/news-card";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Button, Container, Heading, Icon, Picture, Section, Text } from "@/components/ui";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { getDeveloper } from "@/lib/public/site";
 import { getNewsArticle } from "@/lib/public/news";
+import { newsArticleNode } from "@/lib/seo/json-ld";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
 // The slug is only known at request time and the article is in the database:
 // rendered per request and sent complete (CLAUDE.md → Data and state).
@@ -25,11 +30,14 @@ export async function generateMetadata({
   const locale = (await getLocale()) as Locale;
   const article = await getNewsArticle(locale, (await params).slug);
   if (!article) return {};
-  return {
+  return pageMetadata({
+    locale,
+    href: { pathname: "/xeberler/[slug]", params: { slug: article.slug } },
     title: article.title.value,
     description: article.excerpt?.value,
-    openGraph: { type: "article", publishedTime: article.publishedAt },
-  };
+    image: "own",
+    article: { publishedTime: article.publishedAt, modifiedTime: article.updatedAt },
+  });
 }
 
 /**
@@ -44,6 +52,10 @@ export default async function ArticlePage({ params }: PageProps<"/[locale]/xeber
 
   const t = await getTranslations("News");
   const format = await getFormatter();
+  const developer = await getDeveloper();
+  const origin = siteOrigin();
+  const href = { pathname: "/xeberler/[slug]", params: { slug: article.slug } } as const;
+  const path = getPathname({ href, locale });
   const titleLang = article.title.fallback ? article.title.locale : undefined;
 
   return (
@@ -112,6 +124,26 @@ export default async function ArticlePage({ params }: PageProps<"/[locale]/xeber
           </Container>
         </Section>
       )}
+
+      <StructuredData
+        locale={locale}
+        nodes={[
+          await breadcrumbs(locale, [
+            { name: t("title"), href: "/xeberler" },
+            { name: article.title.value, href },
+          ]),
+          newsArticleNode({
+            origin,
+            url: absoluteUrl(path, origin),
+            headline: article.title.value,
+            description: article.excerpt?.value ?? null,
+            datePublished: article.publishedAt,
+            dateModified: article.updatedAt,
+            images: [article.cover?.src ?? null, absoluteUrl(`${path}/opengraph-image`, origin)],
+            author: { name: developer.name, url: developer.website ?? absoluteUrl("/", origin) },
+          }),
+        ]}
+      />
     </>
   );
 }

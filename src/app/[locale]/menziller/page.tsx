@@ -6,12 +6,13 @@ import { ApartmentCard, ApartmentRow } from "@/components/apartments/apartment-c
 import { CatalogueFilters } from "@/components/apartments/catalogue-filters";
 import { Pagination } from "@/components/apartments/pagination";
 import { ViewSwitch } from "@/components/apartments/view-switch";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { buttonClass, Container, Heading, Text } from "@/components/ui";
 import { formatNumber } from "@/i18n/format";
-import { getPathname, Link, redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getCatalogueFacets, listPublicApartments } from "@/lib/public/apartments";
-import { absoluteUrl } from "@/lib/site-url";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 import {
   activeGroups,
   emptyFilters,
@@ -47,21 +48,16 @@ export async function generateMetadata({
   const apartments = await getTranslations("Apartments");
   const indexable = isIndexableCatalogue(params);
   const rooms = indexable ? singleRooms(parseCatalogueParams(params)) : undefined;
-  const canonical = getPathname({
-    href: rooms
-      ? { pathname: "/menziller", query: { otaq: String(rooms) } }
-      : { pathname: "/menziller" },
+  // Filter combinations are views of the landing pages, not pages of their own.
+  return pageMetadata({
     locale,
-  });
-  return {
+    href: rooms ? { pathname: "/menziller", query: { otaq: String(rooms) } } : "/menziller",
     title: rooms ? t("titleRooms", { rooms: formatNumber(rooms, locale) }) : apartments("title"),
     description: rooms
       ? t("descriptionRooms", { rooms: formatNumber(rooms, locale) })
       : t("description"),
-    alternates: { canonical: absoluteUrl(canonical) },
-    // Filter combinations are views of the landing pages, not pages of their own.
-    robots: indexable ? undefined : { index: false, follow: true },
-  };
+    indexable,
+  });
 }
 
 export default async function CataloguePage({ searchParams }: PageProps<"/[locale]/menziller">) {
@@ -159,6 +155,10 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
           <Pagination state={state} pageCount={page.pageCount} locale={locale} />
         </section>
       </div>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: apartments("title"), href: "/menziller" }])]}
+      />
     </Container>
   );
 }

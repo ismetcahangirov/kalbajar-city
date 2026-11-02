@@ -125,12 +125,17 @@ test("hero chips summarise the inventory", async ({ page }) => {
 
 test("the FAQ is published as FAQPage structured data", async ({ page }) => {
   await page.goto("/en");
-  const json = await page.locator('script[type="application/ld+json"]').first().textContent();
-  const data = JSON.parse(json ?? "{}") as {
-    "@type": string;
-    mainEntity: Array<{ name: string; acceptedAnswer: { text: string } }>;
+  // One JSON-LD document per page; the FAQ is one node of its graph.
+  const scripts = page.locator('script[type="application/ld+json"]');
+  await expect(scripts).toHaveCount(1);
+  const graph = JSON.parse((await scripts.textContent()) ?? "{}") as {
+    "@graph": Array<{
+      "@type": string;
+      mainEntity: Array<{ name: string; acceptedAnswer: { text: string } }>;
+    }>;
   };
-  expect(data["@type"]).toBe("FAQPage");
+  const data = graph["@graph"].find((node) => node["@type"] === "FAQPage")!;
+  expect(data).toBeDefined();
   expect(data.mainEntity).toHaveLength(6);
   expect(data.mainEntity[2]).toEqual({
     "@type": "Question",

@@ -12,6 +12,7 @@ import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
 import { StatusBadge } from "@/components/apartments/status-badge";
 import { Localized } from "@/components/home/localized";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { FadeUp, ImageReveal } from "@/components/motion";
 import {
   Button,
@@ -31,7 +32,9 @@ import { getPathname, Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getPublicApartment, listSimilarApartments } from "@/lib/public/apartments";
-import { absoluteUrl } from "@/lib/site-url";
+import { apartmentNodes } from "@/lib/seo/json-ld";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 import { apartmentSlugParamsSchema, type PublicApartmentDetail } from "@/shared/apartments";
 
 // Rendered per request and sent complete, not streamed behind Suspense
@@ -62,7 +65,9 @@ export async function generateMetadata({
   const t = await getTranslations("ApartmentPage");
   const name = await nameOf(apartment);
   const area = formatArea(Number(apartment.areaTotal), locale);
-  return {
+  return pageMetadata({
+    locale,
+    href: { pathname: "/menziller/[slug]", params: { slug: apartment.slug } },
     title: t("metaTitle", { name, rooms: apartment.rooms, area }),
     description: t("description", {
       name,
@@ -70,15 +75,8 @@ export async function generateMetadata({
       area,
       floor: formatNumber(apartment.floor, locale),
     }),
-    alternates: {
-      canonical: absoluteUrl(
-        getPathname({
-          href: { pathname: "/menziller/[slug]", params: { slug: apartment.slug } },
-          locale,
-        }),
-      ),
-    },
-  };
+    image: "own",
+  });
 }
 
 export default async function ApartmentPage({ params }: PageProps<"/[locale]/menziller/[slug]">) {
@@ -90,6 +88,9 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
   const form = await getTranslations("LeadForm");
   const name = await nameOf(apartment);
   const similar = await listSimilarApartments(apartment, locale);
+  const apartments = await getTranslations("Apartments");
+  const origin = siteOrigin();
+  const href = { pathname: "/menziller/[slug]", params: { slug: apartment.slug } } as const;
 
   const facts: Array<{ label: string; value: ReactNode }> = [
     { label: t("rooms"), value: formatNumber(apartment.rooms, locale) },
@@ -291,6 +292,27 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
           </Container>
         </Section>
       )}
+
+      <StructuredData
+        locale={locale}
+        nodes={[
+          await breadcrumbs(locale, [
+            { name: apartments("title"), href: "/menziller" },
+            { name, href },
+          ]),
+          ...apartmentNodes({
+            origin,
+            url: absoluteUrl(getPathname({ href, locale }), origin),
+            name,
+            rooms: apartment.rooms,
+            area: Number(apartment.areaTotal),
+            floor: apartment.floor,
+            status: apartment.status,
+            price: apartment.price,
+            image: apartment.plan?.src ?? null,
+          }),
+        ]}
+      />
     </>
   );
 }

@@ -7,21 +7,34 @@ import { Localized } from "@/components/home/localized";
 import { FadeUp } from "@/components/motion";
 import { MapBlock } from "@/components/site/map-block";
 import { PageHead } from "@/components/site/page-head";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Button, Container, Heading, Icon, Section, Text } from "@/components/ui";
 import { formatNumber } from "@/i18n/format";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getLocationPage, getSiteContacts } from "@/lib/public/site";
+import { geoMeta } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Reads the console's location copy and settings per request and sends the
 // page complete (CLAUDE.md → Data and state).
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  // The coordinates are database data: never read while the build prerenders.
+  await connection();
+  const locale = (await getLocale()) as Locale;
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Location");
-  return { title: nav("location"), description: t("description") };
+  const { coordinates } = await getSiteContacts(locale);
+  return pageMetadata({
+    locale,
+    href: "/yerlesme",
+    title: nav("location"),
+    description: t("description"),
+    other: geoMeta(coordinates),
+  });
 }
 
 /**
@@ -109,6 +122,10 @@ export default async function LocationPage() {
           )}
         </Container>
       </Section>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: nav("location"), href: "/yerlesme" }])]}
+      />
     </>
   );
 }
