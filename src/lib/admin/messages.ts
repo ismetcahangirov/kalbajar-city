@@ -424,6 +424,9 @@ const messages = {
   "dashboard.noActivity": "Hələ heç bir dəyişiklik qeydə alınmayıb.",
   "dashboard.system": "Sistem",
   "dashboard.open": "Bölməni aç: {module}",
+  "dashboard.placeholders": "Təsdiqlənməmiş nümunə dəyərlər: {count}",
+  "dashboard.placeholdersLead":
+    "Bu xanalarda sahibin qərarını gözləyən nümunə dəyərlər var və onlar saytda görünür. Həqiqi dəyəri yazın və ya nümunəni təsdiqləyin.",
 
   "audit.apartment.update": "Mənzili yenilədi",
   "audit.lead.update": "Müraciəti yenilədi",
@@ -431,6 +434,8 @@ const messages = {
   "audit.lead.export": "Müraciətləri CSV-yə ixrac etdi",
   "audit.lead.anonymise": "Müraciətin şəxsi məlumatlarını sildi",
   "audit.settings.update": "Ayarları yenilədi",
+  "audit.settings.placeholder_confirm": "Nümunə dəyəri təsdiqlədi",
+  "audit.home_section.update": "Ana səhifənin bölməsini yenilədi",
   "audit.apartment.create": "Mənzil əlavə etdi",
   "audit.apartment.delete": "Mənzili sildi",
   "audit.apartment.import": "Mənzilləri CSV-dən idxal etdi",
@@ -630,6 +635,7 @@ const messages = {
   "media.usage.seo_override": "Paylaşım şəkli (SEO)",
   "media.usage.home_section": "Ana səhifənin bölməsi",
   "media.usage.media": "Videonun posteri",
+  "media.usage.settings": "Ayarlar",
   "media.delete": "Faylı sil",
   "media.deleteHint":
     "İstifadə olunan fayl silinmir: əvvəlcə onu istifadə olunduğu yerlərdən çıxarın.",
@@ -707,6 +713,150 @@ const messages = {
   "mail.lead.utm": "UTM",
   "mail.lead.referrer": "Gəldiyi sayt",
   "mail.lead.open": "Müraciəti idarə panelində açın",
+
+  "settings.lead":
+    "Saytın hər səhifəsində görünən məlumatlar. Hər bölmə ayrıca yadda saxlanılır; dəyişiklik növbəti sorğuda saytda görünür.",
+  "settings.save": "Yadda saxla",
+  "settings.saving": "Yadda saxlanılır…",
+  "settings.saved": "Ayarlar yadda saxlanıldı",
+  "settings.readOnly": "Rolunuz bu ayarlara yalnız baxmağa icazə verir.",
+  "settings.leadsCard": "Yeni müraciət barədə kimə yazılsın və müraciətlər nə qədər saxlanılsın.",
+  "settings.nav.label": "Ayarların bölmələri",
+  "settings.nav.flagged": "nümunə dəyər təsdiqlənməyib",
+  "settings.nav.contacts": "Əlaqə",
+  "settings.nav.socials": "Sosial şəbəkələr",
+  "settings.nav.developer": "Developer",
+  "settings.nav.complex": "Kompleks",
+  "settings.nav.prices": "Qiymətlər",
+  "settings.nav.analytics": "Analitika",
+  "settings.nav.location": "Yerləşmə",
+
+  "settings.contacts.lead":
+    "Telefonlar, e-poçt, ünvan və iş saatları: əlaqə səhifəsi və axtarış sistemləri üçün məlumatlar bunları göstərir.",
+  "settings.contacts.phones": "Telefonlar",
+  "settings.contacts.phonesHint":
+    "Birinci nömrə əsas xəttdir: zəng düymələri onu yığır. İstənilən yazılışla yazın: 012 434 32 32, +994 50 553 55 55.",
+  "settings.contacts.mainPhone": "Əsas telefon",
+  "settings.contacts.phone": "Telefon {index}",
+  "settings.contacts.phoneNumber": "Nömrə",
+  "settings.contacts.addPhone": "Telefon əlavə et",
+  "settings.contacts.noPhones": "Ən azı bir telefon lazımdır.",
+  "settings.contacts.whatsapp": "WhatsApp nömrəsi",
+  "settings.contacts.whatsappHint": "Boş qalsa, saytda WhatsApp düyməsi göstərilmir.",
+  "settings.contacts.email": "E-poçt",
+  "settings.contacts.address": "Ünvan",
+  "settings.contacts.hours": "İş saatları",
+  "settings.contacts.coordinates": "Xəritədə yer",
+  "settings.contacts.lat": "Enlik",
+  "settings.contacts.lng": "Uzunluq",
+  "settings.contacts.coordinatesHint":
+    "Xəritə və Google Maps, Apple Maps, Waze linkləri bu nöqtəni göstərir. Hər ikisini boş qoysanız, xəritə gizlənir.",
+  "settings.contacts.openMap": "Nöqtəni xəritədə yoxla",
+  "settings.contacts.latRange": "Enlik -90 ilə 90 arasında rəqəm olmalıdır.",
+  "settings.contacts.lngRange": "Uzunluq -180 ilə 180 arasında rəqəm olmalıdır.",
+
+  "settings.socials.lead":
+    "Kompleksin öz hesabları: saytın altında və axtarış sistemləri üçün məlumatlarda.",
+  "settings.socials.instagram": "Instagram",
+  "settings.socials.facebook": "Facebook",
+  "settings.socials.youtube": "YouTube",
+  "settings.socials.tiktok": "TikTok",
+  "settings.socials.hint": "Tam link yazın (https:// ilə). Boş qalan şəbəkə saytda göstərilmir.",
+
+  "settings.developer.lead":
+    "Tikinti şirkəti: “Haqqımızda” səhifəsi və axtarış sistemləri üçün məlumatlar onu adlandırır.",
+  "settings.developer.name": "Ad",
+  "settings.developer.instagram": "Instagram",
+  "settings.developer.website": "Sayt",
+  "settings.developer.logo": "Loqo",
+  "settings.developer.logoHint":
+    "Axtarış sistemləri üçün məlumatlarda istifadə olunur. Nümunə loqo yoxdur: həqiqi faylı seçin.",
+
+  "settings.complex.lead":
+    "Rəqəmlər ana səhifədə, “Haqqımızda” səhifəsində və sitat gətirilən faktlarda görünür.",
+  "settings.complex.facts": "Faktlar",
+  "settings.complex.factsHint":
+    "Sahələr m² ilə, torpaq hektarla; kəsr hissəsi vergüllə yazıla bilər.",
+  "settings.complex.amenities": "Üstünlüklər",
+  "settings.complex.amenitiesHint": "Saytda bu sıra ilə göstərilir. Sıranı oxlarla dəyişin.",
+  "settings.complex.amenity": "Üstünlük {index}",
+  "settings.complex.icon": "İkon",
+  "settings.complex.amenityTitle": "Başlıq",
+  "settings.complex.amenityBody": "Qısa izah",
+  "settings.complex.addAmenity": "Üstünlük əlavə et",
+  "settings.complex.noAmenities": "Hələ üstünlük yoxdur.",
+
+  "settings.prices.lead": "Mənzil qiymətlərinin saytda göstərilib-göstərilməməsi.",
+  "settings.prices.visible": "Qiymətlər saytda göstərilsin",
+  "settings.prices.visibleHint":
+    "Söndürülübsə, kataloq və mənzil səhifələri qiymət əvəzinə “Qiymət sorğu ilə” göstərir.",
+  "settings.prices.showTitle": "Qiymətlər saytda göstərilsin?",
+  "settings.prices.showLead":
+    "Hər mənzilin qiyməti kataloqda və mənzil səhifəsində görünəcək, qiymət filtri və sıralaması açılacaq. Qiyməti olmayan mənzillər “Qiymət sorğu ilə” qalacaq.",
+  "settings.prices.show": "Göstər",
+  "settings.prices.hideTitle": "Qiymətlər saytdan gizlədilsin?",
+  "settings.prices.hideLead":
+    "Kataloqda və mənzil səhifələrində qiymət əvəzinə “Qiymət sorğu ilə” görünəcək, qiymət filtri və sıralaması bağlanacaq.",
+  "settings.prices.hide": "Gizlət",
+
+  "settings.analytics.lead":
+    "Ölçmə identifikatorları. Sayt hələ heç bir izləmə skripti yükləmir; bunlar onun üçün saxlanılır.",
+  "settings.analytics.ga": "Google Analytics ölçmə ID-si",
+  "settings.analytics.gaHint": "G- ilə başlayır.",
+  "settings.analytics.pixel": "Meta Pixel ID-si",
+  "settings.analytics.pixelHint": "Yalnız rəqəmlər.",
+
+  "settings.location.lead":
+    "Ana səhifənin “Yerləşmə” bölməsi; “Yerləşmə” səhifəsi də məsafələri, yol təsvirini və xəritə şəklini buradan götürür.",
+  "settings.location.title": "Başlıq",
+  "settings.location.body": "Mətn",
+  "settings.location.map": "Xəritə şəkli",
+  "settings.location.mapHint":
+    "Ziyarətçi interaktiv xəritəni açana qədər bu şəkil göstərilir. Koordinatlar “Əlaqə” bölməsindədir.",
+  "settings.location.directions": "Yol təsviri",
+  "settings.location.distances": "Məsafələr",
+  "settings.location.distancesHint":
+    "Avtomobillə təxmini vaxt, dəqiqə ilə. Saytda bu sıra ilə göstərilir.",
+  "settings.location.distance": "Məsafə {index}",
+  "settings.location.place": "Yer",
+  "settings.location.minutes": "Dəqiqə",
+  "settings.location.addDistance": "Məsafə əlavə et",
+  "settings.location.noDistances": "Hələ məsafə yoxdur.",
+
+  "placeholder.badge": "Nümunə dəyər — təsdiqlənməlidir",
+  "placeholder.confirm": "Dəyəri təsdiqlə",
+  "placeholder.confirmField": "Dəyəri təsdiqlə: {field}",
+  "placeholder.confirmed": "Dəyər təsdiqləndi",
+  "placeholder.contacts.address": "Ünvan",
+  "placeholder.contacts.coordinates": "Xəritədə yer",
+  "placeholder.contacts.hours": "İş saatları",
+  "placeholder.contacts.email": "E-poçt",
+  "placeholder.homeLocation.distances": "Məsafələr",
+  "placeholder.homeLocation.directions": "Yol təsviri",
+
+  "list.moveUp": "Yuxarı apar: {item}",
+  "list.moveDown": "Aşağı apar: {item}",
+  "list.remove": "Sil: {item}",
+  "list.moved": "{item}: indi {position}-ci yerdədir ({total} yerdən).",
+  "list.removed": "{item} silindi.",
+
+  "amenity.security": "Mühafizə",
+  "amenity.fire-safety": "Yanğın təhlükəsizliyi",
+  "amenity.playground": "Uşaq meydançası",
+  "amenity.windows": "Pəncərələr",
+  "amenity.gas": "Qaz",
+  "amenity.lobby": "Lobbi",
+  "amenity.perimeter": "Qapalı həyət",
+  "amenity.parking": "Qaraj",
+
+  "fact.totalArea": "Ümumi sahə, m²",
+  "fact.residentialArea": "Yaşayış sahəsi, m²",
+  "fact.nonResidentialArea": "Qeyri-yaşayış sahəsi, m²",
+  "fact.landHectares": "Torpaq sahəsi, ha",
+  "fact.apartments": "Mənzillərin sayı",
+  "fact.buildings": "Binaların sayı",
+  "fact.blocks": "Blokların sayı",
+  "fact.parkingSpaces": "Qaraj yerlərinin sayı",
 } as const;
 
 export type MessageKey = keyof typeof messages;

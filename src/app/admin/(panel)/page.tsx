@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -18,6 +18,8 @@ import { adminDateTime } from "@/lib/admin/format";
 import { canOpen } from "@/lib/admin/menu";
 import { isMessageKey, t } from "@/lib/admin/messages";
 import { adminModules, type AdminModule } from "@/lib/admin/navigation";
+import { getPlaceholders } from "@/lib/admin/placeholders";
+import { placeholderLabel, sectionOfPath } from "@/lib/admin/settings-sections";
 import { requireUser } from "@/lib/auth/session";
 import { apartmentStatuses } from "@/shared/inventory";
 import { leadStatuses, leadTypes } from "@/shared/leads";
@@ -27,9 +29,10 @@ export const metadata: Metadata = { title: t("dashboard.title") };
 export const instant = false;
 
 /**
- * The console home (#23): this week's leads, the inventory by status, the
- * translations still missing and the latest changes, each card shown only to
- * roles that may open its module.
+ * The console home (#23): the stand-in values still waiting for the owner
+ * (#27), this week's leads, the inventory by status, the translations still
+ * missing and the latest changes, each card shown only to roles that may open
+ * its module.
  */
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -41,8 +44,10 @@ export default async function DashboardPage() {
     apartments: canOpen(user.role, "apartments"),
     translations: canOpen(user.role, "news"),
     activity: canOpen(user.role, "audit"),
+    placeholders: canOpen(user.role, "settings"),
   };
-  const [leads, inventory, translations, activity] = await Promise.all([
+  const [placeholders, leads, inventory, translations, activity] = await Promise.all([
+    show.placeholders ? getPlaceholders(db) : null,
     show.leads ? leadsThisWeek(db) : null,
     show.apartments ? apartmentsByStatus(db) : null,
     show.translations ? missingTranslationCount(db) : null,
@@ -56,6 +61,30 @@ export default async function DashboardPage() {
         description={t("dashboard.welcome", { name: user.name })}
       />
       <div className="grid gap-4 lg:grid-cols-2">
+        {placeholders?.length ? (
+          <DashboardCard
+            title={t("dashboard.placeholders", { count: placeholders.length })}
+            module="settings"
+          >
+            <p className="text-sm inline-flex items-start gap-1.5">
+              <TriangleAlert aria-hidden className="mt-0.5 size-4 shrink-0 text-text-accent" />
+              {t("dashboard.placeholdersLead")}
+            </p>
+            <ul className="text-sm flex flex-col" data-placeholders="">
+              {placeholders.map((path) => (
+                <li key={path}>
+                  <Link
+                    href={sectionOfPath(path)?.href ?? adminModules.settings.href}
+                    className="inline-flex min-h-(--spacing-target) items-center underline underline-offset-4"
+                  >
+                    {placeholderLabel(path)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </DashboardCard>
+        ) : null}
+
         {leads ? (
           <DashboardCard title={t("dashboard.leads")} module="leads">
             <p className="text-sm text-muted-foreground">
