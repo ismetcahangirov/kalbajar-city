@@ -111,6 +111,34 @@ describe("the store", () => {
     list.unsubscribe();
   });
 
+  it("shows a status change at once and undoes it when the server refuses", async () => {
+    const store = makeStore();
+    const args = { status: ["available" as const] };
+    const list = store.dispatch(adminApartmentsApi.endpoints.adminApartments.initiate(args));
+    await list;
+    const cached = () =>
+      adminApartmentsApi.endpoints.adminApartments.select(args)(store.getState()).data?.items[0]
+        ?.status;
+
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    patchAnswer = Response.json({ error: { code: "FORBIDDEN", message: "No." } }, { status: 403 });
+    vi.stubGlobal("fetch", async (request: Request) => {
+      if (request.method !== "PATCH") throw new Error("only the write is expected");
+      await gate;
+      return patchAnswer.clone();
+    });
+
+    const update = store.dispatch(
+      adminApartmentsApi.endpoints.updateApartment.initiate({ id: "a1", status: "reserved" }),
+    );
+    await vi.waitFor(() => expect(cached()).toBe("reserved"));
+    release();
+    await update;
+    expect(cached()).toBe("available");
+    list.unsubscribe();
+  });
+
   it("reads no error from a network failure", () => {
     expect(apiErrorOf({ status: "FETCH_ERROR", error: "TypeError: failed" })).toBeNull();
     expect(apiErrorOf(undefined)).toBeNull();
