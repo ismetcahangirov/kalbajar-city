@@ -4,7 +4,9 @@
 //
 // - creates the bucket when it is missing
 // - CORS: browsers may PUT from the site's origins (NEXT_PUBLIC_SITE_URL,
-//   BETTER_AUTH_URL), which is how the console sends presigned uploads
+//   BETTER_AUTH_URL), which is how the console sends presigned uploads, and
+//   GET, so the console can draw a stored video's frame on a canvas for its
+//   poster (#25); without CORS the canvas could not be read
 // - policy: anonymous read of `media/*` only; uploads and originals stay private
 // - lifecycle: `uploads/` expires after a day, so abandoned uploads do not pile up
 import { createHash } from "node:crypto";
@@ -52,6 +54,7 @@ async function putCors(): Promise<void> {
     "<CORSRule>",
     ...origins.map((origin) => `<AllowedOrigin>${origin}</AllowedOrigin>`),
     "<AllowedMethod>PUT</AllowedMethod>",
+    "<AllowedMethod>GET</AllowedMethod>",
     "<AllowedHeader>content-type</AllowedHeader>",
     "<ExposeHeader>ETag</ExposeHeader>",
     "<MaxAgeSeconds>3600</MaxAgeSeconds>",
@@ -59,7 +62,7 @@ async function putCors(): Promise<void> {
   ].join("");
   const body = `<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">${rule}</CORSConfiguration>`;
   await s3.send(s3.url("", "?cors"), withMd5(body));
-  console.log(`CORS: PUT from ${origins.join(", ")}`);
+  console.log(`CORS: PUT and GET from ${origins.join(", ")}`);
 }
 
 async function putPolicy(): Promise<void> {

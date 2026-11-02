@@ -167,6 +167,8 @@ describe("toPublicImage", () => {
       variant("avif", width),
     ]),
     codec: null,
+    originalName: null,
+    posterMediaId: null,
     uploadedBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),

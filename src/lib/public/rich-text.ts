@@ -10,7 +10,7 @@ import {
   type TranslatableRichText,
 } from "@/shared/rich-text";
 
-import { toPublicImage, type PublicImage } from "./media";
+import { posterIds, toPublicImage, type PublicImage } from "./media";
 
 type MediaRow = typeof media.$inferSelect;
 
@@ -36,6 +36,16 @@ export async function mediaById(
   if (!unique.length) return new Map();
   const rows = await db.select().from(media).where(inArray(media.id, unique));
   return new Map(rows.map((row) => [row.id, row]));
+}
+
+/** `files` with its videos' posters added, so `toPublicVideo` can show them. */
+export async function withPosters(
+  db: Executor,
+  files: Map<string, MediaRow>,
+): Promise<Map<string, MediaRow>> {
+  const missing = posterIds(files.values()).filter((id) => !files.has(id));
+  if (!missing.length) return files;
+  return new Map([...files, ...(await mediaById(db, missing))]);
 }
 
 /** The sanitised document for the locale, before its images are looked up. */

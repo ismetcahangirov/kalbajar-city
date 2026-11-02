@@ -12,7 +12,13 @@ import { publicTags } from "@/lib/cache/tags";
 import { richTextMediaIds } from "@/shared/rich-text";
 
 import { toPublicImage, toPublicVideo, type PublicImage, type PublicVideo } from "./media";
-import { localizeRichText, mediaById, withImages, type PublicRichText } from "./rich-text";
+import {
+  localizeRichText,
+  mediaById,
+  withImages,
+  withPosters,
+  type PublicRichText,
+} from "./rich-text";
 
 export type PublicConstructionMedia =
   | { kind: "image"; id: string; image: PublicImage; caption: Localized | null }
@@ -70,10 +76,13 @@ export async function loadConstructionTimeline(
       update.body ? localizeRichText(update.body, locale) : null,
     ]),
   );
-  const files = await mediaById(db, [
-    ...links.map((link) => link.mediaId),
-    ...[...bodies.values()].flatMap((body) => richTextMediaIds(body?.blocks ?? [])),
-  ]);
+  const files = await withPosters(
+    db,
+    await mediaById(db, [
+      ...links.map((link) => link.mediaId),
+      ...[...bodies.values()].flatMap((body) => richTextMediaIds(body?.blocks ?? [])),
+    ]),
+  );
 
   return updates.map((update) => {
     const body = bodies.get(update.id);
@@ -84,7 +93,7 @@ export async function loadConstructionTimeline(
         const caption = row?.caption ? localize(row.caption, locale) : null;
         const image = toPublicImage(row, locale);
         if (image) return [{ kind: "image", id: link.mediaId, image, caption }];
-        const video = toPublicVideo(row);
+        const video = toPublicVideo(row, locale, files);
         if (video) {
           const label = row?.alt?.az?.trim() ? localize(row.alt, locale) : null;
           return [{ kind: "video", id: link.mediaId, video, caption, label }];

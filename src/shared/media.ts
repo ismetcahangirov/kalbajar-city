@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import type { Translatable } from "@/i18n/content";
 
-import { listOf, paginationSchema } from "./api";
+import { listOf, paginationSchema, sortSchema } from "./api";
 import { translatableSchema } from "./translatable";
 
 /**
@@ -122,6 +122,8 @@ export const mediaCreateSchema = z.object({
   caption: translatableSchema.nullish(),
   focusX: focus.default(0.5),
   focusY: focus.default(0.5),
+  /** The file's name on the uploader's device, kept for search. */
+  originalName: z.string().trim().max(255).nullish(),
 });
 
 export type MediaCreate = z.input<typeof mediaCreateSchema>;
@@ -136,30 +138,46 @@ export const mediaUpdateSchema = z
     source: z.enum(mediaSources),
     illustrative: z.boolean(),
     decorative: z.boolean(),
+    /** A video's poster: an image from the library, or `null` for none. */
+    posterMediaId: z.uuid().nullable(),
   })
   .partial()
   .refine((value) => Object.keys(value).length > 0, "Change at least one field");
 
 export type MediaUpdate = z.input<typeof mediaUpdateSchema>;
 
-/** `GET /api/v1/admin/media`, newest first. */
+export const mediaSortFields = ["createdAt"] as const;
+
+/**
+ * `GET /api/v1/admin/media`, newest first by default. `q` searches the alt
+ * text and caption in every language and the original file name;
+ * `missingAlt=true` keeps the images the public site will not show yet.
+ */
 export const mediaListQuerySchema = paginationSchema.extend({
   kind: listOf(z.enum(mediaKinds)),
   source: listOf(z.enum(mediaSources)),
+  q: z.string().trim().max(100).optional(),
+  missingAlt: z.stringbool().optional(),
+  sort: sortSchema(mediaSortFields, "-createdAt"),
 });
+
+export type MediaSort = (typeof mediaSortFields)[number] | `-${(typeof mediaSortFields)[number]}`;
 
 export type MediaListParams = {
   page?: number;
   pageSize?: number;
   kind?: MediaKind[];
   source?: MediaSource[];
+  q?: string;
+  missingAlt?: boolean;
+  sort?: MediaSort;
 };
 
 export const mediaIdParamsSchema = z.object({ id: z.uuid() });
 
 /** One place a file is used. */
 export type MediaUsage = {
-  /** The table, e.g. `news` or `home_section`. */
+  /** The table, e.g. `news` or `home_section`; `media` for a video's poster. */
   entityType: string;
   entityId: string;
   /** The field or slot, e.g. `cover`, or the JSON path in a home section. */
@@ -191,6 +209,10 @@ export type AdminMedia = {
   variants: Array<MediaVariant & { url: string }>;
   /** The smallest variant of an image, or the video file. */
   previewUrl: string | null;
+  /** The file's name on the uploader's device; null for files stored before #25. */
+  originalName: string | null;
+  /** A video's poster image. */
+  poster: { id: string; previewUrl: string | null } | null;
   createdAt: string;
   updatedAt: string;
 };

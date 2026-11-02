@@ -153,8 +153,8 @@ export default async function ConstructionPage() {
 /**
  * The stored MP4 with its controls. It never autoplays here and loads
  * nothing until the visitor presses play (`preload="none"`); its frame is
- * sized from the file, so nothing shifts. A poster frame arrives with the
- * media library (#25); until then the player shows its own empty frame.
+ * sized from the file, so nothing shifts. Until then it shows the poster
+ * frame the media library captured (#25), or the player's own empty frame.
  */
 function ConstructionVideo({ video, fallbackLabel }: { video: Video; fallbackLabel: string }) {
   const { width, height } = video.video;
@@ -168,6 +168,7 @@ function ConstructionVideo({ video, fallbackLabel }: { video: Video; fallbackLab
           controls
           preload="none"
           playsInline
+          poster={video.video.poster?.src}
           aria-label={video.label?.value ?? fallbackLabel}
           className="size-full"
         >

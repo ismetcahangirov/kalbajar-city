@@ -29,6 +29,13 @@
       "when": 1793618940517,
       "tag": "0003_leads_crm",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793623060676,
+      "tag": "0004_media_library",
+      "breakpoints": true
     }
   ]
 }

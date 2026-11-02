@@ -34,6 +34,8 @@ export type PublicVideo = {
   type: string;
   width: number | null;
   height: number | null;
+  /** A frame captured in the console (#25), shown until the video plays. */
+  poster: PublicImage | null;
 };
 
 /** The fallback is the sharpest WebP at most this wide: good enough for any browser without srcset. */
@@ -88,10 +90,27 @@ export function toPublicImage(row: MediaRow | undefined, locale: Locale): Public
   };
 }
 
-export function toPublicVideo(row: MediaRow | undefined): PublicVideo | null {
+/**
+ * A video as pages render it. `files` holds the library rows the page loaded;
+ * the poster is used when it is among them and may be shown.
+ */
+export function toPublicVideo(
+  row: MediaRow | undefined,
+  locale: Locale,
+  files: ReadonlyMap<string, MediaRow> = new Map(),
+): PublicVideo | null {
   if (!row || row.kind !== "video") return null;
   const src = mediaUrl(row.key);
-  return src ? { src, type: row.mimeType, width: row.width, height: row.height } : null;
+  if (!src) return null;
+  const poster = row.posterMediaId ? toPublicImage(files.get(row.posterMediaId), locale) : null;
+  return { src, type: row.mimeType, width: row.width, height: row.height, poster };
+}
+
+/** The posters of the videos among `rows`: the ids to load with them. */
+export function posterIds(rows: Iterable<MediaRow>): string[] {
+  return [...rows].flatMap((row) =>
+    row.kind === "video" && row.posterMediaId ? [row.posterMediaId] : [],
+  );
 }
 
 function byWidth(variants: MediaVariant[]): MediaVariant[] {
