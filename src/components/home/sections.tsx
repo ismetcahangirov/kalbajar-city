@@ -23,6 +23,7 @@ import {
   Container,
   Heading,
   Icon,
+  Picture,
   Section,
   Stat,
   Text,
@@ -36,7 +37,6 @@ import { cx } from "@/lib/cx";
 import type { Amenity, HomeSection } from "@/lib/public/home";
 
 import { Localized } from "./localized";
-import { MediaImage } from "./media-image";
 import { SectionHead } from "./section-head";
 
 type Props<K extends HomeSection["kind"]> = Extract<HomeSection, { kind: K }> & {
@@ -104,7 +104,7 @@ export function About({ eyebrow, title, body, image, tone, align }: Props<"about
         </div>
         {image && (
           <ImageReveal className="relative aspect-portrait overflow-hidden rounded-md">
-            <MediaImage image={image} sizes="(min-width: 64rem) 50vw, 100vw" />
+            <Picture image={image} sizes="(min-width: 64rem) 50vw, 100vw" />
           </ImageReveal>
         )}
       </Container>
@@ -135,7 +135,7 @@ export async function Layouts({ title, body, groups, tone, align }: Props<"layou
                 meta={`${range(group.areaMin, group.areaMax)} · ${t("plans", { count: group.plans })}`}
                 media={
                   group.image ? (
-                    <MediaImage
+                    <Picture
                       image={group.image}
                       sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
                     />
@@ -221,7 +221,7 @@ export function CardZoom({ title, scenes, tone, align }: Props<"card_zoom">) {
         aria-labelledby="menzereler"
         scenes={scenes.map((scene) => ({
           key: scene.key,
-          media: <MediaImage image={scene.image} sizes="100vw" />,
+          media: <Picture image={scene.image} sizes="100vw" />,
           caption: scene.caption ? (
             <Text size="body-lg">
               <Localized text={scene.caption} />
@@ -272,7 +272,7 @@ export async function Location({ title, body, map, distances, tone, align }: Pro
         </div>
         {map && (
           <ImageReveal className="relative aspect-grid overflow-hidden rounded-md">
-            <MediaImage image={map} sizes="(min-width: 64rem) 50vw, 100vw" />
+            <Picture image={map} sizes="(min-width: 64rem) 50vw, 100vw" />
           </ImageReveal>
         )}
       </Container>
@@ -328,7 +328,7 @@ export async function Construction({ title, update, tone, align }: Props<"constr
         </div>
         {update.image && (
           <ImageReveal className="relative aspect-grid overflow-hidden rounded-md">
-            <MediaImage image={update.image} sizes="(min-width: 64rem) 50vw, 100vw" />
+            <Picture image={update.image} sizes="(min-width: 64rem) 50vw, 100vw" />
           </ImageReveal>
         )}
       </Container>

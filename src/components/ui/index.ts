@@ -13,6 +13,7 @@ export { Eyebrow } from "./eyebrow";
 export { Heading, type HeadingSize } from "./heading";
 export { Icon } from "./icon";
 export { Input } from "./input";
+export { Picture } from "./picture";
 export { Section, type Tone } from "./section";
 export { Select } from "./select";
 export { Stat } from "./stat";

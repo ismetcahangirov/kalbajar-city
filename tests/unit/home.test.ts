@@ -26,6 +26,8 @@ describe("groupLayouts", () => {
       alt: "",
       position: "50% 50%",
       blurDataURL: null,
+      dominantColor: null,
+      sources: [],
       illustrative: false,
     };
     const groups = groupLayouts(
@@ -58,6 +60,11 @@ describe("media", () => {
     focusX: 0.25,
     focusY: 0.6,
     lqip: null,
+    illustrative: false,
+    decorative: false,
+    dominantColor: null,
+    variants: [],
+    codec: null,
     uploadedBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),

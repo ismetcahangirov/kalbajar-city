@@ -63,8 +63,23 @@ jobs:
           --health-interval 5s
           --health-timeout 3s
           --health-retries 10
+      # The object store from docker-compose.yml, for the media pipeline (#11).
+      storage:
+        image: rustfs/rustfs:1.0.3
+        env:
+          RUSTFS_ACCESS_KEY: kalbajar
+          RUSTFS_SECRET_KEY: kalbajar-secret
+        ports:
+          - 9000:9000
     env:
       DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+      BETTER_AUTH_URL: http://localhost:3010
+      S3_ENDPOINT: http://localhost:9000
+      S3_REGION: eu-central
+      S3_BUCKET: kalbajar
+      S3_ACCESS_KEY_ID: kalbajar
+      S3_SECRET_ACCESS_KEY: kalbajar-secret
+      S3_PUBLIC_URL: http://localhost:9000/kalbajar
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -84,6 +99,10 @@ jobs:
       - run: pnpm db:seed
       - name: Seed is idempotent
         run: pnpm db:seed
+      - name: Wait for the object store
+        run: for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:9000/ && exit 0; sleep 1; done; exit 1
+      - name: Prepare the bucket
+        run: pnpm storage:setup
       - run: pnpm test:db
 
   # Builds without DATABASE_URL on purpose: the build must never need a
@@ -111,6 +130,14 @@ jobs:
         ports:
           - 1025:1025
           - 8025:8025
+      # The object store from docker-compose.yml, for the media pipeline (#11).
+      storage:
+        image: rustfs/rustfs:1.0.3
+        env:
+          RUSTFS_ACCESS_KEY: kalbajar
+          RUSTFS_SECRET_KEY: kalbajar-secret
+        ports:
+          - 9000:9000
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -131,6 +158,20 @@ jobs:
         env:
           DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
         run: pnpm db:migrate && pnpm db:seed
+      - name: Wait for the object store
+        run: for i in $(seq 1 30); do curl -s -o /dev/null http://localhost:9000/ && exit 0; sleep 1; done; exit 1
+      # Storage settings reach only the steps that use them: the build must
+      # not need them either.
+      - name: Prepare the bucket
+        env:
+          BETTER_AUTH_URL: http://localhost:3011
+          S3_ENDPOINT: http://localhost:9000
+          S3_REGION: eu-central
+          S3_BUCKET: kalbajar
+          S3_ACCESS_KEY_ID: kalbajar
+          S3_SECRET_ACCESS_KEY: kalbajar-secret
+          S3_PUBLIC_URL: http://localhost:9000/kalbajar
+        run: pnpm storage:setup
       - run: pnpm exec playwright install --with-deps chromium
       # A throwaway secret for the E2E server's sessions; never used elsewhere.
       - run: echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
@@ -141,6 +182,12 @@ jobs:
           SMTP_PORT: 1025
           SMTP_FROM: Kalbajar City <no-reply@kalbajarcity.com>
           MAILPIT_URL: http://localhost:8025
+          S3_ENDPOINT: http://localhost:9000
+          S3_REGION: eu-central
+          S3_BUCKET: kalbajar
+          S3_ACCESS_KEY_ID: kalbajar
+          S3_SECRET_ACCESS_KEY: kalbajar-secret
+          S3_PUBLIC_URL: http://localhost:9000/kalbajar
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

@@ -2,7 +2,7 @@ import { ArrowRight, BedDouble, Building2, Ruler } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { Parallax } from "@/components/motion";
-import { Button, Container, Heading, Icon, Text } from "@/components/ui";
+import { Button, Container, Heading, Icon, Picture, Text } from "@/components/ui";
 import { formatArea, formatNumber } from "@/i18n/format";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -10,7 +10,6 @@ import type { HomeSection } from "@/lib/public/home";
 
 import { HeroVideo } from "./hero-video";
 import { Localized } from "./localized";
-import { MediaImage } from "./media-image";
 
 type HeroProps = Extract<HomeSection, { kind: "hero" }>;
 
@@ -30,12 +29,16 @@ export async function Hero({ title, subtitle, poster, video, chips }: HeroProps)
     >
       {poster && (
         <>
-          <Parallax variant="hero" className="absolute inset-0 -z-20">
-            <div data-hero-media="" className="relative">
-              <MediaImage image={poster} sizes="100vw" priority />
-              {video && <HeroVideo video={video} />}
-            </div>
-          </Parallax>
+          {/* Positioned here: Parallax's own `relative` would win over an
+              `absolute` passed to it, putting the media in the flex row. */}
+          <div className="absolute inset-0 -z-20">
+            <Parallax variant="hero" className="size-full">
+              <div data-hero-media="" className="relative">
+                <Picture image={poster} sizes="100vw" priority />
+                {video && <HeroVideo video={video} />}
+              </div>
+            </Parallax>
+          </div>
           {/* Scrim from night 55 % to clear, under the text only (ui-kit → Imagery). */}
           <div
             aria-hidden

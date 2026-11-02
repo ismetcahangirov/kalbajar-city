@@ -11,8 +11,12 @@ export function apiError(
   code: string,
   message: string,
   fields?: Record<string, string[]>,
+  /** More about the error for the client, e.g. a file's `usages` on `MEDIA_IN_USE`. */
+  details?: Record<string, unknown>,
 ): Response {
-  const body: ApiError = { error: { code, message, ...(fields ? { fields } : {}) } };
+  const body: ApiError = {
+    error: { ...details, code, message, ...(fields ? { fields } : {}) },
+  };
   return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
 }
 
@@ -30,13 +34,14 @@ export class HttpError extends Error {
     readonly code: string,
     message: string,
     readonly fields?: Record<string, string[]>,
+    readonly details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = "HttpError";
   }
 
   toResponse(): Response {
-    return apiError(this.status, this.code, this.message, this.fields);
+    return apiError(this.status, this.code, this.message, this.fields, this.details);
   }
 }
 

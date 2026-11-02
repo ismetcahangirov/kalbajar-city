@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   real,
@@ -12,22 +14,27 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { mediaKinds, mediaSources, type MediaVariant } from "@/shared/media";
+
 import { id, timestamps, translatable, userId } from "./columns";
 
-export const mediaKind = pgEnum("media_kind", ["image", "video"]);
+export const mediaKind = pgEnum("media_kind", mediaKinds);
 
 /**
  * Where a file came from. `generated` images are atmosphere only and carry an
  * "illustrative" caption wherever they could be read as the real thing
- * (`CLAUDE.md` §3, Imagery).
+ * (`CLAUDE.md` §3, Imagery); `stock` is licensed photography.
  */
-export const mediaSource = pgEnum("media_source", ["owner", "generated"]);
+export const mediaSource = pgEnum("media_source", mediaSources);
 
 export const media = pgTable(
   "media",
   {
     id: id(),
-    /** Object key in the bucket. */
+    /**
+     * Object key in the bucket: the private original of an image
+     * (`originals/<id>.<ext>`), the public file of a video (`media/<id>/video.mp4`).
+     */
     key: text("key").notNull().unique(),
     kind: mediaKind("kind").notNull(),
     source: mediaSource("source").notNull().default("owner"),
@@ -44,12 +51,23 @@ export const media = pgTable(
     focusY: real("focus_y").notNull().default(0.5),
     /** Blur placeholder as a data URL, written by the image pipeline (#11). */
     lqip: text("lqip"),
+    /** Shown with the "Illustrative" chip. Always true for a `generated` image. */
+    illustrative: boolean("illustrative").notNull().default(false),
+    /** Decorative images render with empty alt; any other needs `alt.az` to be shown. */
+    decorative: boolean("decorative").notNull().default(false),
+    /** The image's dominant colour, `#rrggbb`, painted until it loads. */
+    dominantColor: text("dominant_color"),
+    /** Resized copies under `media/<id>/`, written by the image pipeline. */
+    variants: jsonb("variants").$type<MediaVariant[]>().notNull().default([]),
+    /** A video's codec string, e.g. `avc1.640028`. */
+    codec: text("codec"),
     uploadedBy: userId("uploaded_by"),
     ...timestamps,
   },
   (t) => [
     check("media_focus_range", sql`${t.focusX} between 0 and 1 and ${t.focusY} between 0 and 1`),
     check("media_size_positive", sql`${t.size} > 0`),
+    check("media_generated_illustrative", sql`${t.source} <> 'generated' or ${t.illustrative}`),
   ],
 );
 
