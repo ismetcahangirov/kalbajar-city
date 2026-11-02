@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
@@ -8,11 +7,12 @@ import { Lightbox } from "@/components/content/lightbox";
 import { PageHead } from "@/components/content/page-head";
 import { Container, Section } from "@/components/ui";
 import { formatNumber } from "@/i18n/format";
-import { getPathname } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getGallery } from "@/lib/public/gallery";
 import { categoryParam } from "@/lib/public/query";
+import { absoluteUrl } from "@/lib/site-url";
 
 // The filter is in the query string and the data in the database: rendered
 // per request and sent complete (CLAUDE.md → Data and state).
@@ -29,12 +29,10 @@ export async function generateMetadata({
   const metadata: Metadata = { title: t("title"), description: t("description") };
   if ((await searchParams).kateqoriya === undefined) return metadata;
   const locale = (await getLocale()) as Locale;
-  const path = getPathname({ href: "/qalereya", locale });
-  const site = process.env.NEXT_PUBLIC_SITE_URL;
   return {
     ...metadata,
     robots: { index: false, follow: true },
-    alternates: { canonical: site ? new URL(path, site).toString() : path },
+    alternates: { canonical: absoluteUrl(getPathname({ href: "/qalereya", locale })) },
   };
 }
 
@@ -61,7 +59,7 @@ export default async function GalleryPage({ searchParams }: PageProps<"/[locale]
       key: "all",
       label: t("all"),
       count: gallery.items.length,
-      href: getPathname({ href: "/qalereya", locale }),
+      href: { pathname: "/qalereya" as const },
       current: active === null,
       lang: undefined,
     },
@@ -69,10 +67,7 @@ export default async function GalleryPage({ searchParams }: PageProps<"/[locale]
       key: category.slug,
       label: category.name.value,
       count: category.count,
-      href: getPathname({
-        href: { pathname: "/qalereya", query: { kateqoriya: category.slug } },
-        locale,
-      }),
+      href: { pathname: "/qalereya" as const, query: { kateqoriya: category.slug } },
       current: active === category.slug,
       lang: category.name.fallback ? category.name.locale : undefined,
     })),

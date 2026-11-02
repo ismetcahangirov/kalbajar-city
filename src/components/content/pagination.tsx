@@ -1,17 +1,21 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import type { ComponentProps } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { Icon } from "@/components/ui";
+import { Link } from "@/i18n/navigation";
 import { cx } from "@/lib/cx";
-import { pageWindow } from "@/lib/public/query";
+import { pageWindow } from "@/shared/catalogue";
+
+type Href = ComponentProps<typeof Link>["href"];
 
 const item =
   "inline-flex min-h-target min-w-target items-center justify-center gap-1 rounded-full px-3 text-body";
 
 /**
- * Links to the other pages of a list. `href` builds each page's localised URL
- * (with `getPathname`); the current page is marked with `aria-current`.
+ * Links to the other pages of a content list (#21). `href` gives each page's
+ * route and query; the current page is marked with `aria-current`. The
+ * catalogue has its own, which keeps its filters (#18).
  */
 export async function Pagination({
   page,
@@ -20,7 +24,7 @@ export async function Pagination({
 }: {
   page: number;
   pageCount: number;
-  href: (page: number) => string;
+  href: (page: number) => Href;
 }) {
   if (pageCount <= 1) return null;
   const t = await getTranslations("Pagination");

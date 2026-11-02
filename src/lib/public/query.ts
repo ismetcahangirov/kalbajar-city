@@ -22,14 +22,3 @@ export function categoryParam(value: Param, known: readonly string[]): string | 
   const raw = first(value);
   return raw && known.includes(raw) ? raw : null;
 }
-
-/** Page numbers to link: the first, the last, and the current one with its neighbours. */
-export function pageWindow(page: number, pageCount: number): Array<number | "gap"> {
-  const sorted = [...new Set([1, pageCount, page - 1, page, page + 1])]
-    .filter((n) => n >= 1 && n <= pageCount)
-    .sort((a, b) => a - b);
-  return sorted.flatMap((n, i) => {
-    const previous = sorted[i - 1];
-    return previous !== undefined && n - previous > 1 ? ["gap" as const, n] : [n];
-  });
-}

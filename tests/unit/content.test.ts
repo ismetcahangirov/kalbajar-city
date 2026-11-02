@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { RichTextView } from "@/components/content/rich-text-view";
-import { categoryParam, pageParam, pageWindow } from "@/lib/public/query";
+import { categoryParam, pageParam } from "@/lib/public/query";
 import { localizeRichText, summary } from "@/lib/public/rich-text";
 import { constructionUpdateCreateSchema, monthSchema } from "@/shared/content";
 import {
@@ -286,13 +286,6 @@ describe("content query parameters", () => {
     expect(categoryParam("yoxdur", known)).toBeNull();
     expect(categoryParam(undefined, known)).toBeNull();
     expect(categoryParam(["eksteryer", "interyer"], known)).toBe("eksteryer");
-  });
-
-  it("links the first, last and neighbouring pages", () => {
-    expect(pageWindow(1, 1)).toEqual([1]);
-    expect(pageWindow(1, 3)).toEqual([1, 2, 3]);
-    expect(pageWindow(5, 10)).toEqual([1, "gap", 4, 5, 6, "gap", 10]);
-    expect(pageWindow(2, 10)).toEqual([1, 2, 3, "gap", 10]);
   });
 });
 

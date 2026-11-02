@@ -9,7 +9,6 @@ import { Pagination } from "@/components/content/pagination";
 import { FadeUp } from "@/components/motion";
 import { NewsCard } from "@/components/news/news-card";
 import { Container, Section } from "@/components/ui";
-import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getNewsPage } from "@/lib/public/news";
 import { pageParam } from "@/lib/public/query";
@@ -63,11 +62,7 @@ export default async function NewsPage({ searchParams }: PageProps<"/[locale]/xe
               page={page}
               pageCount={list.pageCount}
               href={(n) =>
-                getPathname({
-                  href:
-                    n === 1 ? "/xeberler" : { pathname: "/xeberler", query: { sehife: String(n) } },
-                  locale,
-                })
+                n === 1 ? "/xeberler" : { pathname: "/xeberler", query: { sehife: String(n) } }
               }
             />
           </>
