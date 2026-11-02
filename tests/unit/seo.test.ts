@@ -202,6 +202,20 @@ describe("JSON-LD builders", () => {
     expect(node).not.toHaveProperty("logo");
   });
 
+  it("names the logo once one is chosen in the console", () => {
+    const logo = "https://cdn.example.test/media/1/960.webp";
+    const node = organizationNode({
+      origin,
+      name: "InCity Projects",
+      website: null,
+      sameAs: [],
+      phones: [],
+      email: null,
+      logo,
+    });
+    expect(node.logo).toBe(logo);
+  });
+
   it("adds address and geo to the complex only once they are set", () => {
     const base = {
       origin,

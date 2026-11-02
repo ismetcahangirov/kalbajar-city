@@ -7,6 +7,7 @@ export const tagTypes = [
   "Building",
   "ConstructionUpdate",
   "Floor",
+  "HomeSection",
   "LayoutType",
   "Lead",
   "Media",

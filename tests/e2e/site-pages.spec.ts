@@ -5,9 +5,9 @@ import az from "@/i18n/messages/az.json";
 import en from "@/i18n/messages/en.json";
 import ru from "@/i18n/messages/ru.json";
 import { setOwner } from "@/lib/auth/owner";
-import type { AdminSetting } from "@/shared/settings";
 
 import { waitForHydration } from "./hydration";
+import { flaggedPaths, patchContacts, readContacts, restoreFlags } from "./settings";
 
 const catalogues = { az, en, ru };
 const prefix = { az: "", en: "/en", ru: "/ru" };
@@ -126,16 +126,12 @@ test.describe("the map on /yerlesme", () => {
       await close();
     }
     await signIn(page.request, baseURL!);
-    const current = await page.request.get("/api/v1/admin/settings/contacts");
-    expect(current.status()).toBe(200);
-    const original = ((await current.json()) as AdminSetting<"contacts">).value;
-    expect(original.coordinates, "the seed has no coordinates").toBeNull();
+    // The seed's stand-in coordinates (#27) may be flagged; a save clears the flag.
+    const original = (await readContacts(page.request)).coordinates;
+    const flagged = (await flaggedPaths()).filter((path) => path === "contacts.coordinates");
 
     try {
-      const saved = await page.request.put("/api/v1/admin/settings/contacts", {
-        data: { ...original, coordinates },
-      });
-      expect(saved.status()).toBe(200);
+      await patchContacts(page.request, { coordinates });
 
       // Only the site itself and the object store may be asked for anything.
       const own = new Set([new URL(baseURL!).origin]);
@@ -169,14 +165,15 @@ test.describe("the map on /yerlesme", () => {
       await expect(frame).toHaveAttribute("src", /marker=40\.1017%2C46\.0381/);
       await expect(frame).toBeFocused();
       await osm;
-    } finally {
-      const restored = await page.request.put("/api/v1/admin/settings/contacts", {
-        data: original,
-      });
-      expect(restored.status()).toBe(200);
-    }
 
-    await page.goto("/yerlesme");
-    await expect(page.getByRole("button", { name: az.Map.show })).toHaveCount(0);
+      // No coordinates, no map.
+      await patchContacts(page.request, { coordinates: null });
+      await page.goto("/yerlesme");
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await expect(page.getByRole("button", { name: az.Map.show })).toHaveCount(0);
+    } finally {
+      await patchContacts(page.request, { coordinates: original });
+      await restoreFlags(flagged);
+    }
   });
 });

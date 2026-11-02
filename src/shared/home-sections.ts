@@ -81,3 +81,10 @@ export function parseHomeSectionContent<K extends HomeSectionKey>(
 ): HomeSectionContentByKey[K] {
   return homeSectionContentSchemas[key].parse(content) as HomeSectionContentByKey[K];
 }
+
+/** A home section as the console reads it. */
+export type AdminHomeSection<K extends HomeSectionKey = HomeSectionKey> = {
+  key: K;
+  content: HomeSectionContentByKey[K];
+  updatedAt: string;
+};

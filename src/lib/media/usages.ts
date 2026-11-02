@@ -13,13 +13,14 @@ import {
   mediaUsages as mediaUsageRows,
   news,
   seoOverrides,
+  settings,
 } from "@/db/schema";
 import type { MediaUsage } from "@/shared/media";
 
 /**
  * Every place a file is used, computed live (#11): each foreign key to
  * `media` (a video's poster too, #25), the media ids inside home sections'
- * JSON, and `media_usages` rows
+ * and settings' JSON (the developer's logo, #27), and `media_usages` rows
  * (kept for embeds in rich text). A new column that references `media` must
  * be added here, or the library would let a used file be deleted; the foreign
  * keys' `restrict` still stops that at the database.
@@ -33,6 +34,7 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
     updateRows,
     seoRows,
     sectionRows,
+    settingRows,
     videoRows,
     rows,
   ] = await Promise.all([
@@ -62,6 +64,10 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
       .select({ id: homeSections.id, key: homeSections.key, content: homeSections.content })
       .from(homeSections)
       .where(sql`${homeSections.content}::text like ${`%"${id}"%`}`),
+    db
+      .select({ key: settings.key, value: settings.value })
+      .from(settings)
+      .where(sql`${settings.value}::text like ${`%"${id}"%`}`),
     db
       .select({ id: media.id, name: media.originalName })
       .from(media)
@@ -117,6 +123,14 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
       jsonPaths(row.content, id).map((field) => ({
         entityType: "home_section",
         entityId: row.id,
+        field,
+        label: row.key,
+      })),
+    ),
+    ...settingRows.flatMap((row) =>
+      jsonPaths(row.value, id).map((field) => ({
+        entityType: "settings",
+        entityId: row.key,
         field,
         label: row.key,
       })),

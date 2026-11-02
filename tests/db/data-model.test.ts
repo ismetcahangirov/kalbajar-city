@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import * as s from "@/db/schema";
 import { seed } from "@/db/seed";
+import * as data from "@/db/seed/data";
 import { paragraphs } from "@/shared/rich-text";
 
 import { inRollback, violates, type Tx } from "./helpers";
@@ -41,7 +42,8 @@ describe("seed", () => {
     await inRollback(async (tx) => {
       const first = await seed(tx);
       expect(first).toMatchObject({
-        settings: 7,
+        settings: 8,
+        placeholders: 6,
         layoutTypes: 10,
         homeSections: 11,
         faq: 6,
@@ -68,6 +70,64 @@ describe("seed", () => {
       await seed(tx);
       const [prices] = await tx.select().from(s.settings).where(eq(s.settings.key, "prices"));
       expect(prices?.value).toEqual({ visible: true });
+    });
+  });
+
+  it("fills the owner's pending facts with flagged stand-ins, once", async () => {
+    await inRollback(async (tx) => {
+      await seed(tx);
+      const value = async (key: string) =>
+        (await tx.select().from(s.settings).where(eq(s.settings.key, key)))[0]?.value;
+      const section = async () =>
+        (await tx.select().from(s.homeSections).where(eq(s.homeSections.key, "location")))[0]
+          ?.content;
+
+      const stand = data.placeholderValues;
+      expect(await value("contacts")).toMatchObject({
+        address: stand["contacts.address"],
+        coordinates: stand["contacts.coordinates"],
+        hours: stand["contacts.hours"],
+        email: stand["contacts.email"],
+        // Known facts are not stand-ins.
+        phones: data.settings.contacts.phones,
+      });
+      expect(await section()).toMatchObject({
+        distances: stand["homeLocation.distances"],
+        directions: stand["homeLocation.directions"],
+      });
+      expect(((await value("placeholders")) as { paths: string[] }).paths.sort()).toEqual(
+        Object.keys(stand).sort(),
+      );
+      // No stand-in logo: the developer's stays empty.
+      expect(await value("developer")).not.toHaveProperty("logoMediaId");
+
+      const before = { contacts: await value("contacts"), location: await section() };
+      const second = await seed(tx);
+      expect(second.placeholders).toBe(0);
+      expect({ contacts: await value("contacts"), location: await section() }).toEqual(before);
+    });
+  });
+
+  it("never overwrites a value someone set, and does not flag it", async () => {
+    await inRollback(async (tx) => {
+      const own = {
+        ...data.settings.contacts,
+        email: "sales@example.test",
+        address: { az: "Kəlbəcər, Mərkəzi küçə 1" },
+      };
+      await tx.insert(s.settings).values({ key: "contacts", value: own });
+      await seed(tx);
+      const [contacts] = await tx.select().from(s.settings).where(eq(s.settings.key, "contacts"));
+      expect(contacts?.value).toMatchObject({
+        email: own.email,
+        address: own.address,
+        hours: data.placeholderValues["contacts.hours"],
+      });
+      const [flags] = await tx.select().from(s.settings).where(eq(s.settings.key, "placeholders"));
+      const paths = (flags?.value as { paths: string[] }).paths;
+      expect(paths).not.toContain("contacts.email");
+      expect(paths).not.toContain("contacts.address");
+      expect(paths).toContain("contacts.hours");
     });
   });
 

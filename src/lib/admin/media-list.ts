@@ -9,6 +9,7 @@ import type {
 import { adminNumber } from "./format";
 import { t, type MessageKey } from "./messages";
 import { adminModules } from "./navigation";
+import { settingsSection } from "./settings-sections";
 import type { TableState } from "./table-state";
 
 /** Where the library's filters live in the URL; keys are Azerbaijani like the routes. */
@@ -52,6 +53,7 @@ const usageLabels: Record<string, MessageKey> = {
   construction_update: "media.usage.construction_update",
   seo_override: "media.usage.seo_override",
   home_section: "media.usage.home_section",
+  settings: "media.usage.settings",
   media: "media.usage.media",
 };
 
@@ -61,11 +63,17 @@ function usageHref(usage: MediaUsage): string | null {
     case "floor":
     case "layout_type":
       return adminModules.apartments.href;
+    case "home_section":
+      // The location section is edited with the settings (#27).
+      return usage.label === "location" ? settingsSection("yerlesme").href : adminModules.news.href;
     case "news":
     case "gallery_item":
     case "construction_update":
-    case "home_section":
       return adminModules.news.href;
+    case "settings":
+      return usage.entityId === "developer"
+        ? settingsSection("developer").href
+        : adminModules.settings.href;
     case "seo_override":
       return adminModules.settings.href;
     case "media":

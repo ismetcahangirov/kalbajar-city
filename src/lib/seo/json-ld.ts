@@ -55,11 +55,13 @@ export type OrganizationInput = {
   /** E.164, main line first. */
   phones: string[];
   email: string | null;
+  /** The logo's absolute URL, once chosen in the console (#27). */
+  logo?: string | null;
 };
 
 /**
- * The developer, on every page. No `logo` until the owner supplies the logo
- * artwork (#7): the site has only a text wordmark.
+ * The developer, on every page. `logo` only once the owner has chosen the
+ * logo in the console's settings (#27): there is no stand-in.
  */
 export function organizationNode(input: OrganizationInput): JsonLdNode {
   const url = input.website ?? `${input.origin}/`;
@@ -71,6 +73,7 @@ export function organizationNode(input: OrganizationInput): JsonLdNode {
     "@id": organizationId(input.origin),
     name: input.name,
     url,
+    logo: input.logo,
     email: input.email,
     sameAs,
     contactPoint: input.phones.map((telephone) => ({

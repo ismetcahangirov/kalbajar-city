@@ -4,6 +4,7 @@ import { privacy } from "@/config/privacy";
 
 import { areaSchema } from "./inventory";
 import { phoneSchema } from "./phone";
+import { placeholdersSchema } from "./placeholders";
 import { translatableSchema } from "./translatable";
 
 /** Facts about the complex that pages quote: the stats row, about, the GEO facts block. */
@@ -62,6 +63,8 @@ export const settingsSchemas = {
     name: z.string().min(1),
     instagram: z.url().nullable(),
     website: z.url().nullable(),
+    /** The developer's logo from the media library; the `Organization` logo once set. */
+    logoMediaId: z.uuid().nullish(),
   }),
   complex: z.object({
     totalArea: areaSchema,
@@ -96,6 +99,12 @@ export const settingsSchemas = {
     /** After how many months without activity a lead's personal data is cleared. */
     retentionMonths: z.int().min(6).max(120),
   }),
+  /**
+   * Which values are still stand-ins waiting for the owner (#7, #27). Written
+   * by the seed and cleared by the console's saves, never through the
+   * generic settings endpoint.
+   */
+  placeholders: placeholdersSchema,
 } satisfies Record<string, z.ZodType>;
 
 /** The leads settings until the row is seeded: no recipients, the privacy notice's period (#26). */
@@ -110,9 +119,16 @@ export const settingsKeys = Object.keys(settingsSchemas) as SettingsKey[];
 
 export type SettingsValue<K extends SettingsKey> = z.infer<(typeof settingsSchemas)[K]>;
 
-/** `/api/v1/admin/settings/:key`: an unknown key is a 404. */
+/** The keys the settings endpoint reads and writes: every one but `placeholders`. */
+export type EditableSettingsKey = Exclude<SettingsKey, "placeholders">;
+
+export const editableSettingsKeys = settingsKeys.filter(
+  (key): key is EditableSettingsKey => key !== "placeholders",
+);
+
+/** `/api/v1/admin/settings/:key`: an unknown key, or `placeholders`, is a 404. */
 export const settingsKeyParamsSchema = z.object({
-  key: z.enum(settingsKeys as [SettingsKey, ...SettingsKey[]]),
+  key: z.enum(editableSettingsKeys as [EditableSettingsKey, ...EditableSettingsKey[]]),
 });
 
 /** A settings row as the console reads it. */

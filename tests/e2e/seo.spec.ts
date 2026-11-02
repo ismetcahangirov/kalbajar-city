@@ -285,8 +285,16 @@ test("home publishes the Organization, the complex and the FAQ as JSON-LD", asyn
     name: "Kalbajar City",
     url: `${baseURL}/en`,
   });
-  // Address and coordinates are unset in the seed (#7): left out, not guessed.
-  expect(nodes.get("ApartmentComplex")).not.toHaveProperty("geo");
+  // Coordinates are stand-ins from the settings until the owner confirms them
+  // (#27), and another test clears them for a moment: geo, when present, is
+  // well formed. Leaving it out without coordinates is unit-tested.
+  const geo = nodes.get("ApartmentComplex")?.geo as Record<string, unknown> | undefined;
+  expect(
+    geo === undefined ||
+      (geo["@type"] === "GeoCoordinates" &&
+        typeof geo.latitude === "number" &&
+        typeof geo.longitude === "number"),
+  ).toBe(true);
   const faq = nodes.get("FAQPage")?.mainEntity as Array<Record<string, unknown>>;
   expect(faq.length).toBeGreaterThan(0);
   for (const question of faq) {
