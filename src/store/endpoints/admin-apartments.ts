@@ -2,6 +2,9 @@ import type { Page } from "@/shared/api";
 import type {
   AdminApartment,
   AdminApartmentListParams,
+  ApartmentBulk,
+  ApartmentBulkResult,
+  ApartmentCreate,
   ApartmentUpdate,
 } from "@/shared/apartments";
 
@@ -60,10 +63,56 @@ export const adminApartmentsApi = baseApi.injectEndpoints({
               // Public tags use the slug; layout counts change with the status.
               ...(result ? [{ type: "Apartment" as const, id: result.slug }] : []),
               { type: "LayoutType", id: "LIST" },
+              // Moving an apartment changes the structure's counts.
+              { type: "Floor", id: "LIST" },
+              { type: "Block", id: "LIST" },
+            ],
+    }),
+    createApartment: build.mutation<AdminApartment, ApartmentCreate>({
+      query: (body) => ({ url: "/admin/apartments", method: "POST", body }),
+      invalidatesTags: (_result, error) =>
+        error
+          ? []
+          : [
+              { type: "Apartment", id: "LIST" },
+              { type: "LayoutType", id: "LIST" },
+              { type: "Floor", id: "LIST" },
+              { type: "Block", id: "LIST" },
+            ],
+    }),
+    deleteApartment: build.mutation<void, string>({
+      query: (id) => ({ url: `/admin/apartments/${id}`, method: "DELETE" }),
+      invalidatesTags: (_result, error, id) =>
+        error
+          ? []
+          : [
+              { type: "Apartment", id },
+              { type: "Apartment", id: "LIST" },
+              { type: "LayoutType", id: "LIST" },
+              { type: "Floor", id: "LIST" },
+              { type: "Block", id: "LIST" },
+            ],
+    }),
+    /** One change to the selected apartments, in one transaction (`PATCH /admin/apartments`). */
+    bulkUpdateApartments: build.mutation<ApartmentBulkResult, ApartmentBulk>({
+      query: (body) => ({ url: "/admin/apartments", method: "PATCH", body }),
+      invalidatesTags: (_result, error, { ids }) =>
+        error
+          ? []
+          : [
+              ...ids.map((id) => ({ type: "Apartment" as const, id })),
+              { type: "Apartment", id: "LIST" },
+              { type: "LayoutType", id: "LIST" },
             ],
     }),
   }),
 });
 
-export const { useAdminApartmentsQuery, useAdminApartmentQuery, useUpdateApartmentMutation } =
-  adminApartmentsApi;
+export const {
+  useAdminApartmentsQuery,
+  useAdminApartmentQuery,
+  useUpdateApartmentMutation,
+  useCreateApartmentMutation,
+  useDeleteApartmentMutation,
+  useBulkUpdateApartmentsMutation,
+} = adminApartmentsApi;

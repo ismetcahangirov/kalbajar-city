@@ -1,5 +1,5 @@
 import { getDb } from "@/db";
-import { getAdminApartment, updateApartment } from "@/lib/admin/apartments";
+import { deleteApartment, getAdminApartment, updateApartment } from "@/lib/admin/apartments";
 import { handler } from "@/lib/api/handler";
 import { apartmentIdParamsSchema, apartmentUpdateSchema } from "@/shared/apartments";
 
@@ -8,7 +8,7 @@ export const GET = handler(
   ({ params }) => getAdminApartment(getDb(), params.id),
 );
 
-/** Status (sales may) or price (inventory editors only). */
+/** Status (sales may) or anything else (inventory editors only). */
 export const PATCH = handler(
   {
     auth: { apartmentStatus: ["update"] },
@@ -17,4 +17,12 @@ export const PATCH = handler(
   },
   ({ params, body, user, request }) =>
     updateApartment(getDb(), { id: params.id, input: body, user, headers: request.headers }),
+);
+
+/** Leads from the apartment keep their details and lose the link. */
+export const DELETE = handler(
+  { auth: { inventory: ["delete"] }, params: apartmentIdParamsSchema },
+  async ({ params, user, request }) => {
+    await deleteApartment(getDb(), { id: params.id, user, headers: request.headers });
+  },
 );
