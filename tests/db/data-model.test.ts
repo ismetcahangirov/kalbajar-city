@@ -41,7 +41,7 @@ describe("seed", () => {
     await inRollback(async (tx) => {
       const first = await seed(tx);
       expect(first).toMatchObject({
-        settings: 6,
+        settings: 7,
         layoutTypes: 10,
         homeSections: 11,
         faq: 6,

@@ -8,6 +8,7 @@ export const tagTypes = [
   "Lead",
   "Media",
   "News",
+  "Settings",
 ] as const;
 
 export type TagType = (typeof tagTypes)[number];

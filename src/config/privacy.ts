@@ -4,7 +4,11 @@
  * Change `updated` whenever the notice's substance changes.
  */
 export const privacy = {
-  /** How long a lead (a request from a form) is kept after the last contact about it. */
+  /**
+   * How long a lead (a request from a form) is kept after the last contact
+   * about it: the default of `settings.leads.retentionMonths`, which the
+   * console changes and the notice then states.
+   */
   retentionMonths: 24,
   /** The date the notice last changed, `YYYY-MM-DD`. */
   updated: "2026-11-02",

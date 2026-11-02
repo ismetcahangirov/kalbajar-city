@@ -9,7 +9,7 @@ import { privacy } from "@/config/privacy";
 import { formatPhone } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getAboutPage, getSiteContacts } from "@/lib/public/site";
+import { getAboutPage, getLeadRetentionMonths, getSiteContacts } from "@/lib/public/site";
 
 // Names the developer and the contacts from the console's settings, so it
 // renders per request and is sent complete (CLAUDE.md → Data and state).
@@ -23,14 +23,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /**
  * The privacy notice for the lead forms: what they collect and why, where it
- * is kept, who receives it, for how long (`src/config/privacy.ts`, pending the
- * owner's confirmation in #7), analytics, browser storage and the visitor's
+ * is kept, who receives it, for how long (the console's leads settings, which
+ * the retention job applies; `src/config/privacy.ts` until they are saved), analytics, browser storage and the visitor's
  * rights. The text lives in the catalogues, in every locale.
  */
 export default async function PrivacyPage() {
   await connection();
   const locale = (await getLocale()) as Locale;
-  const [contacts, about] = await Promise.all([getSiteContacts(locale), getAboutPage(locale)]);
+  const [contacts, about, retentionMonths] = await Promise.all([
+    getSiteContacts(locale),
+    getAboutPage(locale),
+    getLeadRetentionMonths(),
+  ]);
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Privacy");
   const format = await getFormatter();
@@ -76,7 +80,7 @@ export default async function PrivacyPage() {
             <Text>{t("recipients.body")}</Text>
           </Block>
           <Block title={t("retention.title")}>
-            <Text>{t("retention.body", { months: privacy.retentionMonths })}</Text>
+            <Text>{t("retention.body", { months: retentionMonths })}</Text>
           </Block>
           <Block title={t("analytics.title")}>
             <Text>{t("analytics.body")}</Text>

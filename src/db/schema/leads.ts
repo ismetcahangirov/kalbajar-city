@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import { check, index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
-import { leadStatuses, leadTypes } from "@/shared/leads";
+import { leadEventTypes, leadStatuses, leadTypes } from "@/shared/leads";
 
 import { id, timestamps, userId } from "./columns";
 import { apartments } from "./inventory";
@@ -11,13 +11,8 @@ export const leadType = pgEnum("lead_type", leadTypes);
 /** The sales pipeline (spec §5): new → contacted → viewing → reserved → closed / lost. */
 export const leadStatus = pgEnum("lead_status", leadStatuses);
 
-export const leadEventType = pgEnum("lead_event_type", [
-  "created",
-  "status_changed",
-  "assigned",
-  "note_added",
-  "notified",
-]);
+/** The timeline's entries; `anonymised` is the retention job clearing the personal data. */
+export const leadEventType = pgEnum("lead_event_type", leadEventTypes);
 
 export type LeadUtm = Partial<
   Record<"source" | "medium" | "campaign" | "term" | "content", string>
@@ -44,12 +39,19 @@ export const leads = pgTable(
     utm: jsonb("utm").$type<LeadUtm>(),
     referrer: text("referrer"),
     assigneeId: userId("assignee_id"),
+    /** Why the sale was lost; set while the status is `lost`. */
+    lostReason: text("lost_reason"),
+    /** When the retention job cleared the personal data (#26). */
+    anonymisedAt: timestamp("anonymised_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [
     index("leads_status_created_idx").on(t.status, t.createdAt),
+    index("leads_created_idx").on(t.createdAt),
     index("leads_apartment_idx").on(t.apartmentId),
+    index("leads_assignee_idx").on(t.assigneeId),
     check("leads_locale", sql`${t.locale} in ('az', 'en', 'ru')`),
+    check("leads_lost_reason", sql`${t.status} <> 'lost' or ${t.lostReason} is not null`),
   ],
 );
 

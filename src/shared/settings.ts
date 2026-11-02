@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { privacy } from "@/config/privacy";
+
 import { areaSchema } from "./inventory";
 import { phoneSchema } from "./phone";
 import { translatableSchema } from "./translatable";
@@ -84,7 +86,23 @@ export const settingsSchemas = {
     googleAnalyticsId: z.string().min(1).nullable(),
     metaPixelId: z.string().min(1).nullable(),
   }),
+  /** The leads module (#26). */
+  leads: z.object({
+    /**
+     * Who gets the e-mail about a new lead. Empty: `LEADS_INBOX`, else the
+     * contacts e-mail.
+     */
+    recipients: z.array(z.email().max(254)).max(20),
+    /** After how many months without activity a lead's personal data is cleared. */
+    retentionMonths: z.int().min(6).max(120),
+  }),
 } satisfies Record<string, z.ZodType>;
+
+/** The leads settings until the row is seeded: no recipients, the privacy notice's period (#26). */
+export const defaultLeadSettings: SettingsValue<"leads"> = {
+  recipients: [],
+  retentionMonths: privacy.retentionMonths,
+};
 
 export type SettingsKey = keyof typeof settingsSchemas;
 

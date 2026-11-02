@@ -20,7 +20,8 @@
     "db:studio": "drizzle-kit studio",
     "test:db": "vitest run --config vitest.db.config.mts",
     "auth:owner": "tsx scripts/auth-owner.mts",
-    "storage:setup": "tsx scripts/storage-setup.mts"
+    "storage:setup": "tsx scripts/storage-setup.mts",
+    "leads:retention": "tsx scripts/leads-retention.mts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.1",

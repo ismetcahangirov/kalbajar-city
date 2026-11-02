@@ -7,6 +7,8 @@ import { apartments, blocks, floors, leadEvents, leads, settings } from "@/db/sc
 import { formatPhone } from "@/i18n/format";
 import { t } from "@/lib/admin/messages";
 import { escapeHtml, sendMail } from "@/lib/mail";
+
+import { leadSettings } from "./settings";
 import { settingsSchemas } from "@/shared/settings";
 
 /**
@@ -22,8 +24,13 @@ function siteUrl(): string {
   throw new Error("NEXT_PUBLIC_SITE_URL is not set (see .env.example)");
 }
 
-/** `LEADS_INBOX` (one or more comma-separated addresses), else the contacts e-mail. */
+/**
+ * The recipients set in the console (#26), else `LEADS_INBOX` (one or more
+ * comma-separated addresses), else the contacts e-mail.
+ */
 async function recipient(db: Executor): Promise<string | null> {
+  const { recipients } = await leadSettings(db);
+  if (recipients.length) return recipients.join(", ");
   const inbox = process.env.LEADS_INBOX?.trim();
   if (inbox) return inbox;
   const [row] = await db
@@ -130,7 +137,10 @@ export async function notifyLead(db: Executor, id: string): Promise<boolean> {
   let error: string | undefined;
   try {
     const to = await recipient(db);
-    if (!to) throw new Error("No sales inbox: set LEADS_INBOX or the contacts e-mail");
+    if (!to)
+      throw new Error(
+        "No sales inbox: set the recipients in the console, LEADS_INBOX or the contacts e-mail",
+      );
     await sendMail({ to, ...(await leadMail(db, id)) });
     ok = true;
   } catch (cause) {

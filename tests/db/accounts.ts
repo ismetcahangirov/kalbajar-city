@@ -20,7 +20,11 @@ export const password = "correct horse battery staple";
 const { db, close } = connect(inject("databaseUrl"));
 afterAll(close);
 
-let ip = 0;
+// Each test file loads this module afresh; a random start keeps files that
+// run within the same minute from sharing addresses, and so the sign-in
+// rate limit (five a minute per address), which Better Auth keeps in the
+// database.
+let ip = Math.floor(Math.random() * 250);
 
 /** A request to Better Auth from its own origin, each from a new client IP. */
 export function authRequest(

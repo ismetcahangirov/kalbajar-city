@@ -13,9 +13,10 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { NewLeadsBadge, newLeadsBadgeId } from "@/components/admin/leads/new-leads-badge";
 import {
   Sidebar,
   SidebarContent,
@@ -68,7 +69,6 @@ export function AppSidebar({
   user: { name: string; role: string };
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const { isMobile, setOpenMobile } = useSidebar();
   const [signingOut, setSigningOut] = useState(false);
 
@@ -80,8 +80,9 @@ export function AppSidebar({
   async function signOut() {
     setSigningOut(true);
     await authClient.signOut();
-    router.replace(adminPaths.login);
-    router.refresh();
+    // A full page load, not a client-side one: it drops the store's cached
+    // leads and stops the polling queries, and cannot race a refresh.
+    window.location.replace(adminPaths.login);
   }
 
   return (
@@ -122,12 +123,14 @@ export function AppSidebar({
                         <Link
                           href={item.href}
                           aria-current={current ? "page" : undefined}
+                          aria-describedby={item.module === "leads" ? newLeadsBadgeId : undefined}
                           onClick={closeSheet}
                         >
                           <Icon aria-hidden />
                           <span>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
+                      {item.module === "leads" ? <NewLeadsBadge /> : null}
                     </SidebarMenuItem>
                   );
                 })}

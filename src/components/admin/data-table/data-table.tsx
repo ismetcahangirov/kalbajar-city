@@ -26,6 +26,7 @@ import { apiErrorMessage } from "@/lib/admin/api-error";
 import { t } from "@/lib/admin/messages";
 import {
   hasFilters,
+  isDay,
   nextSort,
   parseSort,
   readTableState,
@@ -40,7 +41,13 @@ import {
 import { cn } from "@/lib/admin/utils";
 import type { Page } from "@/shared/api";
 
-import { FilterMenu, SortSelect, type DataTableFilter } from "./controls";
+import {
+  DateFilter,
+  FilterMenu,
+  isDateFilter,
+  SortSelect,
+  type DataTableAnyFilter,
+} from "./controls";
 
 declare module "@tanstack/react-table" {
   // The generics are TanStack's; the console only adds fields.
@@ -71,7 +78,7 @@ export type DataTableProps<T, P> = {
   /** Names the table for screen readers. */
   caption: string;
   columns: ColumnDef<T>[];
-  filters?: DataTableFilter[];
+  filters?: DataTableAnyFilter[];
   /** Sort fields beyond the sortable columns' own. */
   sortFields?: readonly string[];
   defaultSort: string;
@@ -81,6 +88,8 @@ export type DataTableProps<T, P> = {
   /** The URL state as the endpoint's parameters. */
   toParams: (state: TableState & { pageSize: number }) => P;
   getRowId: (item: T) => string;
+  /** Marks rows out, e.g. new leads; pair it with text, never colour alone. */
+  rowClassName?: (item: T) => string | undefined;
 };
 
 const skeletonRows = 6;
@@ -101,6 +110,7 @@ export function DataTable<T, P>({
   useList,
   toParams,
   getRowId,
+  rowClassName,
 }: DataTableProps<T, P>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -115,7 +125,10 @@ export function DataTable<T, P>({
       ],
       defaultSort,
       filters: Object.fromEntries(
-        filters.map((filter) => [filter.key, filter.options.map((option) => option.value)]),
+        filters.map((filter) => [
+          filter.key,
+          isDateFilter(filter) ? isDay : filter.options.map((option) => option.value),
+        ]),
       ),
     }),
     [columns, sortFields, defaultSort, filters],
@@ -187,14 +200,23 @@ export function DataTable<T, P>({
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        {filters.map((filter) => (
-          <FilterMenu
-            key={filter.key}
-            filter={filter}
-            selected={state.filters[filter.key] ?? []}
-            onChange={(values) => navigate(withFilter(state, filter.key, values))}
-          />
-        ))}
+        {filters.map((filter) =>
+          isDateFilter(filter) ? (
+            <DateFilter
+              key={filter.key}
+              filter={filter}
+              value={state.filters[filter.key]?.[0]}
+              onChange={(value) => navigate(withFilter(state, filter.key, value ? [value] : []))}
+            />
+          ) : (
+            <FilterMenu
+              key={filter.key}
+              filter={filter}
+              selected={state.filters[filter.key] ?? []}
+              onChange={(values) => navigate(withFilter(state, filter.key, values))}
+            />
+          ),
+        )}
         {filtered ? (
           <Button type="button" variant="ghost" onClick={() => navigate(withoutFilters(state))}>
             {t("table.clearFilters")}
@@ -288,7 +310,7 @@ export function DataTable<T, P>({
                       </TableRow>
                     ))
                   : rows.map((row) => (
-                      <TableRow key={row.id}>
+                      <TableRow key={row.id} className={rowClassName?.(row.original)}>
                         {row.getVisibleCells().map((cell) => {
                           const meta = cell.column.columnDef.meta;
                           const content = flexRender(cell.column.columnDef.cell, cell.getContext());
@@ -328,7 +350,10 @@ export function DataTable<T, P>({
                   const cells = row.getVisibleCells();
                   const primary = cells.find((cell) => cell.column.columnDef.meta?.primary);
                   return (
-                    <li key={row.id} className="bg-card rounded-md border p-4">
+                    <li
+                      key={row.id}
+                      className={cn("bg-card rounded-md border p-4", rowClassName?.(row.original))}
+                    >
                       {primary ? (
                         <p className="mb-2 font-medium">
                           {flexRender(primary.column.columnDef.cell, primary.getContext())}
