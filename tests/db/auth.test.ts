@@ -3,21 +3,22 @@ import { readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
-import { hashPassword } from "better-auth/crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, inject, it, vi } from "vitest";
 
 import { connect } from "@/db/client";
-import { accounts, auditLog, loginThrottles, sessions, users } from "@/db/schema";
+import { auditLog, loginThrottles, sessions, users } from "@/db/schema";
 import type { Permission, UserRole } from "@/lib/auth/permissions";
 
-// Better Auth and getDb() read these on first use, so they point at the test
-// database before anything signs in.
-process.env.DATABASE_URL = inject("databaseUrl");
-process.env.BETTER_AUTH_SECRET = "test-secret-that-is-long-enough-for-better-auth";
-process.env.BETTER_AUTH_URL = "http://localhost:3010";
-
-const origin = process.env.BETTER_AUTH_URL;
+import {
+  call,
+  createUser,
+  origin,
+  password,
+  sessionCookie,
+  signIn,
+  type TestUser,
+} from "./accounts";
 
 const mail = vi.hoisted(() => ({ sent: [] as { to: string; text: string }[] }));
 vi.mock("@/lib/mail", () => ({
@@ -38,6 +39,7 @@ vi.mock("next/navigation", () => ({
   forbidden: () => {
     throw new Error("forbidden");
   },
+  unstable_rethrow: () => {},
 }));
 
 const { getAuth } = await import("@/lib/auth");
@@ -47,58 +49,6 @@ const { maxFailures } = await import("@/lib/auth/throttle");
 
 const { db, close } = connect(inject("databaseUrl"));
 afterAll(close);
-
-const password = "correct horse battery staple";
-let ip = 0;
-
-/** A request to Better Auth from its own origin, each from a new client IP. */
-function authRequest(
-  path: string,
-  init: { body?: unknown; cookie?: string; method?: string } = {},
-) {
-  const headers = new Headers({ origin, "x-forwarded-for": `198.51.100.${(ip++ % 250) + 1}` });
-  if (init.cookie) headers.set("cookie", init.cookie);
-  if (init.body !== undefined) headers.set("content-type", "application/json");
-  return new Request(`${origin}/api/v1/auth${path}`, {
-    method: init.method ?? (init.body === undefined ? "GET" : "POST"),
-    headers,
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  });
-}
-
-const call = (path: string, init?: Parameters<typeof authRequest>[1]) =>
-  getAuth().handler(authRequest(path, init));
-
-function sessionCookie(response: Response): string {
-  const cookie = response.headers
-    .getSetCookie()
-    .map((value) => value.split(";")[0] ?? "")
-    .find((value) => value.startsWith("better-auth.session_token="));
-  if (!cookie) throw new Error(`No session cookie (status ${response.status})`);
-  return cookie;
-}
-
-async function signIn(email: string, secret = password) {
-  return call("/sign-in/email", { body: { email, password: secret } });
-}
-
-type TestUser = { id: string; email: string; role: UserRole; cookie: string };
-
-async function createUser(role: UserRole): Promise<TestUser> {
-  const id = randomUUID();
-  const email = `${role}-${id.slice(0, 8)}@test.kalbajarcity.com`;
-  await db.insert(users).values({ id, name: `Test ${role}`, email, role, emailVerified: true });
-  await db.insert(accounts).values({
-    id: randomUUID(),
-    userId: id,
-    accountId: id,
-    providerId: "credential",
-    password: await hashPassword(password),
-  });
-  const response = await signIn(email);
-  expect(response.status, `sign in as ${role}`).toBe(200);
-  return { id, email, role, cookie: sessionCookie(response) };
-}
 
 async function lastAudit(entityId: string, action: string) {
   const [row] = await db

@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 import { areaSchema } from "./inventory";
+import { phoneSchema } from "./phone";
 import { translatableSchema } from "./translatable";
-
-const e164 = z.string().regex(/^\+[1-9]\d{6,14}$/, "Phone must be in E.164, e.g. +994124343232");
 
 /** Facts about the complex that pages quote: the stats row, about, the GEO facts block. */
 export const complexFactKeys = [
@@ -40,8 +39,8 @@ const count = z.int().nonnegative();
 export const settingsSchemas = {
   contacts: z.object({
     /** The first phone is the main line used by the call buttons. */
-    phones: z.array(e164).min(1),
-    whatsapp: e164.nullable(),
+    phones: z.array(phoneSchema).min(1),
+    whatsapp: phoneSchema.nullable(),
     email: z.email().nullable(),
     address: translatableSchema.nullable(),
     /** Null until the owner confirms them (#7). */
