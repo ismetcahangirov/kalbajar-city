@@ -40,6 +40,9 @@ const securityHeaders = [
   },
 ];
 
+/** sharp's platform packages (`@img/sharp-<os>-<cpu>`, `@img/sharp-libvips-<os>-<cpu>`). */
+const sharpNativeFiles = "./node_modules/.pnpm/@img+sharp-*/node_modules/@img/*/lib/**/*";
+
 const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
@@ -47,6 +50,14 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Crawlers get metadata in the initial HTML instead of a streamed <head>.
   htmlLimitedBots: /.*/,
+  // The media routes run sharp (#11). File tracing copies its .node addon into
+  // the standalone output but not the libvips library beside it, which the
+  // addon loads at runtime; without it every media route fails to start.
+  outputFileTracingIncludes: {
+    "/api/v1/admin/media": [sharpNativeFiles],
+    "/api/v1/admin/media/*": [sharpNativeFiles],
+    "/api/v1/admin/media/*/*": [sharpNativeFiles],
+  },
   experimental: {
     // The root layout sits under [locale], so unmatched URLs need a 404 that
     // does not depend on a layout.

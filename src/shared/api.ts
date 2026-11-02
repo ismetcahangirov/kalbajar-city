@@ -8,7 +8,10 @@ import { locales } from "@/i18n/routing";
  * format.
  */
 
-/** The one error shape: `{ error: { code, message, fields? } }`. */
+/**
+ * The one error shape: `{ error: { code, message, fields? } }`. A few codes add
+ * details beside them, e.g. `MEDIA_IN_USE` lists the file's `usages`.
+ */
 export type ApiErrorBody = {
   error: {
     code: string;
