@@ -12,6 +12,15 @@ import {
   FormMessage,
 } from "@/components/admin/ui/form";
 import { Input } from "@/components/admin/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/admin/ui/select";
 import { Textarea } from "@/components/admin/ui/textarea";
 
 type FieldProps<T extends FieldValues> = {
@@ -67,6 +76,74 @@ export function TextareaField<T extends FieldValues>({
           <FormControl>
             <Textarea {...input} {...field} value={field.value ?? ""} />
           </FormControl>
+          {description ? <FormDescription>{description}</FormDescription> : null}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+export type SelectOption = { value: string; label: string };
+
+/**
+ * A labelled select bound to the surrounding `<Form>`. Options may come in
+ * groups (`{ label, options }`), e.g. floors by block.
+ */
+export function SelectField<T extends FieldValues>({
+  name,
+  label,
+  description,
+  placeholder,
+  options,
+  disabled,
+  onValueChange,
+}: FieldProps<T> & {
+  placeholder?: string;
+  options: Array<SelectOption | { label: string; options: SelectOption[] }>;
+  disabled?: boolean;
+  /** Called after the field takes the value, e.g. to fill a dependent field. */
+  onValueChange?: (value: string) => void;
+}) {
+  const { control } = useFormContext<T>();
+  const item = (option: SelectOption) => (
+    <SelectItem key={option.value} value={option.value}>
+      {option.label}
+    </SelectItem>
+  );
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <Select
+            value={field.value ?? ""}
+            disabled={disabled}
+            onValueChange={(value) => {
+              field.onChange(value);
+              onValueChange?.(value);
+            }}
+          >
+            <FormControl>
+              <SelectTrigger ref={field.ref} onBlur={field.onBlur} className="w-full">
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {options.map((option) =>
+                "options" in option ? (
+                  <SelectGroup key={option.label}>
+                    <SelectLabel>{option.label}</SelectLabel>
+                    {option.options.map(item)}
+                  </SelectGroup>
+                ) : (
+                  item(option)
+                ),
+              )}
+            </SelectContent>
+          </Select>
           {description ? <FormDescription>{description}</FormDescription> : null}
           <FormMessage />
         </FormItem>

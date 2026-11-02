@@ -12,6 +12,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, type ReactNode } from "react";
 
 import { Button } from "@/components/admin/ui/button";
+import { Checkbox } from "@/components/admin/ui/checkbox";
 import { Skeleton } from "@/components/admin/ui/skeleton";
 import {
   Table,
@@ -90,9 +91,44 @@ export type DataTableProps<T, P> = {
   getRowId: (item: T) => string;
   /** Marks rows out, e.g. new leads; pair it with text, never colour alone. */
   rowClassName?: (item: T) => string | undefined;
+  /** Row selection, e.g. for bulk actions: a checkbox per row and one for the page. */
+  selection?: DataTableSelection<T>;
+};
+
+/**
+ * Selected rows, held by the caller by id with their data, so a selection
+ * survives paging and filtering and a bulk action can preview its result.
+ */
+export type DataTableSelection<T> = {
+  selected: ReadonlyMap<string, T>;
+  onChange: (next: Map<string, T>) => void;
+  /** The row's name in its checkbox's accessible label, e.g. `A-101`. */
+  label: (item: T) => string;
 };
 
 const skeletonRows = 6;
+
+/** A checkbox inside a 44 px target, so it is easy to hit on a phone. */
+function SelectBox({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean | "indeterminate";
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <span className="-m-2 inline-flex min-h-target min-w-target items-center justify-center">
+      <Checkbox
+        aria-label={label}
+        checked={checked}
+        onCheckedChange={(value) => onChange(value === true)}
+        className="size-5"
+      />
+    </span>
+  );
+}
 
 /**
  * A server-paginated list for every console module: declare the columns,
@@ -111,6 +147,7 @@ export function DataTable<T, P>({
   toParams,
   getRowId,
   rowClassName,
+  selection,
 }: DataTableProps<T, P>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -172,6 +209,39 @@ export function DataTable<T, P>({
   const rows = table.getRowModel().rows;
   const filtered = hasFilters(state);
   const pageCount = data?.pageCount ?? 0;
+
+  const pageItems = data?.items ?? [];
+  const selectedOnPage = pageItems.filter((item) => selection?.selected.has(getRowId(item)));
+  const pageChecked: boolean | "indeterminate" =
+    pageItems.length > 0 && selectedOnPage.length === pageItems.length
+      ? true
+      : selectedOnPage.length > 0
+        ? "indeterminate"
+        : false;
+  const toggleRow = (item: T, checked: boolean) => {
+    if (!selection) return;
+    const next = new Map(selection.selected);
+    if (checked) next.set(getRowId(item), item);
+    else next.delete(getRowId(item));
+    selection.onChange(next);
+  };
+  const togglePage = (checked: boolean) => {
+    if (!selection) return;
+    const next = new Map(selection.selected);
+    for (const item of pageItems) {
+      if (checked) next.set(getRowId(item), item);
+      else next.delete(getRowId(item));
+    }
+    selection.onChange(next);
+  };
+  const rowBox = (item: T) =>
+    selection ? (
+      <SelectBox
+        label={t("table.select", { name: selection.label(item) })}
+        checked={selection.selected.has(getRowId(item))}
+        onChange={(checked) => toggleRow(item, checked)}
+      />
+    ) : null;
 
   const status = isLoading
     ? t("table.loading")
@@ -275,6 +345,15 @@ export function DataTable<T, P>({
               <TableHeader>
                 {table.getHeaderGroups().map((group) => (
                   <TableRow key={group.id}>
+                    {selection ? (
+                      <TableHead className="w-12">
+                        <SelectBox
+                          label={t("table.selectPage")}
+                          checked={pageChecked}
+                          onChange={togglePage}
+                        />
+                      </TableHead>
+                    ) : null}
                     {group.headers.map((header) => {
                       const meta = header.column.columnDef.meta;
                       const field = meta?.sortField;
@@ -302,7 +381,7 @@ export function DataTable<T, P>({
                 {isLoading
                   ? Array.from({ length: skeletonRows }, (_, index) => (
                       <TableRow key={index}>
-                        {columns.map((_column, cell) => (
+                        {(selection ? [null, ...columns] : columns).map((_column, cell) => (
                           <TableCell key={cell}>
                             <Skeleton className="h-4 w-full max-w-24" />
                           </TableCell>
@@ -310,7 +389,12 @@ export function DataTable<T, P>({
                       </TableRow>
                     ))
                   : rows.map((row) => (
-                      <TableRow key={row.id} className={rowClassName?.(row.original)}>
+                      <TableRow
+                        key={row.id}
+                        className={rowClassName?.(row.original)}
+                        data-state={selection?.selected.has(row.id) ? "selected" : undefined}
+                      >
+                        {selection ? <TableCell>{rowBox(row.original)}</TableCell> : null}
                         {row.getVisibleCells().map((cell) => {
                           const meta = cell.column.columnDef.meta;
                           const content = flexRender(cell.column.columnDef.cell, cell.getContext());
@@ -338,6 +422,18 @@ export function DataTable<T, P>({
           </div>
 
           {/* Below md: one card per row. */}
+          {selection && pageItems.length ? (
+            <div className="mb-3 flex items-center gap-3 px-4 md:hidden">
+              <SelectBox
+                label={t("table.selectPage")}
+                checked={pageChecked}
+                onChange={togglePage}
+              />
+              <span aria-hidden className="text-sm text-muted-foreground">
+                {t("table.selectPage")}
+              </span>
+            </div>
+          ) : null}
           <ul aria-label={caption} className="flex flex-col gap-3 md:hidden">
             {isLoading
               ? Array.from({ length: skeletonRows }, (_, index) => (
@@ -354,10 +450,15 @@ export function DataTable<T, P>({
                       key={row.id}
                       className={cn("bg-card rounded-md border p-4", rowClassName?.(row.original))}
                     >
-                      {primary ? (
-                        <p className="mb-2 font-medium">
-                          {flexRender(primary.column.columnDef.cell, primary.getContext())}
-                        </p>
+                      {primary || selection ? (
+                        <div className="mb-2 flex items-center gap-3">
+                          {rowBox(row.original)}
+                          {primary ? (
+                            <p className="font-medium">
+                              {flexRender(primary.column.columnDef.cell, primary.getContext())}
+                            </p>
+                          ) : null}
+                        </div>
                       ) : null}
                       <dl className="text-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
                         {cells
