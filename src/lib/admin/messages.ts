@@ -575,6 +575,7 @@ const messages = {
 
   "media.caption": "Media faylları",
   "media.search": "Alt mətn, izah və ya fayl adı ilə axtar",
+  "media.searchShort": "Axtar: alt mətn, izah, ad",
   "media.kind": "Növ",
   "media.kind.image": "Şəkil",
   "media.kind.video": "Video",

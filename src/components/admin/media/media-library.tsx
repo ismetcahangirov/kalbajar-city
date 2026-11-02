@@ -23,7 +23,12 @@ import { UploadList, UploadZone } from "./upload-zone";
 import { useMediaUploads } from "./use-media-uploads";
 
 const filters: DataTableAnyFilter[] = [
-  { key: mediaFilterKeys.search, label: t("media.search"), kind: "text" },
+  {
+    key: mediaFilterKeys.search,
+    label: t("media.search"),
+    placeholder: t("media.searchShort"),
+    kind: "text",
+  },
   {
     key: mediaFilterKeys.kind,
     label: t("media.kind"),

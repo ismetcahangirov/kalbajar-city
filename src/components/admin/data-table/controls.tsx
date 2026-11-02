@@ -43,6 +43,8 @@ export type DataTableTextFilter = {
   key: string;
   label: string;
   kind: "text";
+  /** A short hint in the box; `label` names it for screen readers. */
+  placeholder?: string;
 };
 
 export type DataTableAnyFilter = DataTableFilter | DataTableDateFilter | DataTableTextFilter;
@@ -81,7 +83,7 @@ export function TextFilter({
   useEffect(() => () => clearTimeout(timer.current), []);
 
   return (
-    <label className="relative flex min-w-0 flex-1 items-center sm:max-w-72">
+    <label className="relative flex min-w-0 basis-full items-center sm:max-w-80 sm:flex-1 sm:basis-auto">
       <span className="sr-only">{filter.label}</span>
       <Search
         aria-hidden
@@ -91,7 +93,7 @@ export function TextFilter({
         type="search"
         className="pl-9"
         data-filter={filter.key}
-        placeholder={filter.label}
+        placeholder={filter.placeholder ?? filter.label}
         maxLength={searchTextMax}
         value={text}
         onChange={(event) => {

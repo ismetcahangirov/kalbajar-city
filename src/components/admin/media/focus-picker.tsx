@@ -107,7 +107,7 @@ export function FocusPicker({
           {crops.map((crop) => (
             <div key={crop.label} className="flex flex-col gap-1">
               <div
-                className="bg-muted h-24 overflow-hidden rounded-sm"
+                className="bg-muted h-16 overflow-hidden rounded-sm sm:h-24"
                 style={{ aspectRatio: crop.ratio }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
