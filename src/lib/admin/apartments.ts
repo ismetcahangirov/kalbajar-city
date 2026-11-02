@@ -171,3 +171,17 @@ export async function updateApartment(
   revalidatePublic(publicTags.inventory);
   return result;
 }
+
+/** The block codes and room counts the console's filters offer, in display order. */
+export async function apartmentFilterOptions(
+  db: Executor,
+): Promise<{ blocks: string[]; rooms: number[] }> {
+  const [blockRows, roomRows] = await Promise.all([
+    db.select({ code: blocks.code }).from(blocks).orderBy(asc(blocks.sortOrder), asc(blocks.code)),
+    db
+      .selectDistinct({ rooms: layoutTypes.rooms })
+      .from(layoutTypes)
+      .orderBy(asc(layoutTypes.rooms)),
+  ]);
+  return { blocks: blockRows.map((row) => row.code), rooms: roomRows.map((row) => row.rooms) };
+}
