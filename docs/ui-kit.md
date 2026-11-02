@@ -332,7 +332,13 @@ Rules:
 - Lists are built on `DataTable` (`src/components/admin/data-table`): a table
   from `md`, cards below, page, sort and filters in the URL
   (`?sehife=`, `?sira=`, Azerbaijani filter keys). A module declares its
-  columns, filters and RTK Query endpoint and adds no layout code
+  columns, filters and RTK Query endpoint and adds no layout code. A list of
+  pictures passes `grid` for a thumbnail grid, the default view, with the
+  table and cards as "list" (`?gorunus=siyahi`); a `kind: "text"` filter is a
+  search box (`?axtar=`)
+- Media is chosen with `MediaPicker` (`src/components/admin/media`): search,
+  kind filter and an upload zone in a dialog, returning the chosen file.
+  Uploads report progress per file and their problems in plain words
 - Forms use `useAdminForm` with the shared zod schema, the field wrappers in
   `src/components/admin/form`, `TranslatableField` for `{ az, en, ru }`
   values, `applyApiErrors` for the API's `fields`. Messages are Azerbaijani;
