@@ -179,6 +179,24 @@ describe("a lead from a person", () => {
     error.mockRestore();
     expect(state.sent.map((mail) => mail.to)).toEqual(["office@test.kalbajarcity.com"]);
   });
+  it("goes to the recipients set in the console before LEADS_INBOX", async () => {
+    await db.insert(settings).values({
+      key: "leads",
+      value: {
+        recipients: ["a@test.kalbajarcity.com", "b@test.kalbajarcity.com"],
+        retentionMonths: 24,
+      },
+    });
+    try {
+      await post(lead());
+      await settle();
+      expect(state.sent.map((mail) => mail.to)).toEqual([
+        "a@test.kalbajarcity.com, b@test.kalbajarcity.com",
+      ]);
+    } finally {
+      await db.delete(settings).where(eq(settings.key, "leads"));
+    }
+  });
 });
 
 describe("spam", () => {

@@ -18,7 +18,12 @@ export const statements = {
   content: ["read", "create", "update", "delete", "publish"],
   media: ["read", "upload", "update", "delete"],
   seo: ["read", "update"],
-  leads: ["read", "update", "export", "delete"],
+  /**
+   * `assign` is seeing every lead and giving it to anyone. Without it a user
+   * works only the leads assigned to them or to nobody, and may only take an
+   * unassigned one (#26).
+   */
+  leads: ["read", "update", "assign", "export", "delete"],
   settings: ["read", "update"],
   audit: ["read"],
 } as const;
@@ -67,7 +72,7 @@ export const roles = {
     seo: [...statements.seo],
   }),
   sales: accessControl.newRole({
-    leads: [...statements.leads],
+    leads: ["read", "update"],
     inventory: ["read"],
     apartmentStatus: ["update"],
   }),

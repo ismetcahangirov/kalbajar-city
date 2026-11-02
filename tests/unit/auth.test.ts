@@ -13,7 +13,7 @@ const matrix: Record<UserRole, { allowed: Permission[]; forbidden: Permission[] 
     allowed: [
       { user: ["create", "set-role", "ban"] },
       { settings: ["update"] },
-      { leads: ["read"] },
+      { leads: ["read", "update", "assign", "export", "delete"] },
     ],
     forbidden: [{ user: ["impersonate"] }],
   },
@@ -22,6 +22,7 @@ const matrix: Record<UserRole, { allowed: Permission[]; forbidden: Permission[] 
       { user: ["create", "set-role", "ban"] },
       { settings: ["update"] },
       { audit: ["read"] },
+      { leads: ["read", "update", "assign", "export", "delete"] },
     ],
     forbidden: [{ user: ["impersonate"] }],
   },
@@ -36,11 +37,16 @@ const matrix: Record<UserRole, { allowed: Permission[]; forbidden: Permission[] 
   },
   sales: {
     allowed: [
-      { leads: ["read", "update", "export"] },
+      { leads: ["read", "update"] },
       { inventory: ["read"] },
       { apartmentStatus: ["update"] },
     ],
     forbidden: [
+      // Sales works its own and unassigned leads; the export is the owner's and admins'.
+      { leads: ["assign"] },
+      { leads: ["export"] },
+      { leads: ["delete"] },
+      { settings: ["read"] },
       { inventory: ["update"] },
       { content: ["update"] },
       { media: ["upload"] },

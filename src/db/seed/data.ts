@@ -9,7 +9,7 @@ import { contacts } from "@/config/contacts";
 import type { Translatable } from "@/i18n/content";
 import type { HomeSectionContentByKey, HomeSectionKey } from "@/shared/home-sections";
 import type { RoomArea, RoomKind } from "@/shared/inventory";
-import type { SettingsKey, SettingsValue } from "@/shared/settings";
+import { defaultLeadSettings, type SettingsKey, type SettingsValue } from "@/shared/settings";
 
 const t = (az: string, en: string, ru: string): Translatable => ({ az, en, ru });
 
@@ -240,6 +240,7 @@ export const settings: { [K in SettingsKey]: SettingsValue<K> } = {
   },
   prices: { visible: false },
   analytics: { googleAnalyticsId: null, metaPixelId: null },
+  leads: defaultLeadSettings,
 };
 
 export const galleryCategories = [
