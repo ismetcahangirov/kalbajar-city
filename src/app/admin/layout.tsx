@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { t } from "@/lib/admin/messages";
+import { StoreProvider } from "@/store/provider";
 
 import "./admin.css";
 
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
   return (
     <html lang="az" className="h-full antialiased">
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

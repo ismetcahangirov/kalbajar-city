@@ -208,14 +208,21 @@ Read both before touching UI.
 - A page that needs request-time data (route params without
   `generateStaticParams`, the database) exports `instant = false`, so it
   renders per request and is sent complete instead of streaming
-- Client-side data goes through RTK Query. No ad-hoc `fetch` in components
+- Client-side data goes through RTK Query: one `baseApi` in `src/store/api.ts`,
+  endpoints added per feature with `injectEndpoints`. No ad-hoc `fetch` in
+  components (lint enforces it)
+- Every `/api/v1/*` route is built with `handler()` from `@/lib/api/handler`:
+  zod schemas for params, query and body (shared ones in `src/shared`), the
+  session check, and the one error shape
 - Admin writes invalidate both the RTK Query tags and the server `cacheTag`s
-  they affect
+  they affect, the latter through `revalidatePublic()` from
+  `@/lib/cache/revalidate`, so the next request shows the change
 - Every schema change is a versioned migration
 - Every privileged write is audited: `audit()` from `@/lib/audit`, in the
   transaction that makes the write
-- Console pages call `requireUser(permission)` and `/api/v1/admin/*` handlers
-  `authorize(request, permission)` from `@/lib/auth/session`. `proxy.ts` only
+- Console pages call `requireUser(permission)` from `@/lib/auth/session`;
+  `/api/v1/admin/*` handlers pass the permission as `handler({ auth })`, which
+  calls `authorize(request, permission)`. `proxy.ts` only
   checks that a session cookie exists; it is not the access check. Roles and
   their permissions live in one matrix, `src/lib/auth/permissions.ts`
 

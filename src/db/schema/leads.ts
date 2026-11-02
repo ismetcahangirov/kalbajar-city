@@ -1,20 +1,15 @@
 import { sql } from "drizzle-orm";
 import { check, index, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
+import { leadStatuses, leadTypes } from "@/shared/leads";
+
 import { id, timestamps, userId } from "./columns";
 import { apartments } from "./inventory";
 
-export const leadType = pgEnum("lead_type", ["inquiry", "viewing", "callback"]);
+export const leadType = pgEnum("lead_type", leadTypes);
 
 /** The sales pipeline (spec §5): new → contacted → viewing → reserved → closed / lost. */
-export const leadStatus = pgEnum("lead_status", [
-  "new",
-  "contacted",
-  "viewing",
-  "reserved",
-  "closed",
-  "lost",
-]);
+export const leadStatus = pgEnum("lead_status", leadStatuses);
 
 export const leadEventType = pgEnum("lead_event_type", [
   "created",
