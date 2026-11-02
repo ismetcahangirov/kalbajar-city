@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import az from "@/i18n/messages/az.json";
+
 import { waitForHydration } from "./hydration";
 
 const overflow = (page: Page) =>
@@ -99,9 +101,10 @@ test.describe("mobile", () => {
       "href",
       "tel:+994124343232",
     );
+    // The chat opens with a message typed in, in the page's language.
     await expect(bar.getByRole("link", { name: "WhatsApp" })).toHaveAttribute(
       "href",
-      "https://wa.me/994505535555",
+      `https://wa.me/994505535555?text=${encodeURIComponent(az.Shell.whatsappMessage)}`,
     );
     const box = await bar.getByRole("link", { name: "Zəng edin" }).boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(56);

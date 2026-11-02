@@ -56,6 +56,8 @@ export const homeSectionContentSchemas = {
     title: text,
     body: text.nullish(),
     mapMediaId: mediaId.nullish(),
+    /** How to get there, for the location page; the home section does not show it. */
+    directions: text.nullish(),
     distances: z.array(z.object({ place: text, minutes: z.int().positive() })),
   }),
   construction: z.object({ title: text }),

@@ -410,7 +410,7 @@ export async function Cta({ title, body, tone }: Props<"cta">) {
               {shell("call")}
             </Button>
             <Button
-              href={whatsappHref(contacts.whatsapp)}
+              href={whatsappHref(contacts.whatsapp, shell("whatsappMessage"))}
               data-track="click_whatsapp"
               rel="noopener noreferrer"
               variant="secondary"

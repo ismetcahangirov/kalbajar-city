@@ -170,7 +170,8 @@
   "NotFound": {
     "title": "Page not found",
     "body": "The page you are looking for does not exist or has moved.",
-    "home": "Back to the home page"
+    "home": "Back to the home page",
+    "catalogue": "See the apartments"
   },
   "Navigation": {
     "label": "Main menu",
@@ -202,7 +203,8 @@
     "columnUpdates": "Updates",
     "place": "Kalbajar, Azerbaijan",
     "developer": "Developer: {developer}",
-    "rights": "© {year} Kalbajar City"
+    "rights": "© {year} Kalbajar City",
+    "whatsappMessage": "Hello! I am interested in an apartment at Kalbajar City."
   },
   "Placeholder": {
     "body": "This page is being prepared."
@@ -258,7 +260,20 @@
   "Contact": {
     "description": "Kalbajar City sales office: book a viewing, request a call-back or call us.",
     "lead": "Book a viewing or leave your number, and the sales team will get in touch.",
-    "direct": "Contact us directly"
+    "direct": "Contact us directly",
+    "phones": "Phone",
+    "whatsappChat": "Write to us on WhatsApp",
+    "email": "E-mail",
+    "address": "Address",
+    "hours": "Office hours",
+    "socials": "Social media",
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "youtube": "YouTube",
+      "tiktok": "TikTok"
+    },
+    "map": "On the map"
   },
   "Construction": {
     "title": "Construction progress",
@@ -313,5 +328,121 @@
     "share": "Share",
     "copied": "Link copied",
     "failed": "The link could not be copied. Copy it from the address bar."
+  },
+  "Map": {
+    "show": "Show the interactive map",
+    "frameTitle": "Map of Kalbajar City (OpenStreetMap)",
+    "pin": "Kalbajar City",
+    "apps": "Open in a map app",
+    "open": {
+      "google": "Google Maps",
+      "apple": "Apple Maps",
+      "waze": "Waze"
+    },
+    "newTab": "(opens in a new tab)"
+  },
+  "Location": {
+    "description": "Where Kalbajar City is and how to get there.",
+    "lead": "Kalbajar City is in Kalbajar, Azerbaijan, among the mountains.",
+    "details": "Getting here",
+    "distances": "Distances",
+    "minutes": "{minutes} min",
+    "directions": "How to get here",
+    "directionsDefault": "When you book a viewing, the sales team will tell you the best route and the current travel arrangements, and agree a time that suits you.",
+    "viewing": "Book a viewing",
+    "map": "Map"
+  },
+  "About": {
+    "description": "Kalbajar City in Kalbajar: the complex, its key facts, its amenities and its developer.",
+    "lead": "Kalbajar City is the first private residential complex in Kalbajar.",
+    "factsTitle": "Kalbajar City in brief",
+    "facts": {
+      "developer": "Kalbajar City is a residential complex in Kalbajar, Azerbaijan, developed by {developer}.",
+      "homes": "Kalbajar City has {apartmentsText} {apartments, plural, one {apartment} other {apartments}} in {buildingsText} {buildings, plural, one {residential building} other {residential buildings}} with {blocksText} {blocks, plural, one {block} other {blocks}}.",
+      "area": "The total area of Kalbajar City is {total}, including {residential} of residential space and {nonResidential} of non-residential space.",
+      "land": "Kalbajar City stands on {land} of land.",
+      "parking": "Kalbajar City has an underground car park with {parkingText} {parking, plural, one {space} other {spaces}}."
+    },
+    "amenities": "What the complex offers",
+    "developer": {
+      "eyebrow": "The developer",
+      "body": "Kalbajar City is built by {developer}.",
+      "website": "Website",
+      "instagram": "Instagram"
+    },
+    "apartments": "See the apartments",
+    "viewing": "Book a viewing"
+  },
+  "Privacy": {
+    "description": "How the Kalbajar City website handles the details you send through its forms: what we collect, why, who receives it and how long we keep it.",
+    "lead": "What happens to the details you give us on this site, and what you can ask us to do with them.",
+    "updated": "Last updated: {date}",
+    "controller": {
+      "title": "Who we are",
+      "body": "This website belongs to Kalbajar City, the residential complex in Kalbajar developed by {developer}. We decide how the details sent through the site are used, and we are who you contact about them."
+    },
+    "data": {
+      "title": "What we collect",
+      "body": "We collect only what you send us through a form: an inquiry, a viewing booking or a call-back request. With it we receive:",
+      "items": {
+        "contact": "your name and phone number, and your e-mail address if you give it;",
+        "request": "your message, the time that suits you for a viewing or a call, and the apartment you asked about;",
+        "attribution": "the page you sent the form from, the site that sent you to us, and the campaign tags in the link you followed (such as utm_source);",
+        "language": "the language of the page and the time you sent the form."
+      },
+      "none": "Browsing the site without sending a form does not give us your name or contact details."
+    },
+    "purpose": {
+      "title": "Why we use it",
+      "body": "We use your details to answer your request: to call or write back, arrange a viewing and tell you about the apartment you asked about. The page and campaign details show us which pages and advertisements bring requests. We do not sell your details, and we send no marketing messages you did not ask for."
+    },
+    "storage": {
+      "title": "Where it is kept",
+      "body": "Requests are stored in the website's database, on a server operated for Kalbajar City, and can be opened only in the sales console with a personal account. To stop automated abuse, the site counts the forms sent from each connection for a few minutes in memory; your IP address is not stored with your request."
+    },
+    "recipients": {
+      "title": "Who receives it",
+      "body": "Each request is sent by e-mail to the Kalbajar City sales team and can be seen in the sales console by the people who handle requests. We share it with nobody else unless the law requires us to."
+    },
+    "retention": {
+      "title": "How long we keep it",
+      "body": "We keep a request for {months, plural, one {# month} other {# months}} after our last contact about it, then delete it, unless you ask us to delete it sooner."
+    },
+    "analytics": {
+      "title": "Analytics",
+      "body": "No analytics or advertising script is installed on this site at present, so nothing about your visit is sent to an analytics service. The site is ready to report a few events, such as a sent form or a tap on the call or WhatsApp button, to a tag manager, but does so only once one is installed. If we install one, we will update this notice first and name the service here."
+    },
+    "cookies": {
+      "title": "Cookies and browser storage",
+      "body": "The public site sets no cookies. It keeps two small notes in your browser:",
+      "items": {
+        "locale": "that you closed the suggestion to read the site in your language (local storage), so it does not come back;",
+        "attribution": "the campaign tags of the link you arrived with, for this visit only (session storage), so a form you send from another page still carries them."
+      },
+      "console": "The sales console, used only by the Kalbajar City team, sets a session cookie when someone signs in."
+    },
+    "rights": {
+      "title": "Your rights",
+      "body": "You may ask us at any time to:",
+      "items": {
+        "access": "tell you what details we hold about you and give you a copy;",
+        "correct": "correct details that are wrong or incomplete;",
+        "delete": "delete your details, unless the law requires us to keep them;",
+        "object": "stop using your details, for example to stop contacting you;",
+        "withdraw": "withdraw the consent you gave with the form; this does not affect what was done before."
+      }
+    },
+    "contact": {
+      "title": "How to contact us",
+      "body": "Send your request through the <link>contact page</link> or call {phone}. We answer requests about personal data without undue delay.",
+      "email": "You can also write to {email}."
+    }
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "body": "The page could not be loaded. Try again, or go to the apartments or the home page.",
+    "retry": "Try again",
+    "catalogue": "See the apartments",
+    "home": "Back to the home page"
   }
 }

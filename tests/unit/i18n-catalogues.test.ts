@@ -48,6 +48,21 @@ function plurals(elements: MessageFormatElement[]): Array<string[]> {
   });
 }
 
+function argumentNames(elements: MessageFormatElement[]): string[] {
+  return elements.flatMap((element) => {
+    if (element.type === TYPE.literal || element.type === TYPE.pound) return [];
+    if (element.type === TYPE.tag) return argumentNames(element.children);
+    const own = [element.value];
+    if (element.type === TYPE.plural || element.type === TYPE.select) {
+      return [
+        ...own,
+        ...Object.values(element.options).flatMap((option) => argumentNames(option.value)),
+      ];
+    }
+    return own;
+  });
+}
+
 describe("message catalogues", () => {
   it.each(Object.keys(catalogues))("%s has every key and no extra ones", (locale) => {
     const keys = [...(flat[locale]?.keys() ?? [])].sort();
@@ -71,8 +86,11 @@ describe("message catalogues", () => {
   });
 
   it("uses the same arguments in every locale", () => {
+    // From the parsed message, so a plural branch's text ("one {apartment}")
+    // is not taken for an argument and a locale with more plural forms does
+    // not count its arguments more than once.
     const argumentsOf = (message: string) =>
-      [...message.matchAll(/\{(\w+)/g)].map((match) => match[1]).sort();
+      [...new Set(argumentNames(parse(message, { requiresOtherClause: true })))].sort();
     for (const key of allKeys) {
       const expected = argumentsOf(flat.az?.get(key) ?? "");
       for (const locale of ["en", "ru"]) {

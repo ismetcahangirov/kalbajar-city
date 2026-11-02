@@ -30,7 +30,7 @@ export function MobileActionBar() {
           {t("call")}
         </a>
         <a
-          href={whatsappHref(contacts.whatsapp)}
+          href={whatsappHref(contacts.whatsapp, t("whatsappMessage"))}
           data-track="click_whatsapp"
           rel="noopener noreferrer"
           className={cx(half, "rounded-e-full bg-surface-raised text-text")}

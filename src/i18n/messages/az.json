@@ -170,7 +170,8 @@
   "NotFound": {
     "title": "Səhifə tapılmadı",
     "body": "Axtardığınız səhifə yoxdur və ya köçürülüb.",
-    "home": "Ana səhifəyə qayıt"
+    "home": "Ana səhifəyə qayıt",
+    "catalogue": "Mənzillərə baxın"
   },
   "Navigation": {
     "label": "Əsas menyu",
@@ -202,7 +203,8 @@
     "columnUpdates": "Yeniliklər",
     "place": "Kəlbəcər, Azərbaycan",
     "developer": "Tikinti şirkəti: {developer}",
-    "rights": "© {year} Kalbajar City"
+    "rights": "© {year} Kalbajar City",
+    "whatsappMessage": "Salam! Kalbajar City-dəki mənzillərlə maraqlanıram."
   },
   "Placeholder": {
     "body": "Bu səhifə hazırlanır."
@@ -258,7 +260,20 @@
   "Contact": {
     "description": "Kalbajar City satış ofisi: baxışa yazılın, geri zəng sifariş edin və ya bizə zəng edin.",
     "lead": "Baxışa yazılın və ya nömrənizi qoyun, satış komandası sizinlə əlaqə saxlasın.",
-    "direct": "Birbaşa əlaqə"
+    "direct": "Birbaşa əlaqə",
+    "phones": "Telefon",
+    "whatsappChat": "WhatsApp-da yazın",
+    "email": "E-poçt",
+    "address": "Ünvan",
+    "hours": "İş saatları",
+    "socials": "Sosial şəbəkələr",
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "youtube": "YouTube",
+      "tiktok": "TikTok"
+    },
+    "map": "Xəritədə"
   },
   "Construction": {
     "title": "Tikintinin gedişatı",
@@ -313,5 +328,121 @@
     "share": "Paylaş",
     "copied": "Link kopyalandı",
     "failed": "Linki kopyalamaq alınmadı. Onu ünvan sətrindən kopyalayın."
+  },
+  "Map": {
+    "show": "İnteraktiv xəritəni göstər",
+    "frameTitle": "Kalbajar City xəritədə (OpenStreetMap)",
+    "pin": "Kalbajar City",
+    "apps": "Xəritə tətbiqində açın",
+    "open": {
+      "google": "Google Maps",
+      "apple": "Apple Maps",
+      "waze": "Waze"
+    },
+    "newTab": "(yeni pəncərədə açılır)"
+  },
+  "Location": {
+    "description": "Kalbajar City harada yerləşir və ora necə getmək olar.",
+    "lead": "Kalbajar City Azərbaycanın Kəlbəcər şəhərində, dağların qoynunda yerləşir.",
+    "details": "Yol və məsafələr",
+    "distances": "Məsafələr",
+    "minutes": "{minutes} dəq",
+    "directions": "Necə gəlmək olar",
+    "directionsDefault": "Baxışa yazıldığınız zaman satış komandası sizə ən rahat yolu və hazırkı səfər qaydalarını izah edəcək, sizə uyğun vaxtı razılaşdıracaq.",
+    "viewing": "Baxışa yazılın",
+    "map": "Xəritə"
+  },
+  "About": {
+    "description": "Kəlbəcərdəki Kalbajar City: kompleks, əsas faktlar, üstünlüklər və tikinti şirkəti.",
+    "lead": "Kalbajar City Kəlbəcərin ilk özəl yaşayış kompleksidir.",
+    "factsTitle": "Qısaca Kalbajar City",
+    "facts": {
+      "developer": "Kalbajar City Azərbaycanın Kəlbəcər şəhərində {developer} şirkətinin inşa etdiyi yaşayış kompleksidir.",
+      "homes": "Kalbajar City-də {buildingsText} {buildings, plural, one {yaşayış binasında} other {yaşayış binasında}}, {blocksText} {blocks, plural, one {blokda} other {blokda}} {apartmentsText} {apartments, plural, one {mənzil} other {mənzil}} var.",
+      "area": "Kalbajar City-nin ümumi sahəsi {total} təşkil edir; bura {residential} yaşayış və {nonResidential} qeyri-yaşayış sahəsi daxildir.",
+      "land": "Kalbajar City {land} torpaq sahəsində yerləşir.",
+      "parking": "Kalbajar City-də {parkingText} {parking, plural, one {yerlik} other {yerlik}} yeraltı qaraj var."
+    },
+    "amenities": "Kompleksdə nələr var",
+    "developer": {
+      "eyebrow": "Tikinti şirkəti",
+      "body": "Kalbajar City-ni {developer} inşa edir.",
+      "website": "Sayt",
+      "instagram": "Instagram"
+    },
+    "apartments": "Mənzillərə baxın",
+    "viewing": "Baxışa yazılın"
+  },
+  "Privacy": {
+    "description": "Kalbajar City saytı formalar vasitəsilə göndərdiyiniz məlumatlarla necə davranır: nəyi toplayırıq, nə üçün, kim alır və nə qədər saxlayırıq.",
+    "lead": "Bu saytda bizə verdiyiniz məlumatlarla nə baş verir və onlarla bağlı bizdən nə tələb edə bilərsiniz.",
+    "updated": "Son yenilənmə: {date}",
+    "controller": {
+      "title": "Biz kimik",
+      "body": "Bu sayt Kəlbəcərdə {developer} şirkətinin inşa etdiyi Kalbajar City yaşayış kompleksinə məxsusdur. Sayt vasitəsilə göndərilən məlumatların necə istifadə olunduğuna biz qərar veririk və bu barədə müraciət ünvanınız da bizik."
+    },
+    "data": {
+      "title": "Nəyi toplayırıq",
+      "body": "Yalnız forma vasitəsilə göndərdiklərinizi toplayırıq: sorğu, baxışa yazılış və ya geri zəng sifarişi. Bununla birlikdə alırıq:",
+      "items": {
+        "contact": "adınızı və telefon nömrənizi, göstərsəniz e-poçt ünvanınızı;",
+        "request": "mesajınızı, baxış və ya zəng üçün sizə uyğun vaxtı və soruşduğunuz mənzili;",
+        "attribution": "formanı göndərdiyiniz səhifəni, sizi bizə yönləndirən saytı və keçdiyiniz linkdəki kampaniya etiketlərini (məsələn, utm_source);",
+        "language": "səhifənin dilini və formanı göndərdiyiniz vaxtı."
+      },
+      "none": "Forma göndərmədən saytı gəzmək bizə adınızı və ya əlaqə məlumatlarınızı vermir."
+    },
+    "purpose": {
+      "title": "Nə üçün istifadə edirik",
+      "body": "Məlumatlarınızı sorğunuza cavab vermək üçün istifadə edirik: sizə zəng etmək və ya yazmaq, baxış təşkil etmək və soruşduğunuz mənzil haqqında danışmaq. Səhifə və kampaniya məlumatları hansı səhifələrin və reklamların müraciət gətirdiyini göstərir. Məlumatlarınızı satmırıq və istəmədiyiniz reklam mesajları göndərmirik."
+    },
+    "storage": {
+      "title": "Harada saxlanılır",
+      "body": "Müraciətlər Kalbajar City üçün işləyən serverdə, saytın verilənlər bazasında saxlanılır və yalnız şəxsi hesabla satış panelində açıla bilər. Avtomatlaşdırılmış sui-istifadənin qarşısını almaq üçün sayt hər bağlantıdan göndərilən formaları bir neçə dəqiqəlik yaddaşda sayır; IP ünvanınız müraciətinizlə birlikdə saxlanılmır."
+    },
+    "recipients": {
+      "title": "Kim alır",
+      "body": "Hər müraciət e-poçtla Kalbajar City satış komandasına göndərilir və satış panelində müraciətlərlə işləyən əməkdaşlar tərəfindən görünür. Qanun tələb etmədikcə onu heç kimlə paylaşmırıq."
+    },
+    "retention": {
+      "title": "Nə qədər saxlayırıq",
+      "body": "Müraciəti onunla bağlı son əlaqədən sonra {months, plural, one {# ay} other {# ay}} saxlayırıq, sonra silirik; daha tez silinməsini istəsəniz, daha tez silirik."
+    },
+    "analytics": {
+      "title": "Analitika",
+      "body": "Hazırda saytda heç bir analitika və ya reklam skripti quraşdırılmayıb, buna görə ziyarətiniz haqqında heç nə analitika xidmətinə göndərilmir. Sayt bir neçə hadisəni, məsələn, göndərilən formanı və ya zəng və WhatsApp düyməsinə toxunuşu teq menecerinə ötürməyə hazırdır, lakin bunu yalnız o quraşdırıldıqdan sonra edir. Belə bir xidmət quraşdırsaq, əvvəlcə bu bildirişi yeniləyib həmin xidmətin adını burada göstərəcəyik."
+    },
+    "cookies": {
+      "title": "Cookie-lər və brauzer yaddaşı",
+      "body": "İctimai sayt heç bir cookie yaratmır. Brauzerinizdə iki kiçik qeyd saxlayır:",
+      "items": {
+        "locale": "saytı öz dilinizdə oxumaq təklifini bağladığınızı (local storage), təklif yenidən çıxmasın deyə;",
+        "attribution": "gəldiyiniz linkin kampaniya etiketlərini, yalnız bu ziyarət üçün (session storage), başqa səhifədən göndərdiyiniz forma da onları daşısın deyə."
+      },
+      "console": "Yalnız Kalbajar City komandasının istifadə etdiyi satış paneli kimsə daxil olanda sessiya cookie-si yaradır."
+    },
+    "rights": {
+      "title": "Hüquqlarınız",
+      "body": "İstənilən vaxt bizdən tələb edə bilərsiniz ki:",
+      "items": {
+        "access": "haqqınızda hansı məlumatları saxladığımızı bildirək və surətini verək;",
+        "correct": "səhv və ya natamam məlumatları düzəldək;",
+        "delete": "qanun saxlamağı tələb etmirsə, məlumatlarınızı silək;",
+        "object": "məlumatlarınızdan istifadəni dayandıraq, məsələn, sizinlə əlaqə saxlamayaq;",
+        "withdraw": "forma ilə verdiyiniz razılığı geri götürəsiniz; bu, əvvəl görülənlərə təsir etmir."
+      }
+    },
+    "contact": {
+      "title": "Bizimlə necə əlaqə saxlamaq olar",
+      "body": "Müraciətinizi <link>əlaqə səhifəsi</link> vasitəsilə göndərin və ya {phone} nömrəsinə zəng edin. Fərdi məlumatlarla bağlı müraciətlərə gecikmədən cavab veririk.",
+      "email": "{email} ünvanına da yaza bilərsiniz."
+    }
+  },
+  "ErrorPage": {
+    "title": "Xəta baş verdi",
+    "body": "Səhifəni yükləmək mümkün olmadı. Yenidən cəhd edin və ya mənzillərə, yaxud ana səhifəyə keçin.",
+    "retry": "Yenidən cəhd edin",
+    "catalogue": "Mənzillərə baxın",
+    "home": "Ana səhifəyə qayıt"
   }
 }
