@@ -1,0 +1,417 @@
+import { randomUUID } from "node:crypto";
+import { readdirSync } from "node:fs";
+import { join, relative, sep } from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { hashPassword } from "better-auth/crypto";
+import { and, desc, eq } from "drizzle-orm";
+import { afterAll, beforeAll, beforeEach, describe, expect, inject, it, vi } from "vitest";
+
+import { connect } from "@/db/client";
+import { accounts, auditLog, loginThrottles, sessions, users } from "@/db/schema";
+import type { Permission, UserRole } from "@/lib/auth/permissions";
+
+// Better Auth and getDb() read these on first use, so they point at the test
+// database before anything signs in.
+process.env.DATABASE_URL = inject("databaseUrl");
+process.env.BETTER_AUTH_SECRET = "test-secret-that-is-long-enough-for-better-auth";
+process.env.BETTER_AUTH_URL = "http://localhost:3010";
+
+const origin = process.env.BETTER_AUTH_URL;
+
+const mail = vi.hoisted(() => ({ sent: [] as { to: string; text: string }[] }));
+vi.mock("@/lib/mail", () => ({
+  sendMail: async (message: { to: string; text: string }) => void mail.sent.push(message),
+  escapeHtml: (value: string) => value,
+}));
+
+// Console pages read the session through next/headers and leave through
+// redirect() or forbidden(); here they read a cookie the test sets and throw.
+const page = vi.hoisted(() => ({ cookie: "" }));
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers(page.cookie ? { cookie: page.cookie } : {}),
+}));
+vi.mock("next/navigation", () => ({
+  redirect: (url: string) => {
+    throw new Error(`redirect:${url}`);
+  },
+  forbidden: () => {
+    throw new Error("forbidden");
+  },
+}));
+
+const { getAuth } = await import("@/lib/auth");
+const { authorize, requireUser } = await import("@/lib/auth/session");
+const { setOwner } = await import("@/lib/auth/owner");
+const { maxFailures } = await import("@/lib/auth/throttle");
+
+const { db, close } = connect(inject("databaseUrl"));
+afterAll(close);
+
+const password = "correct horse battery staple";
+let ip = 0;
+
+/** A request to Better Auth from its own origin, each from a new client IP. */
+function authRequest(
+  path: string,
+  init: { body?: unknown; cookie?: string; method?: string } = {},
+) {
+  const headers = new Headers({ origin, "x-forwarded-for": `198.51.100.${(ip++ % 250) + 1}` });
+  if (init.cookie) headers.set("cookie", init.cookie);
+  if (init.body !== undefined) headers.set("content-type", "application/json");
+  return new Request(`${origin}/api/v1/auth${path}`, {
+    method: init.method ?? (init.body === undefined ? "GET" : "POST"),
+    headers,
+    body: init.body === undefined ? undefined : JSON.stringify(init.body),
+  });
+}
+
+const call = (path: string, init?: Parameters<typeof authRequest>[1]) =>
+  getAuth().handler(authRequest(path, init));
+
+function sessionCookie(response: Response): string {
+  const cookie = response.headers
+    .getSetCookie()
+    .map((value) => value.split(";")[0] ?? "")
+    .find((value) => value.startsWith("better-auth.session_token="));
+  if (!cookie) throw new Error(`No session cookie (status ${response.status})`);
+  return cookie;
+}
+
+async function signIn(email: string, secret = password) {
+  return call("/sign-in/email", { body: { email, password: secret } });
+}
+
+type TestUser = { id: string; email: string; role: UserRole; cookie: string };
+
+async function createUser(role: UserRole): Promise<TestUser> {
+  const id = randomUUID();
+  const email = `${role}-${id.slice(0, 8)}@test.kalbajarcity.com`;
+  await db.insert(users).values({ id, name: `Test ${role}`, email, role, emailVerified: true });
+  await db.insert(accounts).values({
+    id: randomUUID(),
+    userId: id,
+    accountId: id,
+    providerId: "credential",
+    password: await hashPassword(password),
+  });
+  const response = await signIn(email);
+  expect(response.status, `sign in as ${role}`).toBe(200);
+  return { id, email, role, cookie: sessionCookie(response) };
+}
+
+async function lastAudit(entityId: string, action: string) {
+  const [row] = await db
+    .select()
+    .from(auditLog)
+    .where(and(eq(auditLog.entityId, entityId), eq(auditLog.action, action)))
+    .orderBy(desc(auditLog.id))
+    .limit(1);
+  return row;
+}
+
+const roles: UserRole[] = ["owner", "admin", "editor", "sales"];
+const people = {} as Record<UserRole, TestUser>;
+
+beforeAll(async () => {
+  for (const role of roles) people[role] = await createUser(role);
+});
+
+beforeEach(() => {
+  page.cookie = "";
+  mail.sent.length = 0;
+});
+
+/** One action each role may take and one it may not, for pages and handlers. */
+const matrix: Record<UserRole, { allowed: Permission; forbidden?: Permission }> = {
+  owner: { allowed: { settings: ["update"] } },
+  admin: { allowed: { user: ["create"] }, forbidden: { user: ["impersonate"] } },
+  editor: { allowed: { content: ["publish"] }, forbidden: { leads: ["read"] } },
+  sales: { allowed: { apartmentStatus: ["update"] }, forbidden: { content: ["update"] } },
+};
+
+describe("console pages", () => {
+  it("send a signed-out visitor to the sign-in page", async () => {
+    await expect(requireUser()).rejects.toThrow("redirect:/admin/giris");
+    page.cookie = "better-auth.session_token=forged.value";
+    await expect(requireUser()).rejects.toThrow("redirect:/admin/giris");
+  });
+
+  for (const role of roles) {
+    it(`let ${role} open what the role allows and answer 403 otherwise`, async () => {
+      page.cookie = people[role].cookie;
+      const user = await requireUser(matrix[role].allowed);
+      expect(user).toMatchObject({ id: people[role].id, role });
+      const { forbidden } = matrix[role];
+      if (forbidden) await expect(requireUser(forbidden)).rejects.toThrow("forbidden");
+    });
+  }
+});
+
+const routesRoot = join(process.cwd(), "src", "app", "api", "v1", "admin");
+
+function routeFiles(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return routeFiles(path);
+    return entry.name === "route.ts" ? [path] : [];
+  });
+}
+
+type Handler = (request: Request, context: unknown) => Promise<Response>;
+
+describe("/api/v1/admin handlers", () => {
+  const routes = routeFiles(routesRoot);
+  const context = { params: Promise.resolve({}) };
+
+  it("are discovered", () => {
+    expect(routes.length).toBeGreaterThan(0);
+  });
+
+  for (const file of routes) {
+    const path = `/api/v1/admin/${relative(routesRoot, file).split(sep).slice(0, -1).join("/")}`;
+
+    it(`${path} rejects anonymous and forged sessions in the shared error shape`, async () => {
+      const exports = (await import(pathToFileURL(file).href)) as Record<string, unknown>;
+      const handlers = Object.entries(exports).filter(([, value]) => typeof value === "function");
+      expect(handlers.length).toBeGreaterThan(0);
+      for (const [method, handler] of handlers as [string, Handler][]) {
+        for (const cookie of [undefined, "better-auth.session_token=forged.value"]) {
+          const headers = new Headers(cookie ? { cookie } : {});
+          const response = await handler(
+            new Request(`${origin}${path}`, { method, headers }),
+            context,
+          );
+          expect(response.status, `${method} ${path}`).toBe(401);
+          expect(await response.json()).toEqual({
+            error: { code: "UNAUTHORIZED", message: expect.any(String) },
+          });
+        }
+      }
+    });
+  }
+
+  it("/api/v1/admin/me answers every role with its own account", async () => {
+    const { GET } = await import("@/app/api/v1/admin/me/route");
+    for (const role of roles) {
+      const headers = new Headers({ cookie: people[role].cookie });
+      const response = await GET(new Request(`${origin}/api/v1/admin/me`, { headers }));
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        user: { id: people[role].id, name: `Test ${role}`, email: people[role].email, role },
+      });
+    }
+  });
+
+  for (const role of roles) {
+    it(`authorize() lets ${role} do what the role allows and answers 403 otherwise`, async () => {
+      const request = new Request(`${origin}/api/v1/admin/x`, {
+        headers: { cookie: people[role].cookie },
+      });
+      const allowed = await authorize(request, matrix[role].allowed);
+      expect(allowed.user?.role).toBe(role);
+      const { forbidden } = matrix[role];
+      if (!forbidden) return;
+      const denied = await authorize(request, forbidden);
+      expect(denied.response?.status).toBe(403);
+      expect(await denied.response?.json()).toEqual({
+        error: { code: "FORBIDDEN", message: expect.any(String) },
+      });
+    });
+  }
+});
+
+describe("user management through Better Auth's admin endpoints", () => {
+  it("keeps editors and sales out", async () => {
+    for (const role of ["editor", "sales"] as const) {
+      const response = await call("/admin/list-users", { cookie: people[role].cookie });
+      expect(response.status, role).toBe(403);
+    }
+  });
+
+  it("lets an admin change a sales account but not the owner's", async () => {
+    const target = await createUser("sales");
+    const set = await call("/admin/set-role", {
+      cookie: people.admin.cookie,
+      body: { userId: target.id, role: "editor" },
+    });
+    expect(set.status).toBe(200);
+    expect(await lastAudit(target.id, "user.set_role")).toMatchObject({
+      actorId: people.admin.id,
+      before: { role: "sales" },
+      after: { role: "editor" },
+    });
+
+    const ban = await call("/admin/ban-user", {
+      cookie: people.admin.cookie,
+      body: { userId: people.owner.id },
+    });
+    expect(ban.status).toBe(403);
+    expect(await ban.json()).toMatchObject({ code: "OWNER_PROTECTED" });
+
+    const promote = await call("/admin/set-role", {
+      cookie: people.admin.cookie,
+      body: { userId: target.id, role: "owner" },
+    });
+    expect(promote.status).toBe(403);
+  });
+
+  it("lets nobody impersonate another account", async () => {
+    const response = await call("/admin/impersonate-user", {
+      cookie: people.owner.cookie,
+      body: { userId: people.editor.id },
+    });
+    expect(response.status).toBe(403);
+  });
+
+  it("signs a deactivated account out and keeps it out", async () => {
+    const target = await createUser("editor");
+    const ban = await call("/admin/ban-user", {
+      cookie: people.owner.cookie,
+      body: { userId: target.id },
+    });
+    expect(ban.status).toBe(200);
+    expect(await lastAudit(target.id, "user.deactivate")).toMatchObject({
+      actorId: people.owner.id,
+      before: { banned: false },
+      after: { banned: true },
+    });
+    page.cookie = target.cookie;
+    await expect(requireUser()).rejects.toThrow("redirect:/admin/giris");
+    expect((await signIn(target.email)).status).toBe(403);
+  });
+});
+
+describe("audit log", () => {
+  for (const role of roles) {
+    it(`records ${role}'s own profile change with the diff, actor and IP`, async () => {
+      const response = await call("/update-user", {
+        cookie: people[role].cookie,
+        body: { name: `Renamed ${role}` },
+      });
+      expect(response.status).toBe(200);
+      const row = await lastAudit(people[role].id, "user.update");
+      expect(row).toMatchObject({
+        actorId: people[role].id,
+        entityType: "user",
+        before: { name: `Test ${role}` },
+        after: { name: `Renamed ${role}` },
+      });
+      expect(row?.ip).toMatch(/^198\.51\.100\.\d+$/);
+      await db
+        .update(users)
+        .set({ name: `Test ${role}` })
+        .where(eq(users.id, people[role].id));
+    });
+  }
+
+  it("keeps the author of a logged action from being deleted", async () => {
+    await expect(db.delete(users).where(eq(users.id, people.owner.id))).rejects.toThrow();
+  });
+});
+
+describe("failed sign-ins", () => {
+  it(`lock the address after ${maxFailures} in a row, whatever the IP`, async () => {
+    const target = await createUser("sales");
+    for (let i = 0; i < maxFailures; i++) {
+      const response = await signIn(target.email, "wrong password, try again");
+      expect(response.status, `attempt ${i + 1}`).toBe(401);
+    }
+    const locked = await signIn(target.email);
+    expect(locked.status).toBe(429);
+    expect(await locked.json()).toMatchObject({ code: "ACCOUNT_LOCKED" });
+
+    // Once the lock runs out the right password works and clears the count.
+    await db
+      .update(loginThrottles)
+      .set({ lockedUntil: new Date(Date.now() - 1000) })
+      .where(eq(loginThrottles.email, target.email));
+    expect((await signIn(target.email)).status).toBe(200);
+    expect(
+      await db.select().from(loginThrottles).where(eq(loginThrottles.email, target.email)),
+    ).toEqual([]);
+  });
+
+  it("start counting again after a successful sign-in", async () => {
+    const target = await createUser("editor");
+    for (let round = 0; round < 2; round++) {
+      for (let i = 0; i < maxFailures - 1; i++) {
+        expect((await signIn(target.email, "wrong password, try again")).status).toBe(401);
+      }
+      expect((await signIn(target.email)).status, `round ${round + 1}`).toBe(200);
+    }
+  });
+
+  it("are counted for unknown addresses too, so the lock reveals nothing", async () => {
+    const email = `nobody-${randomUUID().slice(0, 8)}@test.kalbajarcity.com`;
+    for (let i = 0; i < maxFailures; i++) await signIn(email, "anything at all here");
+    expect((await signIn(email)).status).toBe(429);
+  });
+});
+
+describe("password reset", () => {
+  it("e-mails a link that sets a new password, signs other sessions out and is audited", async () => {
+    const target = await createUser("editor");
+    const request = await call("/request-password-reset", {
+      body: { email: target.email, redirectTo: "/admin/sifre-berpa" },
+    });
+    expect(request.status).toBe(200);
+    expect(mail.sent).toHaveLength(1);
+    const link = mail.sent[0]?.text.match(/https?:\/\/\S+/)?.[0];
+    expect(link).toContain("/api/v1/auth/reset-password/");
+
+    const landing = await getAuth().handler(new Request(link!, { headers: { origin } }));
+    const location = new URL(landing.headers.get("location") ?? "", origin);
+    expect(location.pathname).toBe("/admin/sifre-berpa");
+    const token = location.searchParams.get("token");
+    expect(token).toBeTruthy();
+
+    const newPassword = "a brand new passphrase";
+    const reset = await call("/reset-password", { body: { newPassword, token } });
+    expect(reset.status).toBe(200);
+    expect(await db.select().from(sessions).where(eq(sessions.userId, target.id))).toEqual([]);
+    expect(await lastAudit(target.id, "user.password_reset")).toMatchObject({
+      actorId: target.id,
+      before: null,
+      after: null,
+    });
+    expect((await signIn(target.email)).status).toBe(401);
+    expect((await signIn(target.email, newPassword)).status).toBe(200);
+  });
+
+  it("sends nothing for an unknown address and answers the same", async () => {
+    const response = await call("/request-password-reset", {
+      body: { email: "nobody@test.kalbajarcity.com", redirectTo: "/admin/sifre-berpa" },
+    });
+    expect(response.status).toBe(200);
+    expect(mail.sent).toHaveLength(0);
+  });
+});
+
+describe("pnpm auth:owner", () => {
+  it("creates an owner who can sign in, then resets the password and signs it out", async () => {
+    const email = `first-owner-${randomUUID().slice(0, 8)}@test.kalbajarcity.com`;
+    const first = await setOwner(db, { email, name: "First Owner", password });
+    expect(first.created).toBe(true);
+    const cookie = sessionCookie(await signIn(email));
+    expect(await lastAudit(first.userId, "user.create")).toMatchObject({ actorId: null });
+
+    const second = await setOwner(db, {
+      email,
+      name: "First Owner",
+      password: "another passphrase",
+    });
+    expect(second).toEqual({ userId: first.userId, created: false });
+    page.cookie = cookie;
+    await expect(requireUser()).rejects.toThrow("redirect:/admin/giris");
+    expect((await signIn(email)).status).toBe(401);
+    expect((await signIn(email, "another passphrase")).status).toBe(200);
+    expect(await lastAudit(first.userId, "user.password_set")).toMatchObject({ actorId: null });
+  });
+
+  it("refuses a short password", async () => {
+    await expect(
+      setOwner(db, { email: "short@test.kalbajarcity.com", name: "Short", password: "short" }),
+    ).rejects.toThrow();
+  });
+});
