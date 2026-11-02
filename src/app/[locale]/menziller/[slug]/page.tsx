@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { ApartmentCard } from "@/components/apartments/apartment-card";
 import { AreaTable } from "@/components/apartments/area-table";
+import { DeferredLeadForm } from "@/components/apartments/deferred-lead-form";
 import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
 import { StatusBadge } from "@/components/apartments/status-badge";
@@ -86,6 +87,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
   if (!found) notFound();
   const { apartment, locale } = found;
   const t = await getTranslations("ApartmentPage");
+  const form = await getTranslations("LeadForm");
   const name = await nameOf(apartment);
   const similar = await listSimilarApartments(apartment, locale);
 
@@ -169,10 +171,31 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
               </div>
             )}
 
-            {/* The inquiry form goes here once #22 lands:
-                <LeadForm type="inquiry" apartment={{ slug: apartment.slug, label: name }} /> */}
-
             <ShareActions title={name} />
+
+            {apartment.status !== "sold" && (
+              <section
+                aria-labelledby="sorgu-basliq"
+                className="flex flex-col gap-6 rounded-md bg-surface-raised p-6"
+                data-print-hidden=""
+              >
+                <div className="flex flex-col gap-2">
+                  <Heading as="h2" size="title" id="sorgu-basliq">
+                    {form("heading.inquiry")}
+                  </Heading>
+                  <Text tone="muted">{form("intro.inquiry")}</Text>
+                </div>
+                <DeferredLeadForm
+                  type="inquiry"
+                  // "Mənzil 102 (A blok) haqqında": door numbers repeat across blocks.
+                  apartment={{
+                    slug: apartment.slug,
+                    label: `${apartment.number} (${apartment.block.name.value})`,
+                  }}
+                  labelledBy="sorgu-basliq"
+                />
+              </section>
+            )}
           </div>
 
           <figure className="flex flex-col gap-4 lg:order-1 lg:col-span-7">

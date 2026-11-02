@@ -33,3 +33,34 @@
     }
   }
 }
+
+/* The place the inquiry form takes before its script loads
+   (deferred-lead-form.tsx), so nothing moves when it appears: the form's
+   tallest height in az, en and ru at each width range, measured on the
+   production build on 2026-11-02 (Russian runs longest). Re-measure when
+   the form's fields or copy change. */
+@utility min-h-lead-form {
+  min-height: 57.25rem;
+
+  @media (width >= 22.5rem) {
+    min-height: 55.5rem;
+  }
+  @media (width >= 24rem) {
+    min-height: 52.125rem;
+  }
+  @media (width >= 30rem) {
+    min-height: 49rem;
+  }
+  @media (width >= 40rem) {
+    min-height: 42.3125rem;
+  }
+  @media (width >= 64rem) {
+    min-height: 52.125rem;
+  }
+  @media (width >= 68.75rem) {
+    min-height: 50.4375rem;
+  }
+  @media (width >= 96rem) {
+    min-height: 42.3125rem;
+  }
+}

@@ -4,7 +4,7 @@ import { expect, test, type APIRequestContext, type Locator, type Page } from "@
 import { eq } from "drizzle-orm";
 
 import { connect, databaseUrl } from "@/db/client";
-import { apartments, layoutTypes, media } from "@/db/schema";
+import { apartments, leadEvents, layoutTypes, leads, media } from "@/db/schema";
 import { setOwner } from "@/lib/auth/owner";
 
 import { waitForHydration } from "./hydration";
@@ -143,6 +143,63 @@ test.describe("at 320 px with the keyboard alone", () => {
     await expectNoHorizontalScroll(page);
     await expect(page.getByRole("table", { name: "Otaqların sahəsi" })).toBeVisible();
   });
+});
+
+test("an inquiry from an apartment page is stored with the apartment and its page", async ({
+  page,
+}, testInfo) => {
+  const slug = "blok-c-menzil-102";
+  const name = `E2E ${testInfo.project.name}-${randomUUID().slice(0, 8)}`;
+  // Its own visitor, so the per-IP rate limit never decides the test.
+  const octet = Math.floor(Math.random() * 250) + 1;
+  await page.setExtraHTTPHeaders({ "x-forwarded-for": `198.18.${octet}.${octet}` });
+
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto(`/menziller/${slug}`);
+  await waitForHydration(page);
+  const section = page.getByRole("region", { name: "Sual verin" });
+  await section.scrollIntoViewIfNeeded();
+  const form = section.getByRole("form");
+  await expect(form.getByText("Mənzil 102 (C blok) haqqında")).toBeVisible();
+  const shown = Date.now();
+
+  await form.getByLabel("Adınız").fill(name);
+  await form.getByLabel("Telefon").fill("050 123 45 67");
+  await form.getByRole("checkbox").check();
+  // The form's time trap drops anything sent within three seconds of it appearing.
+  await page.waitForTimeout(Math.max(0, 3500 - (Date.now() - shown)));
+  await form.getByRole("button", { name: "Göndər" }).press("Enter");
+  await expect(section.getByText("Müraciətiniz qəbul edildi")).toBeFocused();
+  expect(requests.some((url) => url.endsWith("/api/v1/leads"))).toBe(true);
+
+  const { db, close } = connect(databaseUrl());
+  try {
+    let row: typeof leads.$inferSelect | undefined;
+    // Wait for the sales e-mail's event, so deleting does not race it.
+    await expect
+      .poll(async () => {
+        [row] = await db.select().from(leads).where(eq(leads.name, name));
+        if (!row) return [];
+        const events = await db.select().from(leadEvents).where(eq(leadEvents.leadId, row.id));
+        return events.map((event) => event.type);
+      })
+      .toContain("notified");
+    const [apartment] = await db
+      .select({ id: apartments.id })
+      .from(apartments)
+      .where(eq(apartments.slug, slug));
+    expect(row).toMatchObject({
+      type: "inquiry",
+      apartmentId: apartment!.id,
+      sourcePath: `/menziller/${slug}`,
+      locale: "az",
+      phone: "+994501234567",
+    });
+    await db.delete(leads).where(eq(leads.id, row!.id));
+  } finally {
+    await close();
+  }
 });
 
 // One apartment is marked sold and its layout given a plan, then both are
