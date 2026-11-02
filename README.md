@@ -59,6 +59,7 @@ Local ports are offset so the project runs next to others:
 | `pnpm db:seed`                 | Loads seed data; safe to re-run, never overwrites console edits     |
 | `pnpm db:studio`               | Drizzle Studio                                                      |
 | `pnpm auth:owner`              | Creates the owner account or restores owner access (see below)      |
+| `pnpm storage:setup`           | Creates the bucket and sets its CORS, policy and lifecycle (below)  |
 
 Do not run `pnpm build` while `pnpm dev` is running in the same checkout.
 
@@ -120,3 +121,26 @@ drift apart.
 - Application code reads through `getDb()` from `@/db` (server-only), inside a
   component that has awaited `connection()`; scripts and tests use `connect()`
   from `@/db/client`
+
+## Media
+
+Files live in an S3-compatible bucket (`S3_*` in `.env.example`; RustFS in
+development, whose bucket `docker compose up` prepares). `pnpm storage:setup`
+does the same against any store: it creates the bucket, allows `PUT` from the
+site's origins (CORS), makes `media/*` public-read and nothing else, and
+expires `uploads/` after a day. Run it once per environment.
+
+- `uploads/<uuid>`: where the console sends a file with a presigned `PUT`
+  (`POST /api/v1/admin/media/uploads`), valid for 15 minutes
+- `originals/<id>.<ext>`: the untouched original of an image, private
+- `media/<id>/<width>.<avif|webp>` and `media/<id>/video.mp4`: what pages load
+
+`POST /api/v1/admin/media` checks the bytes (never the declared type), rotates
+by EXIF, strips metadata, and writes AVIF and WebP at 480, 960, 1600 and
+2400 px wide (never upscaled), a blur placeholder and the dominant colour.
+Videos must be H.264 MP4; the box tree is parsed in TypeScript, as the server
+has no ffmpeg. Pages render images with `<Picture>` (`src/components/ui`),
+which offers the variants with `sizes`, width and height. An image without
+Azerbaijani alt text that is not marked decorative is not shown publicly, and
+a file in use cannot be deleted: `mediaUsages()` (`src/lib/media/usages.ts`)
+finds every reference.
