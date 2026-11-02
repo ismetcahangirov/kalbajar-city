@@ -11,7 +11,8 @@ font size, radius, shadow, duration or easing may be written. Components use
 the **semantic** tokens; the raw palette exists only to define them.
 
 The console (`/admin`) uses shadcn/ui and the system font stack. It shares the
-semantic colour tokens and the focus ring, nothing else from this page.
+semantic colour tokens and the focus ring, nothing else from this page; see
+[Console](#console) at the end.
 
 ## Direction
 
@@ -278,3 +279,65 @@ The order follows the spec (§4) and the reference's rhythm:
 10. Footer with the wordmark
 
 Testimonials appear only when the owner provides real, attributable quotes.
+
+## Console
+
+Owner decision, 2026-11-02 (#23):
+
+- **The console is built from shadcn/ui components** (`src/components/admin/ui/`,
+  added with the shadcn CLI from `components.json`; `cn` is in
+  `src/lib/admin/utils.ts`). Generated files are ours to edit: user-facing
+  strings come from `src/lib/admin/messages.ts`, colour literals and layout
+  transitions are removed
+- **Navigation is the shadcn `Sidebar` with `collapsible="icon"`**: an icon
+  rail on desktop (toggled by `SidebarTrigger` in the top bar, `SidebarRail`
+  and `Ctrl/Cmd+B`, the state kept in the `sidebar_state` cookie, scoped to
+  `/admin`), and the off-canvas sheet the component provides below `md`
+- **shadcn on the public site** only where an accessible behaviour primitive is
+  needed (dialog, sheet, popover), restyled with the public tokens on this
+  page. Never with shadcn's default look
+
+Theme. `src/app/admin/admin.css` maps every shadcn variable onto the semantic
+tokens; there is no second palette and no dark mode (`dark:` only matches
+inside a `.dark` element, which nothing renders).
+
+| shadcn variable                                    | Token                                  |
+| -------------------------------------------------- | -------------------------------------- |
+| `--background`                                     | `--color-surface`                      |
+| `--foreground`, `--*-foreground` on light surfaces | `--color-text`                         |
+| `--card`, `--popover`, `--sidebar-accent`          | `--color-surface-raised`               |
+| `--secondary`, `--muted`, `--accent`, `--sidebar`  | `--color-surface-alt`                  |
+| `--muted-foreground`                               | `--color-text-muted`                   |
+| `--primary`, `--sidebar-primary`                   | `--color-action`                       |
+| `--primary-foreground`                             | `--color-action-text`                  |
+| `--destructive`                                    | `--color-error`                        |
+| `--input`                                          | `--color-border-strong`                |
+| `--border`, `--sidebar-border`                     | `--color-border`                       |
+| `--ring`, `--sidebar-ring`                         | `--color-focus`                        |
+| `text-xs` / `sm` / `base` / `lg`                   | `eyebrow` / `small` / `body` / `title` |
+| `font-semibold`                                    | `--font-weight-medium`                 |
+| `rounded-xl`; `shadow-sm` / `md` / `lg`            | `--radius-lg`; `--shadow-raised`       |
+
+shadcn's "accent" is a hover surface in the console, not the public gold.
+
+Rules:
+
+- The focus ring is the shared one (2 px `--color-focus`, offset 3 px). It is
+  unlayered CSS in `admin.css`, so the components' `outline-none` cannot
+  remove it; their own focus rings are stripped
+- Below `md` and on touch screens, buttons, inputs, menu items and the sidebar
+  toggle are at least 44 × 44 px (`admin.css`)
+- Motion is limited to opacity and transform; the sidebar collapses without a
+  width animation, and reduced motion turns transitions off
+- Lists are built on `DataTable` (`src/components/admin/data-table`): a table
+  from `md`, cards below, page, sort and filters in the URL
+  (`?sehife=`, `?sira=`, Azerbaijani filter keys). A module declares its
+  columns, filters and RTK Query endpoint and adds no layout code
+- Forms use `useAdminForm` with the shared zod schema, the field wrappers in
+  `src/components/admin/form`, `TranslatableField` for `{ az, en, ru }`
+  values, `applyApiErrors` for the API's `fields`. Messages are Azerbaijani;
+  the schemas' and the API's English messages are never shown
+- Feedback: `sonner` toasts (`toastApiError`), `useConfirm()` before
+  destructive actions, `useUnsavedChangesGuard(dirty)` on forms, and
+  `undoOnFailure` (`src/store/optimistic.ts`) for optimistic updates where the
+  server cannot end up with something else
