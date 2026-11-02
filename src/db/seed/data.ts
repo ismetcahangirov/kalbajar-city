@@ -244,6 +244,7 @@ export const settings: { [K in SettingsKey]: SettingsValue<K> } = {
 export const galleryCategories = [
   { slug: "eksteryer", name: t("Eksteryer", "Exterior", "Экстерьер") },
   { slug: "interyer", name: t("İnteryer", "Interior", "Интерьер") },
+  { slug: "menzereler", name: t("Mənzərələr", "Views", "Виды") },
   { slug: "tikinti", name: t("Tikinti", "Construction", "Строительство") },
 ];
 

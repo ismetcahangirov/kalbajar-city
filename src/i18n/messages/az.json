@@ -259,5 +259,59 @@
     "description": "Kalbajar City satış ofisi: baxışa yazılın, geri zəng sifariş edin və ya bizə zəng edin.",
     "lead": "Baxışa yazılın və ya nömrənizi qoyun, satış komandası sizinlə əlaqə saxlasın.",
     "direct": "Birbaşa əlaqə"
+  },
+  "Construction": {
+    "title": "Tikintinin gedişatı",
+    "description": "Kalbajar City-nin tikintisi ay-ay: meydançadan fotolar, video və ümumi irəliləyiş.",
+    "lead": "Hər ay tikinti meydançasından yeni fotolar, video və qısa qeyd.",
+    "overall": "Ümumi irəliləyiş",
+    "progress": "{percent} tamamlanıb",
+    "asOf": "Vəziyyət: {month}",
+    "monthProgress": "Ayın sonunda: {percent} tamamlanıb",
+    "timeline": "Aylar üzrə yeniliklər",
+    "photos": "{month} fotoları",
+    "video": "Tikinti videosu, {month}",
+    "emptyTitle": "İlk hesabat tezliklə",
+    "emptyBody": "Tikinti meydançasından aylıq hesabatlar burada dərc olunacaq. Hələlik tikintini öz gözünüzlə görmək üçün baxışa yazıla bilərsiniz.",
+    "emptyAction": "Baxışa yazılın"
+  },
+  "Gallery": {
+    "title": "Qalereya",
+    "description": "Kalbajar City-nin fotoları: eksteryer, interyer, mənzərələr və tikinti.",
+    "lead": "Kompleksin, onun ətrafının və tikintinin şəkilləri.",
+    "filter": "Kateqoriyalar",
+    "all": "Hamısı",
+    "emptyTitle": "Şəkillər tezliklə",
+    "emptyBody": "Qalereya hazırlanır. İlk şəkillər burada dərc olunacaq."
+  },
+  "Lightbox": {
+    "dialog": "Şəkil baxışı",
+    "open": "Şəkli böyüt: {name}",
+    "untitled": "Şəkil {index}",
+    "position": "Şəkil {index}, cəmi {total}",
+    "previous": "Əvvəlki şəkil",
+    "next": "Növbəti şəkil",
+    "close": "Bağla"
+  },
+  "News": {
+    "title": "Xəbərlər",
+    "description": "Kalbajar City-dən xəbərlər və elanlar.",
+    "lead": "Kompleksdən xəbərlər, elanlar və yeniliklər.",
+    "emptyTitle": "Xəbərlər tezliklə",
+    "emptyBody": "İlk xəbərlər burada dərc olunacaq.",
+    "published": "Dərc olunub",
+    "related": "Digər xəbərlər",
+    "all": "Bütün xəbərlər"
+  },
+  "Pagination": {
+    "label": "Səhifələr",
+    "previous": "Əvvəlki səhifə",
+    "next": "Növbəti səhifə",
+    "page": "Səhifə {page}"
+  },
+  "Share": {
+    "share": "Paylaş",
+    "copied": "Link kopyalandı",
+    "failed": "Linki kopyalamaq alınmadı. Onu ünvan sətrindən kopyalayın."
   }
 }

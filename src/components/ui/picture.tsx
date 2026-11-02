@@ -12,6 +12,12 @@ type PictureProps = {
   sizes: string;
   /** The hero poster: the LCP element, loaded eagerly at high priority. */
   priority?: boolean;
+  /**
+   * `cover` fills the frame around the focus point. `contain` shows the whole
+   * image, letterboxed (the lightbox): without the placeholder or the chip,
+   * which would land on the empty bands; the caller shows the chip.
+   */
+  fit?: "cover" | "contain";
   className?: string;
 };
 
@@ -23,17 +29,26 @@ type PictureProps = {
  * nothing shifts. The blur placeholder, or the dominant colour, shows until
  * the file arrives. Illustrative images carry the chip (`CLAUDE.md` → Imagery).
  */
-export function Picture({ image, sizes, priority = false, className }: PictureProps) {
+export function Picture({
+  image,
+  sizes,
+  priority = false,
+  fit = "cover",
+  className,
+}: PictureProps) {
   const t = useTranslations("Media");
-  const placeholder: CSSProperties = image.blurDataURL
-    ? {
-        backgroundImage: `url("${image.blurDataURL}")`,
-        backgroundSize: "cover",
-        backgroundPosition: image.position,
-      }
-    : image.dominantColor
-      ? { backgroundColor: image.dominantColor }
-      : {};
+  const contain = fit === "contain";
+  const placeholder: CSSProperties = contain
+    ? {}
+    : image.blurDataURL
+      ? {
+          backgroundImage: `url("${image.blurDataURL}")`,
+          backgroundSize: "cover",
+          backgroundPosition: image.position,
+        }
+      : image.dominantColor
+        ? { backgroundColor: image.dominantColor }
+        : {};
   return (
     <>
       <picture className="contents">
@@ -49,11 +64,11 @@ export function Picture({ image, sizes, priority = false, className }: PicturePr
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : undefined}
           decoding={priority ? undefined : "async"}
-          className={cx("size-full object-cover", className)}
+          className={cx("size-full", contain ? "object-contain" : "object-cover", className)}
           style={{ objectPosition: image.position, ...placeholder }}
         />
       </picture>
-      {image.illustrative && (
+      {image.illustrative && !contain && (
         <Badge variant="illustrative" className="absolute start-3 bottom-3">
           {t("illustrative")}
         </Badge>

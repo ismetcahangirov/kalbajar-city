@@ -1,0 +1,30 @@
+/*
+ * Construction progress, gallery and news (#21). Values come from tokens.css.
+ */
+
+@layer base {
+  /* The open lightbox covers the page; the page behind it does not scroll. */
+  html:has([data-lightbox][open]) {
+    overflow: hidden;
+  }
+
+  /* The lightbox fades in and out (motion-system.md: opacity only). Reduced
+     motion shortens every transition to nothing (globals.css). */
+  [data-lightbox] {
+    opacity: 0;
+    transition-property: opacity, display, overlay;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-in-out);
+    transition-behavior: allow-discrete;
+  }
+
+  [data-lightbox][open] {
+    opacity: 1;
+  }
+
+  @starting-style {
+    [data-lightbox][open] {
+      opacity: 0;
+    }
+  }
+}

@@ -5,6 +5,7 @@
 @import "../styles/motion.css";
 @import "../styles/home.css";
 @import "../styles/apartments.css";
+@import "../styles/content.css";
 
 @layer base {
   html {

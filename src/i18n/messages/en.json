@@ -259,5 +259,59 @@
     "description": "Kalbajar City sales office: book a viewing, request a call-back or call us.",
     "lead": "Book a viewing or leave your number, and the sales team will get in touch.",
     "direct": "Contact us directly"
+  },
+  "Construction": {
+    "title": "Construction progress",
+    "description": "Kalbajar City under construction, month by month: photos and video from the site and the overall progress.",
+    "lead": "New photos, video and a short note from the site every month.",
+    "overall": "Overall progress",
+    "progress": "{percent} complete",
+    "asOf": "As of {month}",
+    "monthProgress": "At the end of the month: {percent} complete",
+    "timeline": "Updates by month",
+    "photos": "Photos from {month}",
+    "video": "Construction video, {month}",
+    "emptyTitle": "The first report is coming",
+    "emptyBody": "Monthly reports from the construction site will be published here. Meanwhile, book a viewing to see the site for yourself.",
+    "emptyAction": "Book a viewing"
+  },
+  "Gallery": {
+    "title": "Gallery",
+    "description": "Photos of Kalbajar City: exterior, interiors, views and construction.",
+    "lead": "The complex, its surroundings and its construction in pictures.",
+    "filter": "Categories",
+    "all": "All",
+    "emptyTitle": "Photos are coming",
+    "emptyBody": "The gallery is being prepared. The first photos will be published here."
+  },
+  "Lightbox": {
+    "dialog": "Image viewer",
+    "open": "Enlarge image: {name}",
+    "untitled": "Image {index}",
+    "position": "Image {index} of {total}",
+    "previous": "Previous image",
+    "next": "Next image",
+    "close": "Close"
+  },
+  "News": {
+    "title": "News",
+    "description": "News and announcements from Kalbajar City.",
+    "lead": "News, announcements and updates from the complex.",
+    "emptyTitle": "News is coming",
+    "emptyBody": "The first articles will be published here.",
+    "published": "Published",
+    "related": "More news",
+    "all": "All news"
+  },
+  "Pagination": {
+    "label": "Pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "page": "Page {page}"
+  },
+  "Share": {
+    "share": "Share",
+    "copied": "Link copied",
+    "failed": "The link could not be copied. Copy it from the address bar."
   }
 }

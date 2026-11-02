@@ -28,7 +28,13 @@ export type PublicImage = {
   illustrative: boolean;
 };
 
-export type PublicVideo = { src: string; type: string };
+/** A stored MP4. Width and height size its frame before it loads; null for a file without them. */
+export type PublicVideo = {
+  src: string;
+  type: string;
+  width: number | null;
+  height: number | null;
+};
 
 /** The fallback is the sharpest WebP at most this wide: good enough for any browser without srcset. */
 const fallbackWidth = 1600;
@@ -85,7 +91,7 @@ export function toPublicImage(row: MediaRow | undefined, locale: Locale): Public
 export function toPublicVideo(row: MediaRow | undefined): PublicVideo | null {
   if (!row || row.kind !== "video") return null;
   const src = mediaUrl(row.key);
-  return src ? { src, type: row.mimeType } : null;
+  return src ? { src, type: row.mimeType, width: row.width, height: row.height } : null;
 }
 
 function byWidth(variants: MediaVariant[]): MediaVariant[] {
