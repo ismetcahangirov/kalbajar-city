@@ -126,6 +126,8 @@ jobs:
           DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
         run: pnpm db:migrate && pnpm db:seed
       - run: pnpm exec playwright install --with-deps chromium
+      # A throwaway secret for the E2E server's sessions; never used elsewhere.
+      - run: echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
       - run: pnpm test:e2e
         env:
           DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
