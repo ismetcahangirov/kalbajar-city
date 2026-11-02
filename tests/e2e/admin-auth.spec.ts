@@ -3,6 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { connect, databaseUrl } from "@/db/client";
 import { setOwner } from "@/lib/auth/owner";
 
+import { waitForShell } from "./console";
+
 const password = "an e2e passphrase that is long";
 
 // One worker per project runs this file, so beforeAll creates each owner once.
@@ -47,7 +49,7 @@ test("a signed-out visitor is sent from the console to the sign-in page", async 
   });
 });
 
-test("an owner signs in, sees the console and signs out", async ({ page }, info) => {
+test("an owner signs in, sees the console and signs out", async ({ page, isMobile }, info) => {
   const email = emailFor(info.project.name);
   await page.goto("/admin/giris");
   await waitForForm(page);
@@ -69,14 +71,18 @@ test("an owner signs in, sees the console and signs out", async ({ page }, info)
   await page.getByRole("button", { name: "Daxil ol" }).click();
 
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("İdarə paneli");
-  await expect(page.getByText("Rolunuz: Sahib")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("İcmal");
+  await expect(page.getByText("Xoş gəldiniz, E2E Owner.")).toBeVisible();
   expect((await page.request.get("/api/v1/admin/me")).status()).toBe(200);
 
   // A signed-in visitor skips the sign-in page.
   await page.goto("/admin/giris");
   await expect(page).toHaveURL(/\/admin$/);
 
+  // The sign-out button is in the sidebar, a sheet behind the menu button on phones.
+  await waitForShell(page);
+  if (isMobile) await page.getByRole("button", { name: "Menyunu aç və ya bağla" }).click();
+  await expect(page.getByTestId("sidebar-user")).toContainText("Sahib");
   await page.getByRole("button", { name: "Çıxış" }).click();
   await expect(page).toHaveURL(/\/admin\/giris$/);
   await page.goto("/admin");
