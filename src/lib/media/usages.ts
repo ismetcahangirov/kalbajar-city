@@ -9,6 +9,7 @@ import {
   galleryItems,
   homeSections,
   layoutTypes,
+  media,
   mediaUsages as mediaUsageRows,
   news,
   seoOverrides,
@@ -17,52 +18,63 @@ import type { MediaUsage } from "@/shared/media";
 
 /**
  * Every place a file is used, computed live (#11): each foreign key to
- * `media`, the media ids inside home sections' JSON, and `media_usages` rows
+ * `media` (a video's poster too, #25), the media ids inside home sections'
+ * JSON, and `media_usages` rows
  * (kept for embeds in rich text). A new column that references `media` must
  * be added here, or the library would let a used file be deleted; the foreign
  * keys' `restrict` still stops that at the database.
  */
 export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[]> {
-  const [floorRows, layoutRows, newsRows, galleryRows, updateRows, seoRows, sectionRows, rows] =
-    await Promise.all([
-      db
-        .select({ id: floors.id, number: floors.number, block: blocks.code })
-        .from(floors)
-        .innerJoin(blocks, eq(blocks.id, floors.blockId))
-        .where(eq(floors.planMediaId, id)),
-      db
-        .select({ id: layoutTypes.id, code: layoutTypes.code })
-        .from(layoutTypes)
-        .where(eq(layoutTypes.planMediaId, id)),
-      db.select({ id: news.id, slug: news.slug }).from(news).where(eq(news.coverMediaId, id)),
-      db.select({ id: galleryItems.id }).from(galleryItems).where(eq(galleryItems.mediaId, id)),
-      db
-        .selectDistinct({ id: constructionUpdates.id, slug: constructionUpdates.slug })
-        .from(constructionUpdateMedia)
-        .innerJoin(
-          constructionUpdates,
-          eq(constructionUpdates.id, constructionUpdateMedia.updateId),
-        )
-        .where(eq(constructionUpdateMedia.mediaId, id)),
-      db
-        .select({ id: seoOverrides.id, path: seoOverrides.path })
-        .from(seoOverrides)
-        .where(eq(seoOverrides.ogMediaId, id)),
-      // A uuid in text form cannot match part of another value, so a text
-      // search finds every section that mentions it; the paths come from the JSON.
-      db
-        .select({ id: homeSections.id, key: homeSections.key, content: homeSections.content })
-        .from(homeSections)
-        .where(sql`${homeSections.content}::text like ${`%"${id}"%`}`),
-      db
-        .select({
-          entityType: mediaUsageRows.entityType,
-          entityId: mediaUsageRows.entityId,
-          field: mediaUsageRows.field,
-        })
-        .from(mediaUsageRows)
-        .where(eq(mediaUsageRows.mediaId, id)),
-    ]);
+  const [
+    floorRows,
+    layoutRows,
+    newsRows,
+    galleryRows,
+    updateRows,
+    seoRows,
+    sectionRows,
+    videoRows,
+    rows,
+  ] = await Promise.all([
+    db
+      .select({ id: floors.id, number: floors.number, block: blocks.code })
+      .from(floors)
+      .innerJoin(blocks, eq(blocks.id, floors.blockId))
+      .where(eq(floors.planMediaId, id)),
+    db
+      .select({ id: layoutTypes.id, code: layoutTypes.code })
+      .from(layoutTypes)
+      .where(eq(layoutTypes.planMediaId, id)),
+    db.select({ id: news.id, slug: news.slug }).from(news).where(eq(news.coverMediaId, id)),
+    db.select({ id: galleryItems.id }).from(galleryItems).where(eq(galleryItems.mediaId, id)),
+    db
+      .selectDistinct({ id: constructionUpdates.id, slug: constructionUpdates.slug })
+      .from(constructionUpdateMedia)
+      .innerJoin(constructionUpdates, eq(constructionUpdates.id, constructionUpdateMedia.updateId))
+      .where(eq(constructionUpdateMedia.mediaId, id)),
+    db
+      .select({ id: seoOverrides.id, path: seoOverrides.path })
+      .from(seoOverrides)
+      .where(eq(seoOverrides.ogMediaId, id)),
+    // A uuid in text form cannot match part of another value, so a text
+    // search finds every section that mentions it; the paths come from the JSON.
+    db
+      .select({ id: homeSections.id, key: homeSections.key, content: homeSections.content })
+      .from(homeSections)
+      .where(sql`${homeSections.content}::text like ${`%"${id}"%`}`),
+    db
+      .select({ id: media.id, name: media.originalName })
+      .from(media)
+      .where(eq(media.posterMediaId, id)),
+    db
+      .select({
+        entityType: mediaUsageRows.entityType,
+        entityId: mediaUsageRows.entityId,
+        field: mediaUsageRows.field,
+      })
+      .from(mediaUsageRows)
+      .where(eq(mediaUsageRows.mediaId, id)),
+  ]);
 
   return [
     ...floorRows.map((row) => ({
@@ -109,6 +121,12 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
         label: row.key,
       })),
     ),
+    ...videoRows.map((row) => ({
+      entityType: "media",
+      entityId: row.id,
+      field: "poster",
+      label: row.name,
+    })),
     ...rows.map((row) => ({ ...row, label: null })),
   ];
 }

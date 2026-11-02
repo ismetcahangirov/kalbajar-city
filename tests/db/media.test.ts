@@ -59,6 +59,8 @@ beforeAll(async () => {
 
 // The data-model tests count rows from an empty database, so nothing stays.
 afterAll(async () => {
+  // Posters first: a linked poster cannot be deleted under its video.
+  await db.update(media).set({ posterMediaId: null }).where(inArray(media.id, created));
   const rows = await db.select().from(media).where(inArray(media.id, created));
   await Promise.all(
     rows
@@ -194,11 +196,14 @@ describe("uploading", () => {
 
   it("accepts an H.264 MP4 and stores its codec, size and duration", async () => {
     const key = await upload("admin", h264Mp4(), "video/mp4");
-    const response = await finish("admin", { key, source: "owner" });
+    const response = await finish("admin", { key, source: "owner", originalName: " kənd.mp4 " });
     expect(response.status).toBe(201);
     const item = (await response.json()) as AdminMedia;
     expect(item).toMatchObject({
       kind: "video",
+      // The name on the uploader's device, for search (#25).
+      originalName: "kənd.mp4",
+      poster: null,
       mimeType: "video/mp4",
       codec: "avc1.640028",
       width: 1920,
@@ -553,5 +558,137 @@ describe("editing", () => {
         }),
       );
     });
+  });
+});
+
+describe("video posters (#25)", () => {
+  const patch = (id: string, body: unknown, role: UserRole = "editor") =>
+    itemRoute.PATCH(
+      request(`/admin/media/${id}`, { method: "PATCH", body, cookie: people[role].cookie }),
+      context({ id }),
+    );
+  const detail = async (id: string) =>
+    (await (
+      await itemRoute.GET(
+        request(`/admin/media/${id}`, { cookie: people.editor.cookie }),
+        context({ id }),
+      )
+    ).json()) as AdminMediaDetail;
+
+  it("links a poster image to a video, lists the link as a usage and keeps the poster", async () => {
+    const video = await row({ kind: "video", mimeType: "video/mp4", originalName: "kənd.mp4" });
+    const poster = await row({ decorative: true, alt: null });
+    const other = await row();
+
+    const linked = await patch(video.id, { posterMediaId: poster.id });
+    expect(linked.status).toBe(200);
+    expect(await linked.json()).toMatchObject({ poster: { id: poster.id } });
+    expect((await detail(video.id)).poster?.id).toBe(poster.id);
+    const [entry] = await db
+      .select()
+      .from(auditLog)
+      .where(and(eq(auditLog.entityId, video.id), eq(auditLog.action, "media.update")));
+    expect(entry).toMatchObject({ after: { posterMediaId: poster.id } });
+
+    // The poster is in use by the video, so it cannot be deleted.
+    expect((await detail(poster.id)).usages).toEqual([
+      { entityType: "media", entityId: video.id, field: "poster", label: "kənd.mp4" },
+    ]);
+    const refused = await itemRoute.DELETE(
+      request(`/admin/media/${poster.id}`, { method: "DELETE", cookie: people.editor.cookie }),
+      context({ id: poster.id }),
+    );
+    expect(refused.status).toBe(409);
+    expect(((await refused.json()) as ErrorBody).error.usages).toHaveLength(1);
+
+    // A list shows each video with its poster.
+    const list = (await (
+      await listRoute.GET(
+        request("/admin/media?kind=video&pageSize=100", { cookie: people.editor.cookie }),
+      )
+    ).json()) as { items: AdminMedia[] };
+    expect(list.items.find((item) => item.id === video.id)?.poster?.id).toBe(poster.id);
+
+    // Another poster replaces it; the first one is free again.
+    expect((await patch(video.id, { posterMediaId: other.id })).status).toBe(200);
+    expect((await detail(poster.id)).usages).toEqual([]);
+    const cleared = await patch(video.id, { posterMediaId: null });
+    expect(await cleared.json()).toMatchObject({ poster: null });
+    expect((await detail(other.id)).usages).toEqual([]);
+  });
+
+  it("refuses a poster that is not an image, and a poster for an image", async () => {
+    const video = await row({ kind: "video", mimeType: "video/mp4" });
+    const second = await row({ kind: "video", mimeType: "video/mp4" });
+    const image = await row();
+    const another = await row();
+
+    for (const [target, posterMediaId] of [
+      [video.id, second.id],
+      [video.id, randomUUID()],
+      [image.id, another.id],
+    ] as const) {
+      const response = await patch(target, { posterMediaId });
+      expect(response.status).toBe(422);
+      expect(Object.keys(((await response.json()) as ErrorBody).error.fields ?? {})).toEqual([
+        "posterMediaId",
+      ]);
+    }
+    expect((await patch(video.id, { posterMediaId: "not-a-uuid" })).status).toBe(422);
+    expect((await patch(video.id, { posterMediaId: image.id }, "sales")).status).toBe(403);
+  });
+
+  it("guarantees in the database that a poster stays while its video uses it", async () => {
+    const video = await row({ kind: "video", mimeType: "video/mp4" });
+    const poster = await row();
+    await inRollback(async (tx) => {
+      await violates(tx, "media_poster_not_self", (sp) =>
+        sp.update(media).set({ posterMediaId: video.id }).where(eq(media.id, video.id)),
+      );
+      await tx.update(media).set({ posterMediaId: poster.id }).where(eq(media.id, video.id));
+      await violates(tx, "media_poster_media_id_media_id_fk", (sp) =>
+        sp.delete(media).where(eq(media.id, poster.id)),
+      );
+    });
+  });
+});
+
+describe("searching the library (#25)", () => {
+  const list = async (query: string) =>
+    (
+      (await (
+        await listRoute.GET(
+          request(`/admin/media?pageSize=100&${query}`, { cookie: people.editor.cookie }),
+        )
+      ).json()) as { items: AdminMedia[] }
+    ).items.map((item) => item.id);
+  const q = (text: string) => `q=${encodeURIComponent(text)}`;
+
+  it("finds files by name, alt text and caption in any language, and those without alt text", async () => {
+    const named = await row({ originalName: `qala-${tag}.jpg` });
+    const russian = await row({ alt: { az: "Qala", ru: `крепость ${tag}` } });
+    const captioned = await row({ caption: { az: `Gecə ${tag}` } });
+    const missing = await row({ alt: null, originalName: `bos-${tag}.jpg` });
+    const decorative = await row({ alt: null, decorative: true, originalName: `bez-${tag}.jpg` });
+    const video = await row({ kind: "video", mimeType: "video/mp4", alt: null });
+
+    expect(new Set(await list(q(tag)))).toEqual(
+      new Set([named.id, russian.id, captioned.id, missing.id, decorative.id]),
+    );
+    expect(await list(q(`КРЕПОСТЬ ${tag}`))).toEqual([russian.id]);
+    // `%` and `_` are literal characters, not wildcards.
+    expect(await list(q(`%${tag}`))).toEqual([]);
+
+    const withoutAlt = await list("missingAlt=true");
+    expect(withoutAlt).toContain(missing.id);
+    expect(withoutAlt).not.toContain(decorative.id);
+    expect(withoutAlt).not.toContain(video.id);
+    expect(withoutAlt).not.toContain(named.id);
+    expect(await list(`missingAlt=false&${q(tag)}`)).not.toContain(missing.id);
+
+    const oldestFirst = await list(`sort=createdAt&${q(tag)}`);
+    expect(oldestFirst.indexOf(named.id)).toBeLessThan(oldestFirst.indexOf(missing.id));
+    const newestFirst = await list(q(tag));
+    expect(newestFirst.indexOf(missing.id)).toBeLessThan(newestFirst.indexOf(named.id));
   });
 });

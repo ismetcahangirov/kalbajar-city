@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash, randomUUID } from "node:crypto";
 
-import { and, count, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import type { z } from "zod";
 
 import type { Executor } from "@/db/client";
@@ -43,15 +43,21 @@ const extensions: Record<ImageFormat, string> = {
   avif: "avif",
 };
 
-export function toAdminMedia(row: MediaRow): AdminMedia {
+/** The smallest WebP of an image, or the file of a video. */
+function previewOf(row: MediaRow): string | null {
+  if (row.kind === "video") return mediaUrl(row.key);
+  const webp = row.variants
+    .filter((variant) => variant.format === "webp")
+    .sort((a, b) => a.width - b.width)[0];
+  return webp ? mediaUrl(webp.key) : null;
+}
+
+/** `poster` is the video's poster row, when it has one. */
+export function toAdminMedia(row: MediaRow, poster?: MediaRow): AdminMedia {
   const variants = row.variants.map((variant) => ({
     ...variant,
     url: mediaUrl(variant.key) ?? "",
   }));
-  const preview =
-    row.kind === "video"
-      ? mediaUrl(row.key)
-      : (variants.find((variant) => variant.format === "webp")?.url ?? null);
   return {
     id: row.id,
     kind: row.kind,
@@ -72,10 +78,28 @@ export function toAdminMedia(row: MediaRow): AdminMedia {
     dominantColor: row.dominantColor,
     lqip: row.lqip,
     variants,
-    previewUrl: preview,
+    previewUrl: previewOf(row),
+    originalName: row.originalName,
+    poster:
+      row.posterMediaId && poster?.id === row.posterMediaId
+        ? { id: poster.id, previewUrl: previewOf(poster) }
+        : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
+}
+
+/** The library items for rows, each video with its poster. */
+async function toAdminMediaList(db: Executor, rows: MediaRow[]): Promise<AdminMedia[]> {
+  const ids = [...new Set(rows.flatMap((row) => (row.posterMediaId ? [row.posterMediaId] : [])))];
+  const posters = new Map(
+    ids.length
+      ? (await db.select().from(media).where(inArray(media.id, ids))).map((row) => [row.id, row])
+      : [],
+  );
+  return rows.map((row) =>
+    toAdminMedia(row, row.posterMediaId ? posters.get(row.posterMediaId) : undefined),
+  );
 }
 
 /**
@@ -257,6 +281,7 @@ export async function createMedia(
           caption: input.caption ?? null,
           focusX: input.focusX,
           focusY: input.focusY,
+          originalName: input.originalName || null,
           uploadedBy: user.id,
         })
         .returning();
@@ -284,38 +309,66 @@ export async function createMedia(
   return toAdminMedia(row);
 }
 
-/** The library, newest first. */
+/** `%`, `_` and `\` are taken literally in a search. */
+function likePattern(text: string): string {
+  return `%${text.replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
+}
+
+/** An image the public site leaves out until it has Azerbaijani alt text (`toPublicImage`). */
+const missingAltWhere = and(
+  eq(media.kind, "image"),
+  eq(media.decorative, false),
+  sql`coalesce(btrim(${media.alt}->>'az'), '') = ''`,
+);
+
+/** The library, newest first unless asked otherwise. */
 export async function listMedia(
   db: Executor,
   query: z.output<typeof mediaListQuerySchema>,
 ): Promise<Page<AdminMedia>> {
+  const pattern = query.q ? likePattern(query.q) : null;
   const where: SQL | undefined = and(
     query.kind.length ? inArray(media.kind, query.kind) : undefined,
     query.source.length ? inArray(media.source, query.source) : undefined,
+    pattern
+      ? or(
+          ilike(media.originalName, pattern),
+          ...(["alt", "caption"] as const).flatMap((field) =>
+            (["az", "en", "ru"] as const).map(
+              (locale) => sql`${media[field]}->>${locale} ilike ${pattern}`,
+            ),
+          ),
+        )
+      : undefined,
+    query.missingAlt === true ? missingAltWhere : undefined,
+    query.missingAlt === false ? sql`not (${missingAltWhere})` : undefined,
   );
+  const order = query.sort.direction === "asc" ? asc : desc;
   const [rows, [totals]] = await Promise.all([
     db
       .select()
       .from(media)
       .where(where)
-      .orderBy(desc(media.createdAt), desc(media.id))
+      .orderBy(order(media.createdAt), order(media.id))
       .limit(query.pageSize)
       .offset(offsetOf(query)),
     db.select({ total: count() }).from(media).where(where),
   ]);
-  return toPage(rows.map(toAdminMedia), totals?.total ?? 0, query);
+  return toPage(await toAdminMediaList(db, rows), totals?.total ?? 0, query);
 }
 
 export async function getMedia(db: Executor, id: string): Promise<AdminMediaDetail> {
   const [row] = await db.select().from(media).where(eq(media.id, id));
   if (!row) throw notFound("No such file.");
-  return { ...toAdminMedia(row), usages: await mediaUsages(db, id) };
+  const [item] = await toAdminMediaList(db, [row]);
+  return { ...item!, usages: await mediaUsages(db, id) };
 }
 
 /**
- * Alt text, caption, focus point, source and flags. A generated image stays
- * illustrative: asking otherwise is refused, and switching an image to
- * `generated` turns the flag on.
+ * Alt text, caption, focus point, source, flags and a video's poster. A
+ * generated image stays illustrative: asking otherwise is refused, and
+ * switching an image to `generated` turns the flag on. A poster must be an
+ * image in the library, and only a video has one.
  */
 export async function updateMedia(
   db: Executor,
@@ -333,6 +386,21 @@ export async function updateMedia(
     const source = input.source ?? before.source;
     if (source === "generated" && input.illustrative === false) {
       throw invalidField("illustrative", "A generated image is always illustrative.");
+    }
+    let poster: MediaRow | undefined;
+    if (input.posterMediaId) {
+      if (before.kind !== "video") {
+        throw invalidField("posterMediaId", "Only a video has a poster.");
+      }
+      // Shared lock: the poster cannot be deleted while it is being linked.
+      [poster] = await tx
+        .select()
+        .from(media)
+        .where(eq(media.id, input.posterMediaId))
+        .for("share");
+      if (!poster || poster.kind !== "image") {
+        throw invalidField("posterMediaId", "The poster must be an image in the library.");
+      }
     }
     const [after] = await tx
       .update(media)
@@ -352,11 +420,15 @@ export async function updateMedia(
       after,
       headers,
     });
-    return after!;
+    return { after: after!, poster };
   });
 
   revalidatePublic(publicTags.media);
-  return toAdminMedia(result);
+  if (result.after.posterMediaId && !result.poster) {
+    const [item] = await toAdminMediaList(db, [result.after]);
+    return item!;
+  }
+  return toAdminMedia(result.after, result.poster);
 }
 
 /**

@@ -126,9 +126,11 @@ drift apart.
 
 Files live in an S3-compatible bucket (`S3_*` in `.env.example`; RustFS in
 development, whose bucket `docker compose up` prepares). `pnpm storage:setup`
-does the same against any store: it creates the bucket, allows `PUT` from the
-site's origins (CORS), makes `media/*` public-read and nothing else, and
-expires `uploads/` after a day. Run it once per environment.
+does the same against any store: it creates the bucket, allows `PUT` and
+`GET` from the site's origins (CORS), makes `media/*` public-read and nothing
+else, and expires `uploads/` after a day. Run it once per environment, and
+again after it changes (#25 added `GET`, which the console needs to capture a
+video's poster frame).
 
 - `uploads/<uuid>`: where the console sends a file with a presigned `PUT`
   (`POST /api/v1/admin/media/uploads`), valid for 15 minutes
@@ -144,3 +146,10 @@ which offers the variants with `sizes`, width and height. An image without
 Azerbaijani alt text that is not marked decorative is not shown publicly, and
 a file in use cannot be deleted: `mediaUsages()` (`src/lib/media/usages.ts`)
 finds every reference.
+
+The console's library (`/admin/media`, #25) uploads from the browser straight
+to the bucket, so console pages get their Content Security Policy at request
+time with the `S3_ENDPOINT` origin in `connect-src` (`src/lib/security/csp.ts`,
+set in `src/proxy.ts`); public pages keep the build-time policy from
+`next.config.ts`, built by the same function. A video's poster is a frame the
+browser captures and uploads as an image, linked with `posterMediaId`.

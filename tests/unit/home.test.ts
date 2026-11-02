@@ -65,6 +65,8 @@ describe("media", () => {
     dominantColor: null,
     variants: [],
     codec: null,
+    originalName: null,
+    posterMediaId: null,
     uploadedBy: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -89,13 +91,22 @@ describe("media", () => {
     });
     expect(toPublicImage(row, "ru")?.alt).toBe("Dağlar");
     expect(toPublicImage({ ...row, width: null }, "az")).toBeNull();
-    expect(toPublicVideo(row)).toBeNull();
-    expect(toPublicVideo({ ...row, kind: "video", mimeType: "video/mp4" })).toEqual({
+    expect(toPublicVideo(row, "az")).toBeNull();
+    const video = { ...row, id: "video", kind: "video" as const, mimeType: "video/mp4" };
+    expect(toPublicVideo(video, "az")).toEqual({
       src: "https://cdn.example/home/hero%20poster.jpg",
       type: "video/mp4",
       width: row.width,
       height: row.height,
+      poster: null,
     });
+    // The poster is the library image linked to the video, shown when it may be.
+    const files = new Map([[row.id, row]]);
+    expect(toPublicVideo({ ...video, posterMediaId: row.id }, "en", files)?.poster).toMatchObject({
+      alt: "Mountains",
+      illustrative: true,
+    });
+    expect(toPublicVideo({ ...video, posterMediaId: row.id }, "en")?.poster).toBeNull();
   });
 });
 

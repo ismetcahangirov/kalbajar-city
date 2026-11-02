@@ -12,6 +12,7 @@ import {
   timestamp,
   unique,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 
 import { mediaKinds, mediaSources, type MediaVariant } from "@/shared/media";
@@ -61,6 +62,15 @@ export const media = pgTable(
     variants: jsonb("variants").$type<MediaVariant[]>().notNull().default([]),
     /** A video's codec string, e.g. `avc1.640028`. */
     codec: text("codec"),
+    /** The file's name on the uploader's device, for search (#25). */
+    originalName: text("original_name"),
+    /**
+     * A video's poster: an image in the library, captured from a frame in the
+     * browser (#25), since the server has no video decoder.
+     */
+    posterMediaId: uuid("poster_media_id").references((): AnyPgColumn => media.id, {
+      onDelete: "restrict",
+    }),
     uploadedBy: userId("uploaded_by"),
     ...timestamps,
   },
@@ -68,6 +78,8 @@ export const media = pgTable(
     check("media_focus_range", sql`${t.focusX} between 0 and 1 and ${t.focusY} between 0 and 1`),
     check("media_size_positive", sql`${t.size} > 0`),
     check("media_generated_illustrative", sql`${t.source} <> 'generated' or ${t.illustrative}`),
+    check("media_poster_not_self", sql`${t.posterMediaId} <> ${t.id}`),
+    index("media_poster_idx").on(t.posterMediaId),
   ],
 );
 

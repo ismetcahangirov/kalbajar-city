@@ -26,6 +26,7 @@ import { settingsSchemas, type ComplexFactKey, type SettingsValue } from "@/shar
 
 import { groupLayouts, type LayoutGroup } from "./layouts";
 import { toPublicImage, toPublicVideo, type PublicImage, type PublicVideo } from "./media";
+import { withPosters } from "./rich-text";
 
 export type { LayoutGroup };
 
@@ -139,18 +140,23 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   layouts.forEach((layout) => want(layout.planMediaId));
   updateMedia.forEach((row) => want(row.mediaId));
 
-  const files = new Map(
-    mediaIds.size
-      ? (
-          await db
-            .select()
-            .from(media)
-            .where(inArray(media.id, [...mediaIds]))
-        ).map((row) => [row.id, row])
-      : [],
+  const files = await withPosters(
+    db,
+    new Map(
+      mediaIds.size
+        ? (
+            await db
+              .select()
+              .from(media)
+              .where(inArray(media.id, [...mediaIds]))
+          ).map((row) => [row.id, row])
+        : [],
+    ),
   );
   const image = (id: string | null | undefined) =>
     id ? toPublicImage(files.get(id), locale) : null;
+  const video = (id: string | null | undefined) =>
+    id ? toPublicVideo(files.get(id), locale, files) : null;
   const text = (field: Translatable) => localize(field, locale);
   const maybe = (field: Translatable | null | undefined) => (field ? text(field) : null);
 
@@ -165,8 +171,9 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           kind: "hero",
           title: text(c.title),
           subtitle: maybe(c.subtitle),
-          poster: image(c.posterMediaId),
-          video: c.videoMediaId ? toPublicVideo(files.get(c.videoMediaId)) : null,
+          // Without a poster of its own, the hero shows the film's poster frame.
+          poster: image(c.posterMediaId) ?? video(c.videoMediaId)?.poster ?? null,
+          video: video(c.videoMediaId),
           chips: layouts.length
             ? {
                 apartments: complex.apartments,
@@ -247,7 +254,9 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
                 title: text(latestUpdate.title),
                 month: latestUpdate.month,
                 progress: latestUpdate.progressPercent,
-                image: image(updateMedia[0]?.mediaId),
+                // A video's poster stands in when the update leads with a video.
+                image:
+                  image(updateMedia[0]?.mediaId) ?? video(updateMedia[0]?.mediaId)?.poster ?? null,
               },
             }
           : null;

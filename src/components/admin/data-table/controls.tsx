@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@/components/admin/ui/badge";
 import { Input } from "@/components/admin/ui/input";
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/admin/ui/select";
 import { t } from "@/lib/admin/messages";
+import { searchTextMax } from "@/lib/admin/table-state";
 
 export type DataTableFilter = {
   /** The URL key, Azerbaijani like the routes (`blok`, `otaq`). */
@@ -36,10 +38,73 @@ export type DataTableDateFilter = {
   kind: "date";
 };
 
-export type DataTableAnyFilter = DataTableFilter | DataTableDateFilter;
+/** A free-text search (`?axtar=dağ`), sent to the endpoint as typed. */
+export type DataTableTextFilter = {
+  key: string;
+  label: string;
+  kind: "text";
+  /** A short hint in the box; `label` names it for screen readers. */
+  placeholder?: string;
+};
+
+export type DataTableAnyFilter = DataTableFilter | DataTableDateFilter | DataTableTextFilter;
 
 export function isDateFilter(filter: DataTableAnyFilter): filter is DataTableDateFilter {
   return "kind" in filter && filter.kind === "date";
+}
+
+export function isTextFilter(filter: DataTableAnyFilter): filter is DataTableTextFilter {
+  return "kind" in filter && filter.kind === "text";
+}
+
+/** How long typing must pause before a search runs. */
+const searchDelayMs = 300;
+
+/**
+ * A search box. It searches once typing pauses, and follows the URL when it
+ * changes from elsewhere (back button, "clear filters").
+ */
+export function TextFilter({
+  filter,
+  value,
+  onChange,
+}: {
+  filter: DataTableTextFilter;
+  value: string | undefined;
+  onChange: (value: string | null) => void;
+}) {
+  const [text, setText] = useState(value ?? "");
+  const [synced, setSynced] = useState(value);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  if (value !== synced) {
+    setSynced(value);
+    setText(value ?? "");
+  }
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return (
+    <label className="relative flex min-w-0 basis-full items-center sm:max-w-80 sm:flex-1 sm:basis-auto">
+      <span className="sr-only">{filter.label}</span>
+      <Search
+        aria-hidden
+        className="text-muted-foreground pointer-events-none absolute left-3 size-4"
+      />
+      <Input
+        type="search"
+        className="pl-9"
+        data-filter={filter.key}
+        placeholder={filter.placeholder ?? filter.label}
+        maxLength={searchTextMax}
+        value={text}
+        onChange={(event) => {
+          const next = event.target.value;
+          setText(next);
+          clearTimeout(timer.current);
+          timer.current = setTimeout(() => onChange(next.trim() || null), searchDelayMs);
+        }}
+      />
+    </label>
+  );
 }
 
 /** A labelled date input; clearing it removes the filter. */

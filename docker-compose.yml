@@ -46,7 +46,7 @@ services:
       - |
         for i in $$(seq 1 30); do aws --endpoint-url http://storage:9000 s3 ls >/dev/null 2>&1 && break; sleep 1; done
         aws --endpoint-url http://storage:9000 s3 mb s3://kalbajar 2>/dev/null || true
-        aws --endpoint-url http://storage:9000 s3api put-bucket-cors --bucket kalbajar --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:3010"],"AllowedMethods":["PUT"],"AllowedHeaders":["content-type"],"ExposeHeaders":["ETag"],"MaxAgeSeconds":3600}]}'
+        aws --endpoint-url http://storage:9000 s3api put-bucket-cors --bucket kalbajar --cors-configuration '{"CORSRules":[{"AllowedOrigins":["http://localhost:3010"],"AllowedMethods":["PUT","GET"],"AllowedHeaders":["content-type"],"ExposeHeaders":["ETag"],"MaxAgeSeconds":3600}]}'
         aws --endpoint-url http://storage:9000 s3api put-bucket-policy --bucket kalbajar --policy '{"Version":"2012-10-17","Statement":[{"Sid":"PublicMedia","Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::kalbajar/media/*"]}]}'
         aws --endpoint-url http://storage:9000 s3api put-bucket-lifecycle-configuration --bucket kalbajar --lifecycle-configuration '{"Rules":[{"ID":"expire-uploads","Filter":{"Prefix":"uploads/"},"Status":"Enabled","Expiration":{"Days":1},"AbortIncompleteMultipartUpload":{"DaysAfterInitiation":1}}]}' || echo "warning: lifecycle rules not supported; uploads/ will not expire"
         echo "bucket kalbajar ready"

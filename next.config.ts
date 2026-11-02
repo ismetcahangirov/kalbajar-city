@@ -2,38 +2,20 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 import { legacyRedirects } from "./src/config/legacy-redirects";
+import { contentSecurityPolicy as buildContentSecurityPolicy } from "./src/lib/security/csp";
 
 const isDev = process.env.NODE_ENV === "development";
 const isHttps = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
 
 /**
- * Without nonces: a nonce would render every page per request and rule out
- * the cached, prerendered public pages, so Next's inline bootstrap scripts
- * need 'unsafe-inline'. The policy still blocks scripts from other origins,
- * plugins, <base> hijacking, foreign form targets and framing. Images and
- * video may come from any https origin because the object store's public URL
- * is a runtime setting (#11); local http storage is allowed off https only.
- * The one third-party frame is the OpenStreetMap embed, which the location
- * and contact pages load only when the visitor asks for the map (#20).
+ * Pages outside the console. The console's pages get the same policy plus the
+ * object store's origin from `src/proxy.ts` at request time (#25), so this
+ * one is not sent there: two policies would both apply, and the stricter
+ * `connect-src` would block uploads.
  */
-const contentSecurityPolicy = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' blob: data: https:${isHttps ? "" : " http:"}`,
-  `media-src 'self' blob: https:${isHttps ? "" : " http:"}`,
-  "font-src 'self'",
-  "connect-src 'self'",
-  "frame-src https://www.openstreetmap.org",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "frame-ancestors 'none'",
-  ...(isHttps ? ["upgrade-insecure-requests"] : []),
-].join("; ");
+const contentSecurityPolicy = buildContentSecurityPolicy({ dev: isDev, https: isHttps });
 
 const securityHeaders = [
-  { key: "Content-Security-Policy", value: contentSecurityPolicy },
   // Two years. Preloading is the domain owner's call, so it is not requested.
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   { key: "X-Frame-Options", value: "DENY" },
@@ -88,6 +70,10 @@ const nextConfig: NextConfig = {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
     return [
       { source: "/:path*", headers: securityHeaders },
+      {
+        source: "/((?!admin$|admin/).*)",
+        headers: [{ key: "Content-Security-Policy", value: contentSecurityPolicy }],
+      },
       { source: "/admin/:path*", headers: noindex },
       { source: "/api/:path*", headers: noindex },
     ];
