@@ -167,6 +167,10 @@ const messages = {
   "dashboard.open": "Bölməni aç: {module}",
 
   "audit.apartment.update": "Mənzili yenilədi",
+  "audit.media.create": "Media faylı yüklədi",
+  "audit.media.update": "Media faylını yenilədi",
+  "audit.media.delete": "Media faylını sildi",
+  "audit.user.owner_set": "Sahib hesabını təyin etdi",
   "audit.user.create": "Hesab yaratdı",
   "audit.user.update": "Hesabı yenilədi",
   "audit.user.set_role": "Rolu dəyişdi",

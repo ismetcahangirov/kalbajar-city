@@ -1,5 +1,5 @@
 /** Baku is UTC+4 all year; Azerbaijan dropped daylight saving time in 2016. */
-const bakuOffset = 4 * 60 * 60 * 1000;
+export const bakuOffset = 4 * 60 * 60 * 1000;
 
 /** Monday 00:00 in Baku of the week `now` falls in: the start of "this week". */
 export function weekStart(now: Date): Date {

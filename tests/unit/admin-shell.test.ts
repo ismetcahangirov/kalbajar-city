@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { adminArea, adminDateTime, adminMoney, adminNumber } from "@/lib/admin/format";
 import { buildMenu, canOpen } from "@/lib/admin/menu";
 import { adminModules, breadcrumbsFor, isCurrent, moduleOf } from "@/lib/admin/navigation";
 import { translatablesIn, missingLocales } from "@/lib/admin/translatables";
@@ -109,5 +110,20 @@ describe("the dashboard's helpers", () => {
   it("lists the languages a translatable value lacks", () => {
     expect(missingLocales({ az: "Salam", en: "Hello", ru: " " })).toEqual(["ru"]);
     expect(missingLocales(undefined)).toEqual(["az", "en", "ru"]);
+  });
+});
+
+describe("console formatting", () => {
+  it("formats numbers, areas and prices by the az rules without the browser's locale data", () => {
+    expect(adminNumber(22634.5)).toBe("22 634,5");
+    expect(adminArea("62.09")).toBe("62,09 m²");
+    expect(adminArea("74.40")).toBe("74,4 m²");
+    expect(adminMoney("12500000", "AZN")).toBe("125 000 AZN");
+    expect(adminMoney("9999950", "AZN")).toBe("99 999,50 AZN");
+  });
+
+  it("shows times on the Baku clock", () => {
+    expect(adminDateTime("2026-11-02T10:05:00.000Z")).toBe("02.11.2026, 14:05");
+    expect(adminDateTime(new Date("2026-12-31T21:30:00Z"))).toBe("01.01.2027, 01:30");
   });
 });
