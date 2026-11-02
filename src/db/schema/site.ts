@@ -68,7 +68,7 @@ export const auditLog = pgTable(
   "audit_log",
   {
     id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-    actorId: userId("actor_id"),
+    actorId: userId("actor_id", "restrict"),
     /** `<entity>.<verb>`, e.g. `apartment.update`. */
     action: text("action").notNull(),
     entityType: text("entity_type").notNull(),

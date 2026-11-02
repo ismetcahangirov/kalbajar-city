@@ -3,6 +3,8 @@ import { jsonb, numeric, pgEnum, text, timestamp, uuid } from "drizzle-orm/pg-co
 import type { Translatable } from "@/i18n/content";
 import type { TranslatableRichText } from "@/shared/rich-text";
 
+import { users } from "./auth";
+
 export const publishStatus = pgEnum("publish_status", ["draft", "published"]);
 
 export const id = () => uuid("id").primaryKey().defaultRandom();
@@ -19,10 +21,12 @@ export const slug = () => text("slug").notNull().unique();
 export const area = (name: string) => numeric(name, { precision: 8, scale: 2 });
 
 /**
- * A Better Auth user id. Auth tables arrive with #9, which adds the foreign
- * keys; until then the column is a plain `text`.
+ * A user, by Better Auth's text id. Removing the user clears the column, except
+ * where the history must keep its author: the audit log passes `restrict`, so
+ * an account that has acted can only be deactivated.
  */
-export const userId = (name: string) => text(name);
+export const userId = (name: string, onDelete: "set null" | "restrict" = "set null") =>
+  text(name).references(() => users.id, { onDelete });
 
 export const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
