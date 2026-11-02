@@ -198,6 +198,7 @@ describe("the lead submission", () => {
     phone: "+994501234567",
     locale: "az",
     sourcePath: "/elaqe",
+    consent: true,
   };
 
   it("treats empty optional fields as not given", () => {
@@ -214,7 +215,8 @@ describe("the lead submission", () => {
       leadSubmissionSchema.safeParse({
         ...base,
         type: "viewing",
-        preferredAt: "2026-11-10T11:00:00+04:00",
+        // A week from now, with an explicit offset.
+        preferredAt: new Date(Date.now() + 7 * 86_400_000).toISOString().replace("Z", "+00:00"),
       }).success,
     ).toBe(true);
   });

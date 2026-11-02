@@ -69,6 +69,25 @@ const messages = {
   "mail.reset.action": "Yeni şifrə təyin et",
   "mail.reset.footer":
     "Link 1 saat etibarlıdır. Bu sorğunu siz göndərməmisinizsə, məktuba məhəl qoymayın.",
+
+  "lead.type.inquiry": "Sorğu",
+  "lead.type.viewing": "Baxış",
+  "lead.type.callback": "Geri zəng",
+
+  "mail.lead.subject": "Yeni müraciət: {type} · {name}",
+  "mail.lead.lead": "Saytdan yeni müraciət gəldi.",
+  "mail.lead.type": "Növ",
+  "mail.lead.name": "Ad",
+  "mail.lead.phone": "Telefon",
+  "mail.lead.email": "E-poçt",
+  "mail.lead.preferredAt": "İstədiyi vaxt (Bakı)",
+  "mail.lead.apartment": "Mənzil",
+  "mail.lead.message": "Mesaj",
+  "mail.lead.sourcePath": "Göndərildiyi səhifə",
+  "mail.lead.locale": "Dil",
+  "mail.lead.utm": "UTM",
+  "mail.lead.referrer": "Gəldiyi sayt",
+  "mail.lead.open": "Müraciəti idarə panelində açın",
 } as const;
 
 export type MessageKey = keyof typeof messages;

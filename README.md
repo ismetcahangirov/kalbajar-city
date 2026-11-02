@@ -83,6 +83,23 @@ Better Auth serves `/api/v1/auth/*`; the console is `/admin`, signing in is
   `--password-file`, a pipe or a hidden prompt, never from the command line.
   It also lifts a lock, so it is how an owner who is locked out gets back in
 
+## Leads
+
+The inquiry, viewing and call-back forms are one component,
+`src/components/leads/lead-form.tsx`, posting to `POST /api/v1/leads`.
+
+- Spam: a hidden honeypot field and a three-second time trap. A submission
+  caught by either is answered `201` like a real one and not stored
+- Rate limit: five submissions per client IP in ten minutes, then `429` with
+  `Retry-After`. It is counted in memory (`src/lib/rate-limit.ts`), which holds
+  because production runs one standalone Node process. The client IP is the
+  first `X-Forwarded-For` entry, so the reverse proxy must overwrite that
+  header rather than append to one the client sent
+- Each stored lead is e-mailed after the answer to `LEADS_INBOX` (or the
+  contacts e-mail in settings) with a link to it in the console. A failed
+  e-mail never loses the lead: the attempt is recorded on its timeline as a
+  `notified` event with `ok: false`
+
 ## Database
 
 The schema lives in `src/db/schema`, one file per area (inventory, media,

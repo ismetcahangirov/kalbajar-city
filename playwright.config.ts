@@ -8,6 +8,9 @@ if (existsSync(".env")) process.loadEnvFile(".env");
 const port = Number(process.env.E2E_PORT ?? 3011);
 const baseURL = `http://localhost:${port}`;
 
+/** Where the E2E server sends lead e-mails; tests/e2e/leads.spec.ts reads them from Mailpit. */
+const leadsInbox = "sales@e2e.kalbajarcity.test";
+
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
@@ -35,6 +38,8 @@ export default defineConfig({
       HOSTNAME: "0.0.0.0",
       ENABLE_PRIMITIVES: "1",
       BETTER_AUTH_URL: baseURL,
+      NEXT_PUBLIC_SITE_URL: baseURL,
+      LEADS_INBOX: leadsInbox,
     },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,
