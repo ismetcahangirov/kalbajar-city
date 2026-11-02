@@ -42,6 +42,7 @@ export async function StructuredData({
     ],
     phones: contacts.phones,
     email: contacts.email,
+    logo: developer.logo,
   });
   return (
     <script

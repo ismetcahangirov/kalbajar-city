@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, inject, it, vi } from "vitest";
 
 import { connect } from "@/db/client";
@@ -74,7 +74,10 @@ describe("/api/v1/admin/settings/:key", () => {
     const [entry] = await db
       .select()
       .from(auditLog)
-      .where(and(eq(auditLog.entityId, "contacts"), eq(auditLog.action, "settings.update")));
+      .where(and(eq(auditLog.entityId, "contacts"), eq(auditLog.action, "settings.update")))
+      // Other files save contacts too; this test's entry is the newest.
+      .orderBy(desc(auditLog.id))
+      .limit(1);
     expect(entry).toMatchObject({ actorId: people.admin.id, entityType: "settings" });
   });
 

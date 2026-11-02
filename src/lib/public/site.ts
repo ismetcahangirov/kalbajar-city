@@ -93,13 +93,21 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
   };
 }
 
+export type Developer = SettingsValue<"developer"> & {
+  /** The logo's public URL, once the owner has chosen one in the console (#27). */
+  logo: string | null;
+};
+
 /** The developer, for the `Organization` every page publishes as structured data. */
-export async function getDeveloper(): Promise<SettingsValue<"developer">> {
+export async function getDeveloper(): Promise<Developer> {
   "use cache";
-  cacheTag(publicTags.settings);
+  cacheTag(publicTags.settings, publicTags.media);
   cacheLife("days");
 
-  return (await readSetting(getDb(), "developer")) ?? fallbackDeveloper;
+  const db = getDb();
+  const developer = (await readSetting(db, "developer")) ?? fallbackDeveloper;
+  const [logo] = await images(db, [developer.logoMediaId], "az");
+  return { ...developer, logo: logo?.src ?? null };
 }
 
 /** The about page: the home about copy, the amenities, the facts and the developer. */

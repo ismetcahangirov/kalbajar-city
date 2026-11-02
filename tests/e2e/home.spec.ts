@@ -1,13 +1,16 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // The home page (#17) against the seeded database: every section, in the
-// console's order, complete without JavaScript and with reduced motion.
+// console's order, complete without JavaScript and with reduced motion. The
+// location section shows because the seed fills its distances with stand-ins
+// (#27).
 
 const headings = {
   "/": [
     "Biz öz yuvamıza daha uca bir səviyyədə qayıdırıq.",
     "Öz mənzilinizi seçin",
     "Rahatlıq və təhlükəsizlik",
+    "Yerləşmə",
     "Yeni evinizə yol",
     "Tez-tez verilən suallar",
     "Sualınız var? Bizə yazın.",
@@ -16,6 +19,7 @@ const headings = {
     "We are coming home, to a higher standard.",
     "Choose your apartment",
     "Comfort and safety",
+    "Location",
     "The path to your new home",
     "Frequently asked questions",
     "Have a question? Write to us.",
@@ -24,6 +28,7 @@ const headings = {
     "Мы возвращаемся домой — на новом уровне.",
     "Выберите свою квартиру",
     "Комфорт и безопасность",
+    "Расположение",
     "Путь к новому дому",
     "Частые вопросы",
     "Есть вопрос? Напишите нам.",
@@ -61,7 +66,7 @@ test.describe("without JavaScript", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Sizin də dağ mənzərəli mənziliniz olsun!",
     );
-    expect(await sectionHeadings(page)).toHaveLength(6);
+    expect(await sectionHeadings(page)).toHaveLength(7);
 
     const stats = page.getByLabel("Rəqəmlərlə Kalbajar City");
     await expect(stats).toContainText("22 634");

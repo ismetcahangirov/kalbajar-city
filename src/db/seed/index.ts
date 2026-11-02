@@ -1,9 +1,19 @@
 import { count, eq } from "drizzle-orm";
 
 import { slugify } from "@/lib/slug";
-import { homeSectionContentSchemas, homeSectionKeys } from "@/shared/home-sections";
+import {
+  homeSectionContentSchemas,
+  homeSectionKeys,
+  type HomeSectionKey,
+} from "@/shared/home-sections";
 import type { ApartmentStatus } from "@/shared/inventory";
-import { settingsKeys, settingsSchemas } from "@/shared/settings";
+import { homeSectionScope, isBlankValue, placeholdersSchema, valueAt } from "@/shared/placeholders";
+import {
+  editableSettingsKeys,
+  settingsKeys,
+  settingsSchemas,
+  type EditableSettingsKey,
+} from "@/shared/settings";
 
 import type { Executor } from "../client";
 import * as schema from "../schema";
@@ -137,6 +147,8 @@ export async function seed(db: Executor): Promise<SeedReport> {
         .returning()
     ).length;
 
+    report.placeholders = await fillPlaceholders(tx);
+
     // FAQ rows have no natural key, so they are only seeded into an empty table.
     const [faqRows] = await tx.select({ n: count() }).from(schema.faq);
     report.faq =
@@ -232,6 +244,93 @@ export async function seed(db: Executor): Promise<SeedReport> {
 
     return report;
   });
+}
+
+/** A placeholder scope's row: a settings key, or a home section (`homeLocation`). */
+function scopeTarget(
+  scope: string,
+): { table: "settings"; key: EditableSettingsKey } | { table: "home"; key: HomeSectionKey } {
+  const setting = editableSettingsKeys.find((key) => key === scope);
+  if (setting) return { table: "settings", key: setting };
+  const section = homeSectionKeys.find((key) => homeSectionScope(key) === scope);
+  if (section) return { table: "home", key: section };
+  throw new Error(`Unknown placeholder scope: ${scope}`);
+}
+
+/** A copy of `value` with `standIn` at `segments`. */
+function withValueAt(value: unknown, segments: readonly string[], standIn: unknown): unknown {
+  const [head, ...rest] = segments;
+  if (head === undefined) return standIn;
+  const record = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return { ...record, [head]: withValueAt(record[head], rest, standIn) };
+}
+
+/**
+ * Writes each stand-in (`data.placeholderValues`) into its field where the
+ * field is empty, and flags the path in `settings.placeholders`. A field that
+ * holds anything is left alone, so console edits survive and a re-run
+ * changes nothing. Returns how many fields it filled.
+ */
+async function fillPlaceholders(tx: Executor): Promise<number> {
+  const byScope = new Map<string, Array<{ path: string; field: string[]; value: unknown }>>();
+  for (const [path, value] of Object.entries(data.placeholderValues)) {
+    const [scope, ...field] = path.split(".");
+    if (!scope || !field.length) throw new Error(`Bad placeholder path: ${path}`);
+    byScope.set(scope, [...(byScope.get(scope) ?? []), { path, field, value }]);
+  }
+
+  const filled: string[] = [];
+  for (const [scope, entries] of byScope) {
+    const target = scopeTarget(scope);
+    const [row] =
+      target.table === "settings"
+        ? await tx
+            .select({ value: schema.settings.value })
+            .from(schema.settings)
+            .where(eq(schema.settings.key, target.key))
+            .for("update")
+        : await tx
+            .select({ value: schema.homeSections.content })
+            .from(schema.homeSections)
+            .where(eq(schema.homeSections.key, target.key))
+            .for("update");
+    if (!row) continue;
+
+    let next: unknown = row.value;
+    for (const entry of entries) {
+      if (!isBlankValue(valueAt(next, entry.field))) continue;
+      next = withValueAt(next, entry.field, entry.value);
+      filled.push(entry.path);
+    }
+    if (next === row.value) continue;
+
+    if (target.table === "settings") {
+      await tx
+        .update(schema.settings)
+        .set({ value: settingsSchemas[target.key].parse(next) })
+        .where(eq(schema.settings.key, target.key));
+    } else {
+      await tx
+        .update(schema.homeSections)
+        .set({ content: homeSectionContentSchemas[target.key].parse(next) })
+        .where(eq(schema.homeSections.key, target.key));
+    }
+  }
+
+  if (filled.length) {
+    const [row] = await tx
+      .select({ value: schema.settings.value })
+      .from(schema.settings)
+      .where(eq(schema.settings.key, "placeholders"))
+      .for("update");
+    const flagged = placeholdersSchema.safeParse(row?.value).data?.paths ?? [];
+    const value = { paths: [...new Set([...flagged, ...filled])] };
+    await tx
+      .insert(schema.settings)
+      .values({ key: "placeholders", value })
+      .onConflictDoUpdate({ target: schema.settings.key, set: { value } });
+  }
+  return filled.length;
 }
 
 function must<T>(value: T | undefined, key: string): T {

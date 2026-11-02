@@ -241,7 +241,45 @@ export const settings: { [K in SettingsKey]: SettingsValue<K> } = {
   prices: { visible: false },
   analytics: { googleAnalyticsId: null, metaPixelId: null },
   leads: defaultLeadSettings,
+  placeholders: { paths: [] },
 };
+
+/**
+ * Stand-ins for the facts the owner has not decided yet (#7), by placeholder
+ * path (`@/shared/placeholders`). The owner chose (2026-11-02) to fill them
+ * so the pages are complete; the seed writes one only where the field is
+ * empty and flags it, and the console shows the flag until a real value is
+ * saved. They stay modest and generic: the town, not a street; approximate
+ * travel times; a sales mailbox on the site's own domain. There is no logo
+ * stand-in: a made-up logo would misrepresent the developer.
+ */
+export const placeholderValues = {
+  "contacts.address": t(
+    "Kəlbəcər şəhəri, Azərbaycan",
+    "Kalbajar, Azerbaijan",
+    "г. Кельбаджар, Азербайджан",
+  ),
+  /** The town, approximately. */
+  "contacts.coordinates": { lat: 40.1053, lng: 46.0389 },
+  "contacts.hours": t(
+    "Bazar ertəsi–Şənbə, 10:00–19:00",
+    "Monday–Saturday, 10:00–19:00",
+    "Понедельник–суббота, 10:00–19:00",
+  ),
+  "contacts.email": "satis@kalbajarcity.com",
+  "homeLocation.distances": [
+    { place: t("Şəhər mərkəzi", "Town centre", "Центр города"), minutes: 5 },
+    { place: t("İstisu", "Istisu", "Истису"), minutes: 40 },
+    { place: t("Murovdağ aşırımı", "Murovdag pass", "Перевал Муровдаг"), minutes: 60 },
+    { place: t("Gəncə", "Ganja", "Гянджа"), minutes: 150 },
+    { place: t("Bakı", "Baku", "Баку"), minutes: 360 },
+  ],
+  "homeLocation.directions": t(
+    "Bakıdan M2 magistralı ilə Gəncəyə, oradan Murovdağ aşırımından keçərək Kəlbəcərə gəlinir.",
+    "From Baku, take the M2 highway to Ganja, then cross the Murovdag pass to Kalbajar.",
+    "Из Баку по трассе M2 до Гянджи, затем через перевал Муровдаг в Кельбаджар.",
+  ),
+} satisfies Record<string, unknown>;
 
 export const galleryCategories = [
   { slug: "eksteryer", name: t("Eksteryer", "Exterior", "Экстерьер") },

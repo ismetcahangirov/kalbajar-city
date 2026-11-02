@@ -13,9 +13,12 @@ import { publicTags } from "@/lib/cache/tags";
 import {
   settingsSchemas,
   type AdminSetting,
+  type EditableSettingsKey,
   type SettingsKey,
   type SettingsValue,
 } from "@/shared/settings";
+
+import { clearChangedPlaceholders } from "./placeholders";
 
 /** One settings row, as stored; the seed writes every key. */
 export async function getSetting<K extends SettingsKey>(
@@ -34,10 +37,10 @@ export async function getSetting<K extends SettingsKey>(
 /**
  * Replaces a settings value with one that matches its key's schema, audited in
  * the same transaction, then revalidates every public page that reads
- * settings (contacts, the facts, the map). The console's settings screen
- * (#27) builds on this; the location page's map needs it for its coordinates.
+ * settings (contacts, the facts, the map). The stand-ins the save changed lose
+ * their placeholder flag in the same transaction (#27).
  */
-export async function updateSetting<K extends SettingsKey>(
+export async function updateSetting<K extends EditableSettingsKey>(
   db: Executor,
   { key, value, user, headers }: { key: K; value: unknown; user: SessionUser; headers: Headers },
 ): Promise<AdminSetting<K>> {
@@ -68,6 +71,13 @@ export async function updateSetting<K extends SettingsKey>(
       entityId: key,
       before: before ? { value: before.value } : null,
       after: { value: after!.value },
+      headers,
+    });
+    await clearChangedPlaceholders(tx, {
+      scope: key,
+      before: before?.value,
+      after: after!.value,
+      user,
       headers,
     });
     return getSetting(tx, key);
