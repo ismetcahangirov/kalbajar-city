@@ -581,7 +581,9 @@ describe("inventory endpoints", () => {
       .from(auditLog)
       .where(and(eq(auditLog.actorId, people.sales.id), eq(auditLog.action, "apartment.update")));
     expect(entries.map((entry) => entry.entityId).sort()).toEqual([first, second, third].sort());
-    expect(entries.every((entry) => entry.after?.status === "available")).toBe(true);
+    expect(
+      entries.every((entry) => (entry.after as { status?: string } | null)?.status === "available"),
+    ).toBe(true);
     expect(cache.revalidated).toContainEqual(["inventory", { expire: 0 }]);
 
     const sold = await apartmentsRoute.PATCH(
