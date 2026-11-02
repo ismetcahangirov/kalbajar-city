@@ -107,7 +107,7 @@ export function BulkBar({
   return (
     <section
       aria-labelledby={headingId}
-      className="bg-background shadow-md sticky bottom-0 z-10 flex flex-col gap-3 rounded-md border p-4"
+      className="bg-background shadow-md sticky bottom-0 z-10 flex flex-col gap-3 rounded-md border p-3 md:p-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 id={headingId} className="font-medium">
@@ -186,7 +186,7 @@ export function BulkBar({
           </Button>
         ) : null}
       </div>
-      <p id={hintId} className="text-sm text-muted-foreground">
+      <p id={hintId} className="text-sm text-muted-foreground hidden md:block">
         {t("bulk.publishHint")}
       </p>
 
@@ -259,7 +259,7 @@ function PriceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("bulk.priceTitle")}</DialogTitle>
           <DialogDescription>{t("bulk.priceLead")}</DialogDescription>
