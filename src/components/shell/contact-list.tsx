@@ -15,7 +15,11 @@ export function ContactList({ className }: { className?: string }) {
     <ul className={cx("flex flex-col", className)}>
       {contacts.phones.map((phone) => (
         <li key={phone}>
-          <a href={telHref(phone)} className={underlineLinkClass("whitespace-nowrap")}>
+          <a
+            href={telHref(phone)}
+            data-track="click_call"
+            className={underlineLinkClass("whitespace-nowrap")}
+          >
             <Icon icon={Phone} />
             {formatPhone(phone)}
           </a>
@@ -24,6 +28,7 @@ export function ContactList({ className }: { className?: string }) {
       <li>
         <a
           href={whatsappHref(contacts.whatsapp)}
+          data-track="click_whatsapp"
           rel="noopener noreferrer"
           className={underlineLinkClass()}
         >

@@ -99,5 +99,58 @@
   },
   "Placeholder": {
     "body": "This page is being prepared."
+  },
+  "LeadForm": {
+    "heading": {
+      "inquiry": "Ask a question",
+      "viewing": "Book a viewing",
+      "callback": "Request a call-back"
+    },
+    "intro": {
+      "inquiry": "Write your question and the sales team will answer.",
+      "viewing": "Pick a time that suits you; the sales team will call to confirm.",
+      "callback": "Leave your number and we will call you."
+    },
+    "apartment": "About apartment {label}",
+    "name": "Your name",
+    "phone": "Phone",
+    "phoneHelper": "For example, 050 123 45 67 or +994 50 123 45 67",
+    "email": "Email (optional)",
+    "message": "Message (optional)",
+    "preferredAt": "Date and time of the viewing",
+    "preferredAtHelper": "Baku time",
+    "consent": "I have read the <link>privacy notice</link> and agree to the processing of my data.",
+    "consentLabel": "Consent",
+    "newTab": "(opens in a new tab)",
+    "honeypot": "Leave this field empty",
+    "submit": {
+      "inquiry": "Send",
+      "viewing": "Book a viewing",
+      "callback": "Request a call"
+    },
+    "submitting": "Sending…",
+    "error": {
+      "name": "Enter your name.",
+      "phone": "Enter a valid phone number, for example 050 123 45 67.",
+      "email": "Enter a valid email address or leave the field empty.",
+      "preferredAt": "Choose a date and time for the viewing.",
+      "preferredAtRange": "Choose a time within the coming year.",
+      "message": "The message can be at most 2,000 characters.",
+      "consent": "Confirm your consent to send the form.",
+      "summary": "{count, plural, one {# field needs attention} other {# fields need attention}}: {fields}.",
+      "network": "The form was not sent. Check your connection and try again; your entries are kept.",
+      "rateLimited": "Too many requests were sent. Try again in a few minutes or call us.",
+      "server": "The request was not accepted. Check the details and try again, or call us."
+    },
+    "success": {
+      "title": "Thank you, we have your request",
+      "body": "The sales team will contact you shortly.",
+      "again": "Send another request"
+    }
+  },
+  "Contact": {
+    "description": "Kalbajar City sales office: book a viewing, request a call-back or call us.",
+    "lead": "Book a viewing or leave your number, and the sales team will get in touch.",
+    "direct": "Contact us directly"
   }
 }
