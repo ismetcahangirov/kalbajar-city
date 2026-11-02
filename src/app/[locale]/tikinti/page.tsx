@@ -10,11 +10,13 @@ import { ProgressBar } from "@/components/content/progress-bar";
 import { RichText } from "@/components/content/rich-text";
 import { Localized } from "@/components/home/localized";
 import { FadeUp } from "@/components/motion";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Button, Container, Heading, Icon, Section, Text } from "@/components/ui";
 import { formatPercent } from "@/i18n/format";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getConstructionTimeline, type PublicConstructionMedia } from "@/lib/public/construction";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Reads the database per request and sends the page complete, not streamed
 // behind Suspense (CLAUDE.md → Data and state). The data is cached and
@@ -22,8 +24,14 @@ import { getConstructionTimeline, type PublicConstructionMedia } from "@/lib/pub
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Construction");
-  return { title: t("title"), description: t("description") };
+  return pageMetadata({
+    locale,
+    href: "/tikinti",
+    title: t("title"),
+    description: t("description"),
+  });
 }
 
 type Video = Extract<PublicConstructionMedia, { kind: "video" }>;
@@ -134,6 +142,10 @@ export default async function ConstructionPage() {
           </ol>
         )}
       </Container>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/tikinti" }])]}
+      />
     </Section>
   );
 }

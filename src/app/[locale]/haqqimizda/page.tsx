@@ -7,21 +7,29 @@ import { About, Amenities } from "@/components/home/sections";
 import { SectionHead } from "@/components/home/section-head";
 import { FadeUp } from "@/components/motion";
 import { PageHead } from "@/components/site/page-head";
+import { breadcrumbs, complexNode, StructuredData } from "@/components/seo/structured-data";
 import { Button, Container, Icon, Section, Text } from "@/components/ui";
 import type { Localized } from "@/i18n/content";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { factSentences } from "@/lib/facts";
 import { getAboutPage } from "@/lib/public/site";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // The copy, facts and amenities are console data: rendered per request and
 // sent complete (CLAUDE.md → Data and state).
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("About");
-  return { title: nav("about"), description: t("description") };
+  return pageMetadata({
+    locale,
+    href: "/haqqimizda",
+    title: nav("about"),
+    description: t("description"),
+  });
 }
 
 /**
@@ -120,6 +128,13 @@ export default async function AboutPage() {
           </FadeUp>
         </Container>
       </Section>
+      <StructuredData
+        locale={locale}
+        nodes={[
+          await complexNode(locale),
+          await breadcrumbs(locale, [{ name: nav("about"), href: "/haqqimizda" }]),
+        ]}
+      />
     </>
   );
 }

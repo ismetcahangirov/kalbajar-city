@@ -31,6 +31,8 @@ export type PublicNewsArticle = PublicNewsSummary & {
   body: PublicRichText;
   /** The latest other articles. */
   related: PublicNewsSummary[];
+  /** ISO timestamp of the last edit, for `dateModified`. */
+  updatedAt: string;
 };
 
 export const newsPageSize = 12;
@@ -119,6 +121,7 @@ export async function loadNewsArticle(
     lead: row.excerpt ? localize(row.excerpt, locale) : null,
     body: withImages(body, files, locale),
     related: others.map((other) => summarise(other, files, locale)),
+    updatedAt: row.updatedAt.toISOString(),
   };
 }
 

@@ -5,14 +5,15 @@ import { connection } from "next/server";
 import { EmptyState } from "@/components/content/empty-state";
 import { Lightbox } from "@/components/content/lightbox";
 import { PageHead } from "@/components/content/page-head";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Container, Section } from "@/components/ui";
 import { formatNumber } from "@/i18n/format";
-import { getPathname, Link } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getGallery } from "@/lib/public/gallery";
 import { categoryParam } from "@/lib/public/query";
-import { absoluteUrl } from "@/lib/site-url";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // The filter is in the query string and the data in the database: rendered
 // per request and sent complete (CLAUDE.md → Data and state).
@@ -25,15 +26,16 @@ export const instant = false;
 export async function generateMetadata({
   searchParams,
 }: PageProps<"/[locale]/qalereya">): Promise<Metadata> {
-  const t = await getTranslations("Gallery");
-  const metadata: Metadata = { title: t("title"), description: t("description") };
-  if ((await searchParams).kateqoriya === undefined) return metadata;
   const locale = (await getLocale()) as Locale;
-  return {
-    ...metadata,
-    robots: { index: false, follow: true },
-    alternates: { canonical: absoluteUrl(getPathname({ href: "/qalereya", locale })) },
-  };
+  const t = await getTranslations("Gallery");
+  // A category is a view of the gallery: indexable only without one.
+  return pageMetadata({
+    locale,
+    href: "/qalereya",
+    title: t("title"),
+    description: t("description"),
+    indexable: (await searchParams).kateqoriya === undefined,
+  });
 }
 
 const chip =
@@ -116,6 +118,10 @@ export default async function GalleryPage({ searchParams }: PageProps<"/[locale]
           </>
         )}
       </Container>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/qalereya" }])]}
+      />
     </Section>
   );
 }

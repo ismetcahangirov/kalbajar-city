@@ -1,7 +1,8 @@
 {
   "Metadata": {
     "title": "Kalbajar City",
-    "description": "Kəlbəcərin ilk özəl yaşayış kompleksi"
+    "description": "Kəlbəcərin ilk özəl yaşayış kompleksi",
+    "titleTemplate": "%s · Kalbajar City"
   },
   "Home": {
     "title": "Kalbajar City",
@@ -444,5 +445,9 @@
     "retry": "Yenidən cəhd edin",
     "catalogue": "Mənzillərə baxın",
     "home": "Ana səhifəyə qayıt"
+  },
+  "OgImage": {
+    "rooms": "{rooms, plural, one {# otaq} other {# otaq}}",
+    "floor": "Mərtəbə {floor}"
   }
 }

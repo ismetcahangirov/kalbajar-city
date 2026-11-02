@@ -1,7 +1,8 @@
 {
   "Metadata": {
     "title": "Kalbajar City",
-    "description": "The first private residential complex in Kalbajar"
+    "description": "The first private residential complex in Kalbajar",
+    "titleTemplate": "%s · Kalbajar City"
   },
   "Home": {
     "title": "Kalbajar City",
@@ -444,5 +445,9 @@
     "retry": "Try again",
     "catalogue": "See the apartments",
     "home": "Back to the home page"
+  },
+  "OgImage": {
+    "rooms": "{rooms, plural, one {# room} other {# rooms}}",
+    "floor": "Floor {floor}"
   }
 }

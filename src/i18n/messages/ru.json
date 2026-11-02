@@ -1,7 +1,8 @@
 {
   "Metadata": {
     "title": "Kalbajar City",
-    "description": "Первый частный жилой комплекс в Кельбаджаре"
+    "description": "Первый частный жилой комплекс в Кельбаджаре",
+    "titleTemplate": "%s · Kalbajar City"
   },
   "Home": {
     "title": "Kalbajar City",
@@ -444,5 +445,9 @@
     "retry": "Попробовать ещё раз",
     "catalogue": "Смотреть квартиры",
     "home": "На главную"
+  },
+  "OgImage": {
+    "rooms": "{rooms, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}",
+    "floor": "Этаж {floor}"
   }
 }

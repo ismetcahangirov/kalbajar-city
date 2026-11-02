@@ -10,6 +10,7 @@ import { Header } from "@/components/shell/header";
 import { MobileActionBar } from "@/components/shell/mobile-action-bar";
 import { SkipLink } from "@/components/shell/skip-link";
 import { routing } from "@/i18n/routing";
+import { siteOrigin } from "@/lib/seo/url";
 
 import { alethia, alethiaItalic } from "../fonts";
 import "../globals.css";
@@ -20,7 +21,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
-  return { title: t("title"), description: t("description") };
+  // Pages set their own title, canonical, alternates and Open Graph through
+  // `pageMetadata` (src/lib/seo); these are the defaults under them.
+  return {
+    metadataBase: new URL(siteOrigin()),
+    title: { default: t("title"), template: t("titleTemplate") },
+    description: t("description"),
+  };
 }
 
 // Edge to edge, so the action bar can sit above the home indicator with

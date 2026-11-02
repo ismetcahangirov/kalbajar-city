@@ -1,4 +1,5 @@
-import { getLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
 import { Hero } from "@/components/home/hero";
@@ -14,14 +15,33 @@ import {
   Process,
   Stats,
 } from "@/components/home/sections";
+import { complexNode, StructuredData } from "@/components/seo/structured-data";
 import type { Tone } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getHomePage, type HomeSection } from "@/lib/public/home";
+import { getSiteContacts } from "@/lib/public/site";
+import { faqNode } from "@/lib/seo/json-ld";
+import { geoMeta } from "@/lib/seo/metadata";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Reads the database per request and sends the page complete, not streamed
 // behind Suspense (CLAUDE.md → Data and state). The data itself is cached and
 // tagged, so a request costs a cache read until the console changes it.
 export const instant = false;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  const t = await getTranslations("Metadata");
+  const { coordinates } = await getSiteContacts(locale);
+  return pageMetadata({
+    locale,
+    href: "/",
+    title: t("title"),
+    absoluteTitle: true,
+    description: t("description"),
+    other: geoMeta(coordinates),
+  });
+}
 
 export default async function Home() {
   await connection();
@@ -43,7 +63,21 @@ export default async function Home() {
           i % 2 === 0 ? "start" : "center",
         ),
       )}
-      {faq && <FaqJsonLd {...faq} />}
+      {/* The FAQ as it is shown, word for word (spec §6). */}
+      <StructuredData
+        locale={locale}
+        nodes={[
+          await complexNode(locale),
+          faq
+            ? faqNode(
+                faq.items.map((item) => ({
+                  question: item.question.value,
+                  answer: item.answer.value,
+                })),
+              )
+            : null,
+        ]}
+      />
     </>
   );
 }
@@ -74,24 +108,4 @@ function renderSection(section: HomeSection, tone: Tone, align: "start" | "cente
     case "cta":
       return <Cta key={key} {...section} tone={tone} align={align} />;
   }
-}
-
-/** The FAQ shown on the page, as `FAQPage` structured data (spec §6). */
-function FaqJsonLd({ items }: Extract<HomeSection, { kind: "faq" }>) {
-  const data = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: items.map((item) => ({
-      "@type": "Question",
-      name: item.question.value,
-      acceptedAnswer: { "@type": "Answer", text: item.answer.value },
-    })),
-  };
-  return (
-    <script
-      type="application/ld+json"
-      // JSON-LD must be raw JSON; `<` is escaped so text cannot close the tag.
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
-    />
-  );
 }

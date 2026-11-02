@@ -6,9 +6,11 @@ import { LeadForm } from "@/components/leads/lead-form";
 import { ContactDetails } from "@/components/site/contact-details";
 import { MapBlock } from "@/components/site/map-block";
 import { PageHead } from "@/components/site/page-head";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Container, Eyebrow, Heading, Text } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getLocationPage, getSiteContacts } from "@/lib/public/site";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 import type { LeadType } from "@/shared/leads";
 
 // Contacts come from the console's settings: rendered per request and sent
@@ -16,9 +18,15 @@ import type { LeadType } from "@/shared/leads";
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Contact");
-  return { title: nav("contact"), description: t("description") };
+  return pageMetadata({
+    locale,
+    href: "/elaqe",
+    title: nav("contact"),
+    description: t("description"),
+  });
 }
 
 /** Anchors, so other pages can link straight to a form (`/elaqe#baxis`). */
@@ -83,6 +91,10 @@ export default async function ContactPage() {
           )}
         </Container>
       </div>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: nav("contact"), href: "/elaqe" }])]}
+      />
     </>
   );
 }

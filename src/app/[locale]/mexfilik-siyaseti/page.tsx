@@ -4,21 +4,29 @@ import { connection } from "next/server";
 import type { ReactNode } from "react";
 
 import { PageHead } from "@/components/site/page-head";
+import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
 import { Container, Heading, Text } from "@/components/ui";
 import { privacy } from "@/config/privacy";
 import { formatPhone } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getAboutPage, getLeadRetentionMonths, getSiteContacts } from "@/lib/public/site";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Names the developer and the contacts from the console's settings, so it
 // renders per request and is sent complete (CLAUDE.md → Data and state).
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Privacy");
-  return { title: nav("privacy"), description: t("description") };
+  return pageMetadata({
+    locale,
+    href: "/mexfilik-siyaseti",
+    title: nav("privacy"),
+    description: t("description"),
+  });
 }
 
 /**
@@ -117,6 +125,10 @@ export default async function PrivacyPage() {
           </Block>
         </Container>
       </div>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: nav("privacy"), href: "/mexfilik-siyaseti" }])]}
+      />
     </>
   );
 }
