@@ -179,6 +179,7 @@ export const settings: { [K in SettingsKey]: SettingsValue<K> } = {
     whatsapp: contacts.whatsapp,
     email: null,
     address: null,
+    hours: null,
     coordinates: null,
   },
   socials: { instagram: contacts.instagram, facebook: null, youtube: null, tiktok: null },
@@ -367,6 +368,7 @@ export const homeSections: { [K in HomeSectionKey]: HomeSectionContentByKey[K] }
     title: t("Yerləşmə", "Location", "Расположение"),
     body: null,
     mapMediaId: null,
+    directions: null,
     distances: [],
   },
   construction: {

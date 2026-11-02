@@ -11,6 +11,8 @@ const isHttps = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
  * plugins, <base> hijacking, foreign form targets and framing. Images and
  * video may come from any https origin because the object store's public URL
  * is a runtime setting (#11); local http storage is allowed off https only.
+ * The one third-party frame is the OpenStreetMap embed, which the location
+ * and contact pages load only when the visitor asks for the map (#20).
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -20,6 +22,7 @@ const contentSecurityPolicy = [
   `media-src 'self' blob: https:${isHttps ? "" : " http:"}`,
   "font-src 'self'",
   "connect-src 'self'",
+  "frame-src https://www.openstreetmap.org",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

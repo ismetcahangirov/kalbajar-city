@@ -27,7 +27,7 @@ export function ContactList({ className }: { className?: string }) {
       ))}
       <li>
         <a
-          href={whatsappHref(contacts.whatsapp)}
+          href={whatsappHref(contacts.whatsapp, t("whatsappMessage"))}
           data-track="click_whatsapp"
           rel="noopener noreferrer"
           className={underlineLinkClass()}

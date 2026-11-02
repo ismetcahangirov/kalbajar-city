@@ -13,9 +13,12 @@ export default function NotFound() {
         {t("title")}
       </Heading>
       <Text tone="muted">{t("body")}</Text>
-      <Button href={getPathname({ href: "/", locale })} variant="secondary">
-        {t("home")}
-      </Button>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Button href={getPathname({ href: "/menziller", locale })}>{t("catalogue")}</Button>
+        <Button href={getPathname({ href: "/", locale })} variant="secondary">
+          {t("home")}
+        </Button>
+      </div>
     </PlaceholderFrame>
   );
 }
