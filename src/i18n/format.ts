@@ -64,6 +64,26 @@ export function formatArea(value: number, locale: Locale): string {
   return `${formatNumber(value, locale, { maximumFractionDigits: 2 })}${NBSP}${squareMetre[locale]}`;
 }
 
+/**
+ * A price from its minor-unit string (`"15000000"`, as the API sends it) with
+ * the currency code: `150 000 AZN`. Alethia has no manat sign, so the code
+ * is shown (ui-kit → Typography). Kopecks appear only when there are any.
+ */
+export function formatPrice(amount: string, currency: string, locale: Locale): string {
+  const digits =
+    numberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ??
+    2;
+  const minor = BigInt(amount);
+  const unit = BigInt(10 ** digits);
+  const whole = Number(minor / unit);
+  const fraction = Number(minor % unit) / Number(unit);
+  const value = formatNumber(whole + fraction, locale, {
+    minimumFractionDigits: fraction ? digits : 0,
+    maximumFractionDigits: fraction ? digits : 0,
+  });
+  return `${value}${NBSP}${currency}`;
+}
+
 /** A whole percentage from 0–100: `40%` (en), `40 %` (ru), per the locale's pattern. */
 export function formatPercent(value: number, locale: Locale): string {
   return numberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(value / 100);

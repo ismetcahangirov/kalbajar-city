@@ -1,0 +1,35 @@
+/*
+ * The apartment catalogue and apartment pages (src/components/apartments),
+ * and the print stylesheet every public page shares.
+ */
+
+@layer base {
+  /* An open full-screen dialog (filters, the floor plan) covers the page;
+     the page behind it does not scroll. */
+  html:has(dialog[data-scroll-lock][open]) {
+    overflow: hidden;
+  }
+
+  @media print {
+    /* Only the page's own content: no header, footer, action bar or banners. */
+    body > :not(main),
+    [data-print-hidden] {
+      display: none !important;
+    }
+
+    [data-site-main] {
+      padding-top: 0;
+    }
+
+    /* Sections keep their order but not the screen's generous rhythm. */
+    [data-site-main] section {
+      padding-block: calc(var(--spacing) * 6);
+    }
+
+    table,
+    figure,
+    img {
+      break-inside: avoid;
+    }
+  }
+}

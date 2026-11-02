@@ -27,9 +27,9 @@ test("the Azerbaijani prefix redirects to the unprefixed URL", async ({ page }) 
 });
 
 test("switching language keeps the apartment and the query", async ({ page, isMobile }) => {
-  await page.goto("/ru/menziller/a-12?otaq=2");
+  await page.goto("/ru/menziller/blok-a-menzil-101?otaq=2");
   await waitForHydration(page);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Квартира a-12");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Блок A, квартира 101");
 
   // Below lg the switcher lives in the menu.
   const scope = isMobile ? page.getByRole("dialog", { name: "Меню" }) : page.getByRole("banner");
@@ -37,12 +37,12 @@ test("switching language keeps the apartment and the query", async ({ page, isMo
   const english = scope.getByRole("navigation", { name: "Язык" }).getByRole("link", {
     name: "English",
   });
-  await expect(english).toHaveAttribute("href", "/en/menziller/a-12?otaq=2");
+  await expect(english).toHaveAttribute("href", "/en/menziller/blok-a-menzil-101?otaq=2");
   await english.click();
 
-  await expect(page).toHaveURL(/\/en\/menziller\/a-12\?otaq=2$/);
+  await expect(page).toHaveURL(/\/en\/menziller\/blok-a-menzil-101\?otaq=2$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Apartment a-12");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Block A, apartment 101");
 });
 
 test("an unknown path answers 404 in the URL's language", async ({ page }) => {
