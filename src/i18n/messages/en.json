@@ -35,11 +35,118 @@
   "Apartments": {
     "title": "Apartments",
     "count": "{count, plural, one {# apartment} other {# apartments}}",
-    "placeholder": "The apartment catalogue is being prepared."
+    "name": "{block}, apartment {number}"
   },
-  "Apartment": {
-    "title": "Apartment {slug}",
-    "placeholder": "The apartment page is being prepared."
+  "Catalogue": {
+    "titleRooms": "{rooms}-room apartments",
+    "description": "The apartments of Kalbajar City: choose by rooms, area, block and floor, and see each plan and its status.",
+    "descriptionRooms": "{rooms}-room apartments at Kalbajar City: plans, areas and the status of each apartment.",
+    "lead": "Choose by rooms, area, block and floor. Each apartment's plan and status are on its own page.",
+    "results": "{count, plural, one {# apartment} other {# apartments}}",
+    "resultsLabel": "Results",
+    "pageOf": "Page {page} of {pages}",
+    "view": {
+      "label": "View",
+      "grid": "Cards",
+      "list": "List"
+    },
+    "filters": {
+      "title": "Filters and sorting",
+      "open": "Filters",
+      "active": "{count, plural, one {# filter set} other {# filters set}}",
+      "close": "Close filters",
+      "rooms": "Rooms",
+      "area": "Area, m²",
+      "floor": "Floor",
+      "blocks": "Block",
+      "statuses": "Status",
+      "price": "Price, AZN",
+      "from": "From",
+      "to": "To",
+      "floorFrom": "Lowest",
+      "floorTo": "Highest",
+      "any": "Any",
+      "sort": "Sort by",
+      "sortDefault": "Block and floor",
+      "sortOptions": {
+        "areaAsc": "Area: smallest first",
+        "areaDesc": "Area: largest first",
+        "floorAsc": "Floor: lowest first",
+        "floorDesc": "Floor: highest first",
+        "priceAsc": "Price: lowest first",
+        "priceDesc": "Price: highest first"
+      },
+      "apply": "Show {count, plural, one {# apartment} other {# apartments}}",
+      "applyPending": "Show",
+      "matches": "{count, plural, one {# apartment matches} other {# apartments match}}",
+      "reset": "Clear filters"
+    },
+    "empty": {
+      "title": "No apartment matches this choice",
+      "suggestion": "Without the “{filter}” filter: {count, plural, one {# apartment} other {# apartments}}.",
+      "show": "See them",
+      "reset": "See all apartments"
+    },
+    "pagination": {
+      "label": "Pages",
+      "previous": "Previous page",
+      "next": "Next page",
+      "page": "Page {page}"
+    },
+    "card": {
+      "floor": "Floor {floor}",
+      "rooms": "{rooms, plural, one {# room} other {# rooms}}"
+    },
+    "priceOnRequest": "Price on request"
+  },
+  "ApartmentPage": {
+    "metaTitle": "{name}: {rooms, plural, one {# room} other {# rooms}}, {area}",
+    "description": "{name} at Kalbajar City: {rooms, plural, one {# room} other {# rooms}}, {area} in total, floor {floor}. Plan, room areas and status.",
+    "back": "All apartments",
+    "facts": "About this apartment",
+    "rooms": "Rooms",
+    "area": "Total area",
+    "floor": "Floor",
+    "block": "Block",
+    "building": "Building",
+    "layout": "Layout",
+    "status": "Status",
+    "price": "Price",
+    "priceOnRequest": "Price on request",
+    "call": "Call us",
+    "viewing": "Book a viewing",
+    "plan": "Floor plan",
+    "planOpen": "Open the floor plan full screen",
+    "planMissing": "The floor plan of this apartment will be added soon.",
+    "planDialog": "Floor plan: {name}",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "zoomReset": "Original size",
+    "zoomClose": "Close",
+    "zoomHint": "Pinch, turn the mouse wheel or press + and − to zoom. Move with the arrow keys; 0 returns to the original size.",
+    "zoomLevel": "Zoom: {percent}",
+    "breakdown": "Room areas",
+    "room": "Room",
+    "roomArea": "Area",
+    "total": "Total area",
+    "gallery": "Gallery",
+    "similar": "Similar apartments",
+    "similarAll": "All {rooms}-room apartments",
+    "share": "Share",
+    "copied": "Link copied.",
+    "copyFailed": "The link could not be copied. Address: {url}",
+    "print": "Print"
+  },
+  "RoomKinds": {
+    "living": "Living room",
+    "bedroom": "Bedroom",
+    "kitchen": "Kitchen",
+    "hall": "Hallway",
+    "bathroom": "Bathroom",
+    "wardrobe": "Walk-in wardrobe",
+    "storage": "Storage room",
+    "balcony": "Balcony",
+    "numbered": "{name} {number}"
   },
   "Status": {
     "available": "Available",

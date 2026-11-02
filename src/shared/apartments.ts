@@ -26,6 +26,8 @@ const roomsFilter = listOf(z.coerce.number().int().min(1).max(10));
 const blockCode = z.string().regex(/^[A-Za-z0-9-]{1,8}$/, "Unknown block code");
 const area = z.coerce.number().positive().max(100_000);
 const floor = z.coerce.number().int().min(-5).max(200);
+/** Minor units (qəpik), like every price on the wire. */
+const price = z.coerce.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 
 function ordered(min: string, max: string) {
   return (value: Record<string, unknown>, ctx: z.RefinementCtx) => {
@@ -48,12 +50,33 @@ export const apartmentListQuerySchema = paginationSchema
     areaMax: area.optional(),
     floorMin: floor.optional(),
     floorMax: floor.optional(),
-    sort: sortSchema(["number", "area", "floor"], "number"),
+    /** Price filter and price sort apply only while prices are public. */
+    priceMin: price.optional(),
+    priceMax: price.optional(),
+    sort: sortSchema(["number", "area", "floor", "price"], "number"),
   })
   .superRefine(ordered("areaMin", "areaMax"))
-  .superRefine(ordered("floorMin", "floorMax"));
+  .superRefine(ordered("floorMin", "floorMax"))
+  .superRefine(ordered("priceMin", "priceMax"));
 
 export type ApartmentListQuery = z.output<typeof apartmentListQuerySchema>;
+
+/**
+ * While prices are hidden (#7), a price filter or a price sort is ignored:
+ * filtering would reveal which apartments cost less than a figure, and
+ * sorting would reveal their order. The catalogue then sorts naturally.
+ */
+export function withPriceVisibility(
+  query: ApartmentListQuery,
+  pricesVisible: boolean,
+): ApartmentListQuery {
+  if (pricesVisible) return query;
+  const rest = { ...query };
+  delete rest.priceMin;
+  delete rest.priceMax;
+  if (rest.sort.field === "price") rest.sort = { field: "number", direction: "asc" };
+  return rest;
+}
 
 type SortKey<F extends string> = F | `-${F}`;
 
@@ -69,7 +92,10 @@ export type ApartmentListParams = {
   areaMax?: number;
   floorMin?: number;
   floorMax?: number;
-  sort?: SortKey<"number" | "area" | "floor">;
+  /** Minor units; ignored while prices are hidden. */
+  priceMin?: number;
+  priceMax?: number;
+  sort?: SortKey<"number" | "area" | "floor" | "price">;
 };
 
 export const apartmentSlugParamsSchema = z.object({
@@ -97,6 +123,8 @@ export type PublicApartmentDetail = PublicApartment & {
   building: { slug: string; name: Localized };
   roomAreas: RoomArea[];
   description: Localized | null;
+  /** Images of the layout beyond its plan (interiors, views); often empty. */
+  gallery: PublicImage[];
 };
 
 export type PublicLayoutType = {

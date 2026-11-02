@@ -35,11 +35,118 @@
   "Apartments": {
     "title": "Mənzillər",
     "count": "{count, plural, one {# mənzil} other {# mənzil}}",
-    "placeholder": "Mənzil kataloqu hazırlanır."
+    "name": "{block}, mənzil {number}"
   },
-  "Apartment": {
-    "title": "Mənzil {slug}",
-    "placeholder": "Mənzil səhifəsi hazırlanır."
+  "Catalogue": {
+    "titleRooms": "{rooms} otaqlı mənzillər",
+    "description": "Kalbajar City-nin mənzilləri: otaq sayına, sahəyə, bloka və mərtəbəyə görə seçin, planlara və vəziyyətə baxın.",
+    "descriptionRooms": "Kalbajar City-də {rooms} otaqlı mənzillər: planlar, sahələr və hər mənzilin vəziyyəti.",
+    "lead": "Otaq sayına, sahəyə, bloka və mərtəbəyə görə seçin. Hər mənzilin planı və vəziyyəti öz səhifəsindədir.",
+    "results": "{count, plural, one {# mənzil} other {# mənzil}}",
+    "resultsLabel": "Nəticələr",
+    "pageOf": "Səhifə {page} / {pages}",
+    "view": {
+      "label": "Görünüş",
+      "grid": "Kartlar",
+      "list": "Siyahı"
+    },
+    "filters": {
+      "title": "Filtrlər və sıralama",
+      "open": "Filtrlər",
+      "active": "{count, plural, one {# filtr seçilib} other {# filtr seçilib}}",
+      "close": "Filtrləri bağla",
+      "rooms": "Otaq sayı",
+      "area": "Sahə, m²",
+      "floor": "Mərtəbə",
+      "blocks": "Blok",
+      "statuses": "Vəziyyət",
+      "price": "Qiymət, AZN",
+      "from": "Ən az",
+      "to": "Ən çox",
+      "floorFrom": "Ən aşağı",
+      "floorTo": "Ən yuxarı",
+      "any": "Hamısı",
+      "sort": "Sıralama",
+      "sortDefault": "Blok və mərtəbə üzrə",
+      "sortOptions": {
+        "areaAsc": "Sahə: kiçikdən böyüyə",
+        "areaDesc": "Sahə: böyükdən kiçiyə",
+        "floorAsc": "Mərtəbə: aşağıdan yuxarı",
+        "floorDesc": "Mərtəbə: yuxarıdan aşağı",
+        "priceAsc": "Qiymət: ucuzdan bahaya",
+        "priceDesc": "Qiymət: bahadan ucuza"
+      },
+      "apply": "{count, plural, one {# mənzili göstər} other {# mənzili göstər}}",
+      "applyPending": "Göstər",
+      "matches": "{count, plural, one {# mənzil uyğundur} other {# mənzil uyğundur}}",
+      "reset": "Filtrləri təmizlə"
+    },
+    "empty": {
+      "title": "Bu seçimə uyğun mənzil yoxdur",
+      "suggestion": "“{filter}” filtri olmadan {count, plural, one {# mənzil} other {# mənzil}} var.",
+      "show": "Onlara baxın",
+      "reset": "Bütün mənzillərə baxın"
+    },
+    "pagination": {
+      "label": "Səhifələr",
+      "previous": "Əvvəlki səhifə",
+      "next": "Növbəti səhifə",
+      "page": "Səhifə {page}"
+    },
+    "card": {
+      "floor": "Mərtəbə {floor}",
+      "rooms": "{rooms, plural, one {# otaq} other {# otaq}}"
+    },
+    "priceOnRequest": "Qiymət sorğu ilə"
+  },
+  "ApartmentPage": {
+    "metaTitle": "{name}: {rooms, plural, one {# otaq} other {# otaq}}, {area}",
+    "description": "{name}, Kalbajar City: {rooms, plural, one {# otaq} other {# otaq}}, ümumi sahə {area}, mərtəbə {floor}. Plan, otaqların sahələri və vəziyyət.",
+    "back": "Bütün mənzillər",
+    "facts": "Mənzil haqqında",
+    "rooms": "Otaq sayı",
+    "area": "Ümumi sahə",
+    "floor": "Mərtəbə",
+    "block": "Blok",
+    "building": "Bina",
+    "layout": "Plan tipi",
+    "status": "Vəziyyət",
+    "price": "Qiymət",
+    "priceOnRequest": "Qiymət sorğu ilə",
+    "call": "Zəng edin",
+    "viewing": "Baxışa yazılın",
+    "plan": "Plan",
+    "planOpen": "Planı tam ekranda açın",
+    "planMissing": "Bu mənzilin planı tezliklə əlavə olunacaq.",
+    "planDialog": "Plan: {name}",
+    "zoomIn": "Böyüt",
+    "zoomOut": "Kiçilt",
+    "zoomReset": "İlkin ölçü",
+    "zoomClose": "Bağla",
+    "zoomHint": "Böyütmək üçün iki barmaqla açın, siçanın təkərini fırladın və ya + və − düymələrini basın. Oxlarla sürüşdürün, 0 ilkin ölçünü qaytarır.",
+    "zoomLevel": "Miqyas: {percent}",
+    "breakdown": "Otaqların sahəsi",
+    "room": "Otaq",
+    "roomArea": "Sahə",
+    "total": "Ümumi sahə",
+    "gallery": "Qalereya",
+    "similar": "Oxşar mənzillər",
+    "similarAll": "Bütün {rooms} otaqlı mənzillər",
+    "share": "Paylaş",
+    "copied": "Keçid kopyalandı.",
+    "copyFailed": "Keçidi kopyalamaq alınmadı. Ünvan: {url}",
+    "print": "Çap et"
+  },
+  "RoomKinds": {
+    "living": "Qonaq otağı",
+    "bedroom": "Yataq otağı",
+    "kitchen": "Mətbəx",
+    "hall": "Dəhliz",
+    "bathroom": "Sanitar qovşaq",
+    "wardrobe": "Qarderob",
+    "storage": "Anbar",
+    "balcony": "Eyvan",
+    "numbered": "{name} {number}"
   },
   "Status": {
     "available": "Satışda",

@@ -4,6 +4,7 @@
 @import "../styles/shell.css";
 @import "../styles/motion.css";
 @import "../styles/home.css";
+@import "../styles/apartments.css";
 
 @layer base {
   html {
