@@ -191,7 +191,7 @@ test("views of a page are noindex with a canonical to the page; fixtures stay no
   const views = [
     ["/en/menziller?otaq=2&blok=A", "/en/menziller"],
     ["/qalereya?kateqoriya=yoxdur", "/qalereya"],
-    ["/ru/kompleks", "/ru/kompleks"],
+    ["/ru/kompleks?blok=A&mertebe=2", "/ru/kompleks"],
   ] as const;
   for (const [path, canonical] of views) {
     const head = await headOf(request, path);
@@ -241,7 +241,7 @@ test("the sitemap index and each locale's sitemap parse and list only indexable 
       (loc) => loc.slice(`${baseURL}${prefix[locale]}`.length) || "/",
     );
     expect(paths[locale]).toContain(`/xeberler/${article!.slug}`);
-    expect(paths[locale]).not.toContain("/kompleks");
+    expect(paths[locale]).toContain("/kompleks");
   }
   expect(paths.en).toEqual(paths.az);
   expect(paths.ru).toEqual(paths.az);

@@ -43,7 +43,7 @@ function newest(...dates: Array<string | null | undefined>): string | null {
  * Every indexable page in one locale, with `lastmod` from the data and its
  * alternates in every locale. Left out: views of a page (filters other than
  * a single room count, later pages, gallery categories), placeholders
- * (`/kompleks` until #19), development fixtures, and whatever the console
+ * (none at present), development fixtures, and whatever the console
  * marked noindex.
  */
 export function sitemapEntries(data: SitemapData, locale: Locale, origin: string): SitemapEntry[] {
@@ -60,6 +60,7 @@ export function sitemapEntries(data: SitemapData, locale: Locale, origin: string
       href: { pathname: "/menziller/[slug]", params: { slug } } as PageHref,
       lastModified: updatedAt,
     })),
+    { href: "/kompleks", lastModified: apartmentsUpdatedAt },
     { href: "/haqqimizda", lastModified: newest(data.homeUpdatedAt, data.settingsUpdatedAt) },
     { href: "/yerlesme", lastModified: newest(data.homeUpdatedAt, data.settingsUpdatedAt) },
     { href: "/tikinti", lastModified: data.constructionUpdatedAt },

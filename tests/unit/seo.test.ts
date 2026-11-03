@@ -336,7 +336,7 @@ describe("sitemaps", () => {
     expect(urls).toContain(`${origin}/ru/menziller/blok-a-menzil-101`);
     expect(urls).toContain(`${origin}/ru/xeberler/ilk-xeber`);
     expect(urls).not.toContain(`${origin}/ru/elaqe`);
-    expect(urls).not.toContain(`${origin}/ru/kompleks`);
+    expect(urls).toContain(`${origin}/ru/kompleks`);
     expect(urls.some((url) => url.includes("primitivler"))).toBe(false);
 
     const home = entries.find((entry) => entry.url === `${origin}/ru`);
@@ -353,9 +353,9 @@ describe("sitemaps", () => {
         (entry) => new URL(entry.url).pathname,
       ),
     );
-    const placeholders = ["/kompleks", "/primitivler", "/primitivler/hereket"];
+    const fixtures = ["/primitivler", "/primitivler/hereket"];
     for (const route of Object.keys(pathnames)) {
-      if (placeholders.includes(route)) continue;
+      if (fixtures.includes(route)) continue;
       const sample = route.replace(
         "[slug]",
         route.startsWith("/xeberler") ? "ilk-xeber" : "blok-a-menzil-101",

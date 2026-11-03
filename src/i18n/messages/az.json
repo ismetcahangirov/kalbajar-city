@@ -100,6 +100,27 @@
     },
     "priceOnRequest": "Qiymət sorğu ilə"
   },
+  "Complex": {
+    "title": "Kompleks",
+    "description": "Kalbajar City-nin interaktiv sxemi: bloku, mərtəbəni və mənzili seçin, hər mənzilin otaq sayını, sahəsini və vəziyyətini görün.",
+    "lead": "Bloku seçin, sonra mərtəbəni: hər mənzilin yerini, otaq sayını, sahəsini və vəziyyətini görəcəksiniz.",
+    "schematic": "Sxematik görünüş. Binaların real görüntüsü deyil; render və mərtəbə planları əlavə olunacaq.",
+    "blocksNav": "Bloklar",
+    "floorsNav": "Mərtəbələr",
+    "trail": "Seçim",
+    "allBlocks": "Bütün bloklar",
+    "headingBlocks": "Bloku seçin",
+    "headingFloors": "{block}: mərtəbəni seçin",
+    "headingApartments": "{block}, mərtəbə {floor}",
+    "figureBlocks": "Kompleksin sxemi, bloklar",
+    "figureFloors": "{block} sxemi, mərtəbələr",
+    "figureApartments": "{block}, mərtəbə {floor} sxemi, mənzillər",
+    "available": "{count, plural, one {# mənzil satışda} other {# mənzil satışda}}",
+    "legend": "Vəziyyət",
+    "listTitle": "Siyahı",
+    "listLead": "Sxemdəki məlumatın eynisi, siyahı şəklində.",
+    "empty": "Hələlik göstəriləcək mənzil yoxdur."
+  },
   "ApartmentPage": {
     "metaTitle": "{name}: {rooms, plural, one {# otaq} other {# otaq}}, {area}",
     "description": "{name}, Kalbajar City: {rooms, plural, one {# otaq} other {# otaq}}, ümumi sahə {area}, mərtəbə {floor}. Plan, otaqların sahələri və vəziyyət.",

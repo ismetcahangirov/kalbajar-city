@@ -100,6 +100,27 @@
     },
     "priceOnRequest": "Цена по запросу"
   },
+  "Complex": {
+    "title": "Комплекс",
+    "description": "Интерактивная схема Kalbajar City: выберите блок, этаж и квартиру и посмотрите комнаты, площадь и статус каждой квартиры.",
+    "lead": "Выберите блок, затем этаж: вы увидите, где находится каждая квартира, сколько в ней комнат, её площадь и статус.",
+    "schematic": "Схематичный вид, а не изображение зданий; рендеры и планы этажей будут добавлены.",
+    "blocksNav": "Блоки",
+    "floorsNav": "Этажи",
+    "trail": "Выбор",
+    "allBlocks": "Все блоки",
+    "headingBlocks": "Выберите блок",
+    "headingFloors": "{block}: выберите этаж",
+    "headingApartments": "{block}, этаж {floor}",
+    "figureBlocks": "Схема комплекса, блоки",
+    "figureFloors": "{block}: схема этажей",
+    "figureApartments": "{block}, этаж {floor}: схема квартир",
+    "available": "{count, plural, one {# квартира в продаже} few {# квартиры в продаже} many {# квартир в продаже} other {# квартиры в продаже}}",
+    "legend": "Статус",
+    "listTitle": "Список",
+    "listLead": "Те же данные, что на схеме, в виде списка.",
+    "empty": "Пока нет квартир для показа."
+  },
   "ApartmentPage": {
     "metaTitle": "{name}: {rooms, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}, {area}",
     "description": "{name} в Kalbajar City: {rooms, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}, общая площадь {area}, этаж {floor}. Планировка, площади комнат и статус.",
