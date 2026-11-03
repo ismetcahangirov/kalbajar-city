@@ -195,10 +195,34 @@ jobs:
           path: playwright-report
           retention-days: 7
 
+  # The JS budget per public route (CLAUDE.md §5), read from the production
+  # build's manifests by scripts/check-js-budget.mjs: no server, no
+  # database. Its own job, so a budget failure reads as one and does not
+  # wait on E2E.
+  js-budget:
+    name: JS budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The same exact key as build-e2e: the same sources, never another
+      # commit's cache.
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
+      - run: pnpm build
+      - run: pnpm budget:js
+
   ci-complete:
     name: CI complete
     if: always()
-    needs: [checks, unit, database, build-e2e]
+    needs: [checks, unit, database, build-e2e, js-budget]
     runs-on: ubuntu-latest
     steps:
       - name: Every job that ran succeeded
@@ -206,7 +230,7 @@ jobs:
           RESULTS: ${{ toJSON(needs) }}
         run: |
           echo "$RESULTS"
-          for job in checks unit database build-e2e; do
+          for job in checks unit database build-e2e js-budget; do
             echo "$RESULTS" | jq -e --arg j "$job" 'has($j)' > /dev/null || { echo "missing job: $job"; exit 1; }
           done
           failed=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | .key')

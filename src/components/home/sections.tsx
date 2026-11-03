@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
-import { LeadForm } from "@/components/leads/lead-form";
+import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
 import { CountUp, FadeUp, ImageReveal, PinnedCardZoom } from "@/components/motion";
 import {
   Button,
@@ -429,7 +429,7 @@ export async function Cta({ title, body, tone }: Props<"cta">) {
         </div>
         {/* The inquiry form; forms never animate, so it is not wrapped in an entry. */}
         <div className="rounded-md bg-surface-raised p-6 lg:col-span-7 lg:p-10">
-          <LeadForm type="inquiry" labelledBy="muraciet" />
+          <DeferredLeadForm reserve="home" type="inquiry" labelledBy="muraciet" />
         </div>
       </Container>
     </Section>

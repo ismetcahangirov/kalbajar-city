@@ -161,6 +161,8 @@ test("the form is completable with the keyboard alone and announces its errors",
 test("the home page ends with the inquiry form", async ({ page }) => {
   await page.goto("/");
   const section = page.locator('section[aria-labelledby="muraciet"]');
+  // The form's script loads only when its place nears the screen (#30).
+  await section.scrollIntoViewIfNeeded();
   const form = section.locator("form");
   await expect(form).toHaveAttribute("aria-labelledby", "muraciet");
   await expect(form.getByLabel("Mesaj (istəyə bağlı)")).toBeVisible();

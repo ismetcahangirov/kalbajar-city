@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 import { ApartmentCard } from "@/components/apartments/apartment-card";
 import { AreaTable } from "@/components/apartments/area-table";
-import { DeferredLeadForm } from "@/components/apartments/deferred-lead-form";
+import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
 import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
 import { StatusBadge } from "@/components/apartments/status-badge";
@@ -187,6 +187,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
                   <Text tone="muted">{form("intro.inquiry")}</Text>
                 </div>
                 <DeferredLeadForm
+                  reserve="apartment"
                   type="inquiry"
                   // "Mənzil 102 (A blok) haqqında": door numbers repeat across blocks.
                   apartment={{
