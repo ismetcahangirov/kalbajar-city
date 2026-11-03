@@ -44,3 +44,50 @@
     display: none;
   }
 }
+
+/* The place the home inquiry form takes before its script loads
+   (src/components/leads/deferred-lead-form.tsx), so nothing moves when it
+   appears: the tallest height of `LeadForm` (its status line and the form)
+   in az, en and ru at each width range, measured every 5 px from 320 to
+   1920 px on the production build on 2026-11-03 (Russian runs longest).
+   Each breakpoint is the first sampled width at which the shorter height
+   holds. Re-measure when the form's fields or copy, or the CTA's layout,
+   change. */
+@utility min-h-lead-form-home {
+  min-height: 52.3046875rem;
+
+  @media (width >= 21.25rem) {
+    min-height: 50.60546875rem;
+  }
+  @media (width >= 23.75rem) {
+    min-height: 48.90625rem;
+  }
+  @media (width >= 26.5625rem) {
+    min-height: 47.20703125rem;
+  }
+  @media (width >= 28.4375rem) {
+    min-height: 45.80078125rem;
+  }
+  @media (width >= 35.9375rem) {
+    min-height: 44.1015625rem;
+  }
+  @media (width >= 37.8125rem) {
+    min-height: 39.1015625rem;
+  }
+  @media (width >= 54.0625rem) {
+    min-height: 37.6953125rem;
+  }
+  @media (width >= 57.8125rem) {
+    min-height: 35.99609375rem;
+  }
+  /* Two columns from lg: the form gets narrower and taller again. */
+  @media (width >= 64rem) {
+    min-height: 45.80078125rem;
+  }
+  @media (width >= 65.9375rem) {
+    min-height: 44.1015625rem;
+  }
+  @media (width >= 69.0625rem) {
+    min-height: 39.1015625rem;
+  }
+}

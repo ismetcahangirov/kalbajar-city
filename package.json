@@ -8,6 +8,7 @@
     "start": "node .next/standalone/server.js",
     "lint": "eslint --max-warnings=0 && pnpm lint:tokens",
     "lint:tokens": "node scripts/check-tokens.mjs",
+    "budget:js": "node scripts/check-js-budget.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

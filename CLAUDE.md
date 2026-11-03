@@ -241,11 +241,23 @@ Read both before touching UI.
 | Lighthouse Performance (local, median of 3) | 93+                                    |
 | LCP (live, mobile)                          | < 2.5 s                                |
 | CLS                                         | < 0.05                                 |
-| JS per public route (gzip)                  | < 160 KB                               |
+| JS shared by every public route (gzip)      | < 190 KB                               |
+| JS a public route adds to the shared (gzip) | < 40 KB                                |
 | Hero video                                  | never the LCP element; poster image is |
 
 A change that breaks a budget fixes it in the same pull request or does not
 merge.
+
+The JS budgets count the scripts a route's HTML loads on first view, each
+chunk once, at `gzip -9`, read from the production build by
+`pnpm budget:js` (`scripts/check-js-budget.mjs`, the `JS budget` job in CI).
+**Shared** is what every public route loads: React, the Next runtime and the
+locale layout's shell. A page cannot shed it and the browser caches it after
+the first page, so it is budgeted once, for the site. **Per route** is what a
+page adds on top: its own components. Code behind `next/dynamic` or
+`import()` loads later and is not counted, which is why heavy, below-the-fold
+islands (the inquiry form and its Redux store) are deferred. Lower the shared
+budget when the shell gets lighter; never raise it to fit a change.
 
 ---
 

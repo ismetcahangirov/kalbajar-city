@@ -8,16 +8,30 @@ import { cx } from "@/lib/cx";
 
 /**
  * `LeadForm` brings its own Redux store, which would weigh more than the rest
- * of the apartment page's own script (CLAUDE.md §5, JS per route). So its
- * script loads only when the form's place comes near the screen (scrolling,
- * or focus moving past it, brings it there). The place keeps the form's
- * height meanwhile, so nothing moves when it appears.
+ * of a page's own script (CLAUDE.md §5, JS per route). So its script loads
+ * only when the form's place comes near the screen (scrolling, or focus
+ * moving past it, brings it there). The place keeps the form's height
+ * meanwhile, so nothing moves when it appears.
  */
 const LeadForm = dynamic(() => import("@/components/leads/lead-form").then((m) => m.LeadForm), {
   ssr: false,
 });
 
-export function DeferredLeadForm({ className, ...props }: LeadFormProps) {
+/**
+ * The height each placement keeps, measured where the form sits (see the
+ * utilities in src/styles). Literal class names, so Tailwind finds them.
+ */
+const reserves = {
+  apartment: "min-h-lead-form",
+  home: "min-h-lead-form-home",
+} as const;
+
+export type DeferredLeadFormProps = LeadFormProps & {
+  /** Where the form sits: its width there decides the height to keep. */
+  reserve: keyof typeof reserves;
+};
+
+export function DeferredLeadForm({ className, reserve, ...props }: DeferredLeadFormProps) {
   const place = useRef<HTMLDivElement>(null);
   const [near, setNear] = useState(false);
 
@@ -37,7 +51,7 @@ export function DeferredLeadForm({ className, ...props }: LeadFormProps) {
   }, []);
 
   return (
-    <div ref={place} className={cx("min-h-lead-form", className)}>
+    <div ref={place} className={cx(reserves[reserve], className)}>
       {near && <LeadForm {...props} />}
     </div>
   );
