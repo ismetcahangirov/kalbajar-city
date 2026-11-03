@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
+import { AnalyticsScripts } from "@/components/analytics/analytics-scripts";
 import { SiteTracking } from "@/components/analytics/site-tracking";
 import { LocaleSuggestion } from "@/components/i18n/locale-suggestion";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
@@ -58,6 +60,10 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           <LocaleSuggestion />
           <SmoothScroll />
           <SiteTracking />
+          {/* Reads the settings per request; not page content, so it may arrive last. */}
+          <Suspense fallback={null}>
+            <AnalyticsScripts />
+          </Suspense>
         </NextIntlClientProvider>
       </body>
     </html>

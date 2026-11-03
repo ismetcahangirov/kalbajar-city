@@ -13,7 +13,11 @@ const isHttps = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
  * one is not sent there: two policies would both apply, and the stricter
  * `connect-src` would block uploads.
  */
-const contentSecurityPolicy = buildContentSecurityPolicy({ dev: isDev, https: isHttps });
+const contentSecurityPolicy = buildContentSecurityPolicy({
+  dev: isDev,
+  https: isHttps,
+  analytics: true,
+});
 
 const securityHeaders = [
   // Two years. Preloading is the domain owner's call, so it is not requested.

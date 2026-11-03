@@ -1,17 +1,17 @@
 import "server-only";
 
-import { eq, inArray } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { contacts as fallbackContacts } from "@/config/contacts";
 import { privacy } from "@/config/privacy";
 import { getDb } from "@/db";
 import type { Executor } from "@/db/client";
-import { homeSections, media, settings } from "@/db/schema";
+import { homeSections, layoutTypes, media, settings } from "@/db/schema";
 import { localize, type Localized, type Translatable } from "@/i18n/content";
 import type { Locale } from "@/i18n/routing";
 import { publicTags } from "@/lib/cache/tags";
-import type { ComplexFacts } from "@/lib/facts";
+import { layoutFacts, type ComplexFacts, type LayoutFacts } from "@/lib/facts";
 import { homeSectionContentSchemas, type HomeSectionContentByKey } from "@/shared/home-sections";
 import { settingsSchemas, type SettingsKey, type SettingsValue } from "@/shared/settings";
 
@@ -43,6 +43,10 @@ export type AboutPage = {
   } | null;
   amenities: Array<{ icon: Amenity; title: Localized; body: Localized | null }>;
   facts: ComplexFacts | null;
+  /** The layout types' room counts and area range; null while none is listed. */
+  layouts: LayoutFacts | null;
+  /** The address in the page's locale, from the contacts settings; null while unset. */
+  address: string | null;
   developer: SettingsValue<"developer">;
 };
 
@@ -110,17 +114,25 @@ export async function getDeveloper(): Promise<Developer> {
   return { ...developer, logo: logo?.src ?? null };
 }
 
-/** The about page: the home about copy, the amenities, the facts and the developer. */
+/**
+ * The about page: the home about copy, the amenities, the facts and the
+ * developer. The facts also feed `llms.txt`, so both say the same thing.
+ */
 export async function getAboutPage(locale: Locale): Promise<AboutPage> {
   "use cache";
-  cacheTag(publicTags.settings, publicTags.content, publicTags.media);
+  cacheTag(publicTags.settings, publicTags.content, publicTags.media, publicTags.inventory);
   cacheLife("days");
 
   const db = getDb();
-  const [complex, developer, about] = await Promise.all([
+  const [complex, developer, contacts, about, layouts] = await Promise.all([
     readSetting(db, "complex"),
     readSetting(db, "developer"),
+    readSetting(db, "contacts"),
     readSection(db, "about"),
+    db
+      .select({ rooms: layoutTypes.rooms, areaTotal: layoutTypes.areaTotal })
+      .from(layoutTypes)
+      .orderBy(asc(layoutTypes.rooms)),
   ]);
   const text = (field: Translatable) => localize(field, locale);
   const maybe = (field: Translatable | null | undefined) => (field ? text(field) : null);
@@ -142,6 +154,8 @@ export async function getAboutPage(locale: Locale): Promise<AboutPage> {
       body: maybe(item.body),
     })),
     facts: complex ? (facts as ComplexFacts) : null,
+    layouts: layoutFacts(layouts),
+    address: contacts?.address ? text(contacts.address).value : null,
     developer: developer ?? fallbackDeveloper,
   };
 }
@@ -183,6 +197,31 @@ export async function getLeadRetentionMonths(): Promise<number> {
 
   const leads = await readSetting(getDb(), "leads");
   return leads?.retentionMonths ?? privacy.retentionMonths;
+}
+
+export type AnalyticsIds = { googleAnalyticsId: string | null; metaPixelId: string | null };
+
+/** A GA4 measurement ID (`G-XXXXXXX`) and a Meta Pixel ID (digits only). */
+const idFormats = {
+  googleAnalyticsId: /^G-[A-Z0-9]{4,20}$/,
+  metaPixelId: /^\d{5,20}$/,
+} as const;
+
+/**
+ * The analytics IDs the console saved (`settings.analytics`, #29). An ID that
+ * is not in its service's format is ignored rather than put into a script.
+ */
+export async function getAnalyticsIds(): Promise<AnalyticsIds> {
+  "use cache";
+  cacheTag(publicTags.settings);
+  cacheLife("days");
+
+  const analytics = await readSetting(getDb(), "analytics");
+  const valid = (key: keyof AnalyticsIds) => {
+    const value = analytics?.[key]?.trim().toUpperCase();
+    return value && idFormats[key].test(value) ? value : null;
+  };
+  return { googleAnalyticsId: valid("googleAnalyticsId"), metaPixelId: valid("metaPixelId") };
 }
 
 /** A settings value, or null when the row is missing or no longer matches its schema. */

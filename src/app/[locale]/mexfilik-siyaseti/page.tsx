@@ -10,7 +10,12 @@ import { privacy } from "@/config/privacy";
 import { formatPhone } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
-import { getAboutPage, getLeadRetentionMonths, getSiteContacts } from "@/lib/public/site";
+import {
+  getAboutPage,
+  getAnalyticsIds,
+  getLeadRetentionMonths,
+  getSiteContacts,
+} from "@/lib/public/site";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Names the developer and the contacts from the console's settings, so it
@@ -38,14 +43,21 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PrivacyPage() {
   await connection();
   const locale = (await getLocale()) as Locale;
-  const [contacts, about, retentionMonths] = await Promise.all([
+  const [contacts, about, retentionMonths, analytics] = await Promise.all([
     getSiteContacts(locale),
     getAboutPage(locale),
     getLeadRetentionMonths(),
+    getAnalyticsIds(),
   ]);
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Privacy");
   const format = await getFormatter();
+  // The services the layout loads (`AnalyticsScripts`), named as the notice promises.
+  const services = [
+    analytics.googleAnalyticsId && "Google Analytics 4 (Google)",
+    analytics.metaPixelId && "Meta Pixel (Meta Platforms)",
+  ].filter((service): service is string => !!service);
+  const servicesText = format.list(services, { type: "conjunction" });
   const updated = new Date(`${privacy.updated}T00:00:00Z`);
   const phone = contacts.phones[0];
 
@@ -91,10 +103,14 @@ export default async function PrivacyPage() {
             <Text>{t("retention.body", { months: retentionMonths })}</Text>
           </Block>
           <Block title={t("analytics.title")}>
-            <Text>{t("analytics.body")}</Text>
+            <Text>
+              {services.length
+                ? t("analytics.bodyActive", { services: servicesText })
+                : t("analytics.body")}
+            </Text>
           </Block>
           <Block title={t("cookies.title")}>
-            <Text>{t("cookies.body")}</Text>
+            <Text>{services.length ? t("cookies.bodyActive") : t("cookies.body")}</Text>
             <List items={[t("cookies.items.locale"), t("cookies.items.attribution")]} />
             <Text>{t("cookies.console")}</Text>
           </Block>

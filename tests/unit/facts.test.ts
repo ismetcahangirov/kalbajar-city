@@ -6,7 +6,7 @@ import az from "@/i18n/messages/az.json";
 import en from "@/i18n/messages/en.json";
 import ru from "@/i18n/messages/ru.json";
 import type { Locale } from "@/i18n/routing";
-import { factSentences, type ComplexFacts } from "@/lib/facts";
+import { factSentences, layoutFacts, type ComplexFacts, type ExtraFacts } from "@/lib/facts";
 
 const facts: ComplexFacts = seed.settings.complex;
 const catalogues = { az, en, ru };
@@ -15,6 +15,19 @@ const catalogues = { az, en, ru };
 function render(locale: Locale, input: ComplexFacts = facts, developer = "InCity Projects") {
   const t = createTranslator({ locale, messages: catalogues[locale], namespace: "About.facts" });
   return factSentences(input, developer, locale).map((sentence) =>
+    t(sentence.key, sentence.values as never),
+  );
+}
+
+/** With the facts from outside `settings.complex`: layouts and address. */
+const allExtra: ExtraFacts = {
+  layouts: { rooms: [1, 2, 3], areaMin: 45, areaMax: 120 },
+  address: "Kalbajar",
+};
+
+function renderAll(locale: Locale, extra: ExtraFacts = allExtra) {
+  const t = createTranslator({ locale, messages: catalogues[locale], namespace: "About.facts" });
+  return factSentences(facts, "InCity Projects", locale, extra).map((sentence) =>
     t(sentence.key, sentence.values as never),
   );
 }
@@ -62,9 +75,41 @@ describe("the facts block", () => {
 
   it("gives every sentence the arguments its message uses, in every locale", () => {
     for (const locale of ["az", "en", "ru"] as const) {
-      for (const sentence of render(locale)) {
+      for (const sentence of renderAll(locale)) {
         expect(sentence, locale).not.toMatch(/[{}]|About\.facts/);
       }
     }
+  });
+
+  it("states the layouts' room counts and area range, from the layout types", () => {
+    const layouts = layoutFacts([
+      { rooms: 3, areaTotal: "98.40" },
+      { rooms: 1, areaTotal: "45.10" },
+      { rooms: 2, areaTotal: "67.00" },
+      { rooms: 2, areaTotal: "72.50" },
+    ]);
+    expect(layouts).toEqual({ rooms: [1, 2, 3], areaMin: 45.1, areaMax: 98.4 });
+    const plain = (s: string) => s.replaceAll("\u00a0", " ");
+    expect(plain(renderAll("en", { layouts })[2]!)).toBe(
+      "Kalbajar City has 1-, 2-, and 3-room apartments from 45.1 m² to 98.4 m².",
+    );
+    expect(plain(renderAll("az", { layouts })[2]!)).toBe(
+      "Kalbajar City-də 1, 2 və 3 otaqlı mənzillər var; sahələri 45,1 m² ilə 98,4 m² arasındadır.",
+    );
+    expect(plain(renderAll("ru", { layouts })[2]!)).toBe(
+      "В Kalbajar City есть 1-, 2- и 3-комнатные квартиры площадью от 45,1 м² до 98,4 м².",
+    );
+    const single = layoutFacts([{ rooms: 2, areaTotal: "67.00" }]);
+    expect(plain(renderAll("en", { layouts: single })[2]!)).toBe(
+      "Kalbajar City has 2-room apartments of 67 m².",
+    );
+    expect(layoutFacts([])).toBeNull();
+  });
+
+  it("states the address once it is set, and not before", () => {
+    expect(renderAll("en", { address: null }).some((s) => s.includes("address"))).toBe(false);
+    expect(renderAll("en", { address: "Istisu street 1, Kalbajar" }).at(-1)).toBe(
+      "The address of Kalbajar City is Istisu street 1, Kalbajar.",
+    );
   });
 });
