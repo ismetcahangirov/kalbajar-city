@@ -26,10 +26,10 @@ export type LlmsLocale = keyof typeof llmsFiles;
 
 /**
  * The pages a reader is pointed at, each with its catalogue description.
- * The complex page is left out while it is a placeholder (#19).
  */
 const pages = [
   { href: "/menziller", nav: "apartments", namespace: "Catalogue" },
+  { href: "/kompleks", nav: "complex", namespace: "Complex" },
   { href: "/haqqimizda", nav: "about", namespace: "About" },
   { href: "/yerlesme", nav: "location", namespace: "Location" },
   { href: "/tikinti", nav: "construction", namespace: "Construction" },
