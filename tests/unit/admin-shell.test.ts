@@ -23,7 +23,12 @@ describe("the role-aware menu", () => {
   });
 
   it("gives editors the dashboard and the content modules only", () => {
-    expect(hrefs("editor")).toEqual(["/admin", "/admin/xeberler", "/admin/media"]);
+    expect(hrefs("editor")).toEqual([
+      "/admin",
+      "/admin/xeberler",
+      "/admin/media",
+      "/admin/yonlendirmeler",
+    ]);
   });
 
   it("never lists a module the role may not open, and leaves out empty groups", () => {

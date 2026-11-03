@@ -14,6 +14,7 @@ export const tagTypes = [
   "Lead",
   "Media",
   "News",
+  "Redirect",
   "Settings",
 ] as const;
 
