@@ -162,9 +162,14 @@ describe("buildPageMetadata", () => {
     ]);
   });
 
-  it("adds geo meta only with coordinates", () => {
-    expect(geoMeta(null)).toBeUndefined();
-    expect(geoMeta({ lat: 40.1, lng: 46.04 })).toEqual({
+  it("always names the region and place, and adds the position only with coordinates", () => {
+    expect(geoMeta(null, "Kalbajar, Azerbaijan")).toEqual({
+      "geo.region": "AZ-KAL",
+      "geo.placename": "Kalbajar, Azerbaijan",
+    });
+    expect(geoMeta({ lat: 40.1, lng: 46.04 }, "Kalbajar, Azerbaijan")).toEqual({
+      "geo.region": "AZ-KAL",
+      "geo.placename": "Kalbajar, Azerbaijan",
       "geo.position": "40.1;46.04",
       ICBM: "40.1, 46.04",
     });

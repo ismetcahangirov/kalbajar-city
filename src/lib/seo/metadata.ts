@@ -83,16 +83,27 @@ export function languageAlternates(href: PageHref, origin: string): Record<strin
 }
 
 /**
- * `geo.position` and `ICBM` for local search (spec §6), only once the owner
- * has confirmed the coordinates (#7).
+ * The complex's region as ISO 3166-2: Kalbajar District, Azerbaijan. A fact
+ * about where the complex stands, not an owner decision.
+ */
+export const geoRegion = "AZ-KAL";
+
+/**
+ * Local-search meta (spec §6, #29): `geo.region` and `geo.placename` on every
+ * page, and `geo.position` and `ICBM` only once the owner has confirmed the
+ * coordinates (#7).
  */
 export function geoMeta(
   coordinates: { lat: number; lng: number } | null,
-): Record<string, string> | undefined {
-  if (!coordinates) return undefined;
+  placename: string,
+): Record<string, string> {
   return {
-    "geo.position": `${coordinates.lat};${coordinates.lng}`,
-    ICBM: `${coordinates.lat}, ${coordinates.lng}`,
+    "geo.region": geoRegion,
+    "geo.placename": placename,
+    ...(coordinates && {
+      "geo.position": `${coordinates.lat};${coordinates.lng}`,
+      ICBM: `${coordinates.lat}, ${coordinates.lng}`,
+    }),
   };
 }
 

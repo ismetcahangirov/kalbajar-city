@@ -381,9 +381,11 @@
     "facts": {
       "developer": "Kalbajar City is a residential complex in Kalbajar, Azerbaijan, developed by {developer}.",
       "homes": "Kalbajar City has {apartmentsText} {apartments, plural, one {apartment} other {apartments}} in {buildingsText} {buildings, plural, one {residential building} other {residential buildings}} with {blocksText} {blocks, plural, one {block} other {blocks}}.",
+      "layouts": "Kalbajar City has {rooms}-room apartments {range, select, single {of {min}} other {from {min} to {max}}}.",
       "area": "The total area of Kalbajar City is {total}, including {residential} of residential space and {nonResidential} of non-residential space.",
       "land": "Kalbajar City stands on {land} of land.",
-      "parking": "Kalbajar City has an underground car park with {parkingText} {parking, plural, one {space} other {spaces}}."
+      "parking": "Kalbajar City has an underground car park with {parkingText} {parking, plural, one {space} other {spaces}}.",
+      "address": "The address of Kalbajar City is {address}."
     },
     "amenities": "What the complex offers",
     "developer": {
@@ -432,11 +434,13 @@
     },
     "analytics": {
       "title": "Analytics",
-      "body": "No analytics or advertising script is installed on this site at present, so nothing about your visit is sent to an analytics service. The site is ready to report a few events, such as a sent form or a tap on the call or WhatsApp button, to a tag manager, but does so only once one is installed. If we install one, we will update this notice first and name the service here."
+      "body": "No analytics or advertising script is installed on this site at present, so nothing about your visit is sent to an analytics service. The site is ready to report a few events, such as a sent form or a tap on the call or WhatsApp button, to a tag manager, but does so only once one is installed. If we install one, we will update this notice first and name the service here.",
+      "bodyActive": "This site uses {services} to count visits and to measure how well our advertising works. These services receive the pages you open, your device and browser type, an approximate location derived from your IP address, and events such as a sent form or a tap on the call or WhatsApp button. They do not receive what you type into a form. Their scripts load only after the page has finished loading, and they set their own cookies."
     },
     "cookies": {
       "title": "Cookies and browser storage",
       "body": "The public site sets no cookies. It keeps two small notes in your browser:",
+      "bodyActive": "The site itself sets no cookies; the analytics services named above set their own. The site also keeps two small notes in your browser:",
       "items": {
         "locale": "that you closed the suggestion to read the site in your language (local storage), so it does not come back;",
         "attribution": "the campaign tags of the link you arrived with, for this visit only (session storage), so a form you send from another page still carries them."
@@ -470,5 +474,20 @@
   "OgImage": {
     "rooms": "{rooms, plural, one {# room} other {# rooms}}",
     "floor": "Floor {floor}"
+  },
+  "Llms": {
+    "home": "Home page",
+    "facts": "Key facts",
+    "contacts": "Contacts",
+    "pages": "Pages",
+    "faq": "Frequently asked questions",
+    "languages": "Other languages",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "email": "E-mail",
+    "address": "Address",
+    "hours": "Office hours",
+    "developer": "Developer",
+    "developerWebsite": "Developer's website"
   }
 }

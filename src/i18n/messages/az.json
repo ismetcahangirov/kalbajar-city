@@ -381,9 +381,11 @@
     "facts": {
       "developer": "Kalbajar City Azərbaycanın Kəlbəcər şəhərində {developer} şirkətinin inşa etdiyi yaşayış kompleksidir.",
       "homes": "Kalbajar City-də {buildingsText} {buildings, plural, one {yaşayış binasında} other {yaşayış binasında}}, {blocksText} {blocks, plural, one {blokda} other {blokda}} {apartmentsText} {apartments, plural, one {mənzil} other {mənzil}} var.",
+      "layouts": "Kalbajar City-də {rooms} otaqlı mənzillər var; {range, select, single {sahəsi {min}} other {sahələri {min} ilə {max} arasındadır}}.",
       "area": "Kalbajar City-nin ümumi sahəsi {total} təşkil edir; bura {residential} yaşayış və {nonResidential} qeyri-yaşayış sahəsi daxildir.",
       "land": "Kalbajar City {land} torpaq sahəsində yerləşir.",
-      "parking": "Kalbajar City-də {parkingText} {parking, plural, one {yerlik} other {yerlik}} yeraltı qaraj var."
+      "parking": "Kalbajar City-də {parkingText} {parking, plural, one {yerlik} other {yerlik}} yeraltı qaraj var.",
+      "address": "Kalbajar City-nin ünvanı: {address}."
     },
     "amenities": "Kompleksdə nələr var",
     "developer": {
@@ -432,11 +434,13 @@
     },
     "analytics": {
       "title": "Analitika",
-      "body": "Hazırda saytda heç bir analitika və ya reklam skripti quraşdırılmayıb, buna görə ziyarətiniz haqqında heç nə analitika xidmətinə göndərilmir. Sayt bir neçə hadisəni, məsələn, göndərilən formanı və ya zəng və WhatsApp düyməsinə toxunuşu teq menecerinə ötürməyə hazırdır, lakin bunu yalnız o quraşdırıldıqdan sonra edir. Belə bir xidmət quraşdırsaq, əvvəlcə bu bildirişi yeniləyib həmin xidmətin adını burada göstərəcəyik."
+      "body": "Hazırda saytda heç bir analitika və ya reklam skripti quraşdırılmayıb, buna görə ziyarətiniz haqqında heç nə analitika xidmətinə göndərilmir. Sayt bir neçə hadisəni, məsələn, göndərilən formanı və ya zəng və WhatsApp düyməsinə toxunuşu teq menecerinə ötürməyə hazırdır, lakin bunu yalnız o quraşdırıldıqdan sonra edir. Belə bir xidmət quraşdırsaq, əvvəlcə bu bildirişi yeniləyib həmin xidmətin adını burada göstərəcəyik.",
+      "bodyActive": "Bu sayt ziyarətləri saymaq və reklamımızın nə dərəcədə təsirli olduğunu ölçmək üçün {services} istifadə edir. Bu xidmətlər açdığınız səhifələri, cihazınızın və brauzerinizin növünü, IP ünvanınızdan müəyyən edilən təxmini yerinizi və göndərilən forma, zəng və ya WhatsApp düyməsinə toxunuş kimi hadisələri alır. Formaya yazdıqlarınızı almırlar. Onların skriptləri yalnız səhifə tam yükləndikdən sonra yüklənir və öz kukilərini yaradır."
     },
     "cookies": {
       "title": "Cookie-lər və brauzer yaddaşı",
       "body": "İctimai sayt heç bir cookie yaratmır. Brauzerinizdə iki kiçik qeyd saxlayır:",
+      "bodyActive": "Saytın özü kuki yaratmır; yuxarıda adı çəkilən analitika xidmətləri öz kukilərini yaradır. Sayt brauzerinizdə həmçinin iki kiçik qeyd saxlayır:",
       "items": {
         "locale": "saytı öz dilinizdə oxumaq təklifini bağladığınızı (local storage), təklif yenidən çıxmasın deyə;",
         "attribution": "gəldiyiniz linkin kampaniya etiketlərini, yalnız bu ziyarət üçün (session storage), başqa səhifədən göndərdiyiniz forma da onları daşısın deyə."
@@ -470,5 +474,20 @@
   "OgImage": {
     "rooms": "{rooms, plural, one {# otaq} other {# otaq}}",
     "floor": "Mərtəbə {floor}"
+  },
+  "Llms": {
+    "home": "Ana səhifə",
+    "facts": "Əsas faktlar",
+    "contacts": "Əlaqə",
+    "pages": "Səhifələr",
+    "faq": "Tez-tez verilən suallar",
+    "languages": "Digər dillər",
+    "phone": "Telefon",
+    "whatsapp": "WhatsApp",
+    "email": "E-poçt",
+    "address": "Ünvan",
+    "hours": "İş saatları",
+    "developer": "Tikinti şirkəti",
+    "developerWebsite": "Tikinti şirkətinin saytı"
   }
 }

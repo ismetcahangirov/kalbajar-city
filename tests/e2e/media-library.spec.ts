@@ -6,6 +6,7 @@ import sharp from "sharp";
 
 import { connect, databaseUrl } from "@/db/client";
 import { news } from "@/db/schema";
+import { analyticsOrigins } from "@/lib/security/csp";
 import type { AdminMedia, AdminMediaDetail, UploadTicket } from "@/shared/media";
 import { paragraphs } from "@/shared/rich-text";
 
@@ -312,10 +313,11 @@ test("only the console's pages may connect to the object store", async ({ reques
       `connect-src 'self' ${storage}`,
     );
   }
+  // Public pages may send analytics hits (#29), never reach the object store.
   for (const path of ["/", "/en/menziller", "/api/health"]) {
     const response = await request.get(path);
     expect(connectSrc(response.headers()["content-security-policy"]), path).toBe(
-      "connect-src 'self'",
+      ["connect-src 'self'", ...analyticsOrigins.connect].join(" "),
     );
   }
 });

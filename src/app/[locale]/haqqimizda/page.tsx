@@ -46,7 +46,12 @@ export default async function AboutPage() {
   const facts = await getTranslations("About.facts");
   // Catalogue copy in the page's own language, for components that take console text.
   const own = (value: string): Localized => ({ value, locale, fallback: false });
-  const sentences = page.facts ? factSentences(page.facts, page.developer.name, locale) : [];
+  const sentences = page.facts
+    ? factSentences(page.facts, page.developer.name, locale, {
+        layouts: page.layouts,
+        address: page.address,
+      })
+    : [];
   const developerLinks = [
     { key: "website", href: page.developer.website },
     { key: "instagram", href: page.developer.instagram },
