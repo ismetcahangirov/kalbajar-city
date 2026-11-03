@@ -19,9 +19,7 @@ import { complexNode, StructuredData } from "@/components/seo/structured-data";
 import type { Tone } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getHomePage, type HomeSection } from "@/lib/public/home";
-import { getSiteContacts } from "@/lib/public/site";
 import { faqNode } from "@/lib/seo/json-ld";
-import { geoMeta } from "@/lib/seo/metadata";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Reads the database per request and sends the page complete, not streamed
@@ -30,18 +28,15 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
-  // The coordinates are database data: never read while the build prerenders.
-  await connection();
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Metadata");
-  const { coordinates } = await getSiteContacts(locale);
+  // The geo meta, with the coordinates once confirmed, comes from pageMetadata.
   return pageMetadata({
     locale,
     href: "/",
     title: t("title"),
     absoluteTitle: true,
     description: t("description"),
-    other: geoMeta(coordinates),
   });
 }
 

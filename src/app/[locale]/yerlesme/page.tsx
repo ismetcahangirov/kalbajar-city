@@ -14,7 +14,6 @@ import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getLocationPage, getSiteContacts } from "@/lib/public/site";
-import { geoMeta } from "@/lib/seo/metadata";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 // Reads the console's location copy and settings per request and sends the
@@ -22,18 +21,15 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 export const instant = false;
 
 export async function generateMetadata(): Promise<Metadata> {
-  // The coordinates are database data: never read while the build prerenders.
-  await connection();
   const locale = (await getLocale()) as Locale;
   const nav = await getTranslations("Navigation");
   const t = await getTranslations("Location");
-  const { coordinates } = await getSiteContacts(locale);
+  // The geo meta, with the coordinates once confirmed, comes from pageMetadata.
   return pageMetadata({
     locale,
     href: "/yerlesme",
     title: nav("location"),
     description: t("description"),
-    other: geoMeta(coordinates),
   });
 }
 
