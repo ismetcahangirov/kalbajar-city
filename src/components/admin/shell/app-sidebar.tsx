@@ -9,6 +9,7 @@ import {
   Newspaper,
   ScrollText,
   Settings,
+  Signpost,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -42,6 +43,7 @@ const icons: Record<AdminModule, LucideIcon> = {
   leads: Inbox,
   news: Newspaper,
   media: Images,
+  redirects: Signpost,
   settings: Settings,
   users: Users,
   audit: ScrollText,

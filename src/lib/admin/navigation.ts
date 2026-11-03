@@ -32,6 +32,11 @@ export const adminModules = {
     label: "nav.media",
     permission: { media: ["read"] },
   },
+  redirects: {
+    href: "/admin/yonlendirmeler",
+    label: "nav.redirects",
+    permission: { seo: ["read"] },
+  },
   settings: {
     href: "/admin/ayarlar",
     label: "nav.settings",
