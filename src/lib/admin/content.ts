@@ -3,7 +3,7 @@ import "server-only";
 import { and, eq, inArray, like, ne, type SQL } from "drizzle-orm";
 
 import type { Executor } from "@/db/client";
-import { constructionUpdates, media, news } from "@/db/schema";
+import { constructionUpdates, galleryCategories, media, news } from "@/db/schema";
 import type { Translatable } from "@/i18n/content";
 import { invalidField } from "@/lib/api/errors";
 import { slugify, uniqueSlug } from "@/lib/slug";
@@ -14,7 +14,7 @@ import type { MediaKind } from "@/shared/media";
  * referenced files, and the publication date rule.
  */
 
-type SlugTable = typeof news | typeof constructionUpdates;
+type SlugTable = typeof news | typeof constructionUpdates | typeof galleryCategories;
 
 /**
  * The slug to store: the requested one if no other row has it, else one made

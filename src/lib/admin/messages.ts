@@ -840,6 +840,73 @@ const messages = {
   "list.moved": "{item}: indi {position}-ci yerdədir ({total} yerdən).",
   "list.removed": "{item} silindi.",
 
+  "sortable.role": "sıralanan element",
+  "sortable.handle": "Sürüşdürüb sırasını dəyiş: {item}",
+  "sortable.instructions":
+    "Götürmək üçün boşluq və ya Enter düyməsini basın. Ox düymələri ilə yerini dəyişin, yerləşdirmək üçün yenidən boşluq və ya Enter, ləğv etmək üçün Escape basın.",
+  "sortable.picked": "{item} götürüldü: {position}-ci yerdədir ({total} yerdən).",
+  "sortable.outside": "{item} siyahıdan kənardadır.",
+  "sortable.dropped": "{item} {position}-ci yerə qoyuldu ({total} yerdən).",
+  "sortable.cancelled": "Ləğv edildi: {item} əvvəlki yerində qaldı.",
+
+  "content.nav": "Məzmunun bölmələri",
+  "content.nav.news": "Xəbərlər",
+  "content.nav.gallery": "Qalereya",
+  "content.nav.faq": "Suallar",
+  "content.published": "Saytda göstər",
+  "content.publishedHint": "Söndürülsə, bu element idarə panelində qalır, saytda görünmür.",
+  "content.publishDenied": "Saytda göstərib-gizlətmək üçün dərc etmə icazəsi lazımdır.",
+  "content.hidden": "Saytda gizlidir",
+  "content.missing": "Tərcümə yoxdur: {locales}",
+
+  "faq.title": "Tez-tez verilən suallar",
+  "faq.lead":
+    "Ana səhifədəki suallar və cavablar. Sıra saytda və axtarış sistemləri üçün strukturlaşdırılmış məlumatda (FAQPage) eynidir.",
+  "faq.list": "Suallar",
+  "faq.orderHint":
+    "Sırasını dəyişmək üçün tutacağı sürüşdürün və ya oxlardan istifadə edin. Dəyişiklik dərhal saxlanılır.",
+  "faq.new": "Yeni sual",
+  "faq.edit": "Sualı redaktə et",
+  "faq.question": "Sual",
+  "faq.answer": "Cavab",
+  "faq.answerHint":
+    "Cavab sadə mətndir: o, axtarış sistemlərinə olduğu kimi göstərilir. Formatlama və link əlavə etməyin.",
+  "faq.empty": "Hələ sual yoxdur.",
+  "faq.deleteTitle": "Bu sual silinsin?",
+  "faq.delete": "Sualı sil",
+
+  "gallery.title": "Qalereya",
+  "gallery.lead":
+    "Saytdakı qalereyanın kateqoriyaları və şəkilləri. Hər iki siyahının sırası saytdakı sıradır.",
+  "gallery.categories": "Kateqoriyalar",
+  "gallery.newCategory": "Yeni kateqoriya",
+  "gallery.editCategory": "Kateqoriyanı redaktə et",
+  "gallery.noCategories": "Hələ kateqoriya yoxdur.",
+  "gallery.categoryFirst": "Şəkil əlavə etmək üçün əvvəlcə kateqoriya yaradın.",
+  "gallery.slug": "Linkdəki ad",
+  "gallery.slugHint":
+    "Saytda ?kateqoriya= ilə göstərilir. Boş qalsa, Azərbaycanca addan yaranır. Kiçik latın hərfləri, rəqəmlər və defis.",
+  "gallery.itemCount": "Şəkil sayı: {count}",
+  "gallery.deleteCategoryItems":
+    "Kateqoriyadakı {count} şəkil qalereyadan çıxarılacaq. Fayllar media kitabxanasında qalır. Bu əməliyyat geri qaytarılmır.",
+  "gallery.items": "Şəkillər",
+  "gallery.itemsOf": "Şəkillər: {name}",
+  "gallery.category": "Kateqoriya",
+  "gallery.addImage": "Şəkil əlavə et",
+  "gallery.added": "Şəkil qalereyaya əlavə edildi.",
+  "gallery.imagesOnly":
+    "Qalereyaya hələlik yalnız şəkillər əlavə olunur. Videoların burada olub-olmayacağı hələ qərarlaşdırılmayıb.",
+  "gallery.noItems": "Bu kateqoriyada hələ şəkil yoxdur.",
+  "gallery.missingAlt":
+    "Bu şəklin Azərbaycanca alternativ mətni yoxdur, ona görə saytda göstərilmir. Media kitabxanasında əlavə edin.",
+  "gallery.editItem": "Şəkli redaktə et",
+  "gallery.image": "Şəkil",
+  "gallery.caption": "İmza",
+  "gallery.captionHint": "Boş qalsa, saytda faylın media kitabxanasındakı imzası göstərilir.",
+  "gallery.moveHint": "Başqa kateqoriyaya keçirilən şəkil onun sonuna əlavə olunur.",
+  "gallery.deleteItemTitle": "Şəkil qalereyadan çıxarılsın?",
+  "gallery.deleteItemLead": "Fayl media kitabxanasında qalır.",
+
   "amenity.security": "Mühafizə",
   "amenity.fire-safety": "Yanğın təhlükəsizliyi",
   "amenity.playground": "Uşaq meydançası",

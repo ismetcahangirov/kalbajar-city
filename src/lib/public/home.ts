@@ -4,6 +4,7 @@ import { asc, desc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { getDb } from "@/db";
+import type { Executor } from "@/db/client";
 import {
   constructionUpdateMedia,
   constructionUpdates,
@@ -87,6 +88,19 @@ const factUnits: Partial<Record<ComplexFactKey, Unit>> = {
 };
 
 /**
+ * The published FAQ in the console's order (`faqOrder`), ties included. The
+ * home page shows it, and its `FAQPage` structured data lists it word for
+ * word, in this order.
+ */
+export async function loadPublishedFaq(db: Executor) {
+  return db
+    .select()
+    .from(faq)
+    .where(eq(faq.status, "published"))
+    .orderBy(asc(faq.sortOrder), asc(faq.createdAt), asc(faq.id));
+}
+
+/**
  * Everything the home page shows, localised, in the console's order. A
  * section the console hides, or one with nothing to show yet (no scenes, no
  * published construction update), is left out.
@@ -105,7 +119,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
       .orderBy(asc(homeSections.sortOrder)),
     db.select().from(settings).where(eq(settings.key, "complex")),
     db.select().from(layoutTypes).orderBy(asc(layoutTypes.rooms), asc(layoutTypes.areaTotal)),
-    db.select().from(faq).where(eq(faq.status, "published")).orderBy(asc(faq.sortOrder)),
+    loadPublishedFaq(db),
     db
       .select()
       .from(constructionUpdates)
