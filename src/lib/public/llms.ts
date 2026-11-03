@@ -1,11 +1,9 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 
 import { getDb } from "@/db";
-import { faq } from "@/db/schema";
 import { localize } from "@/i18n/content";
 import { formatPhone } from "@/i18n/format";
 import { getPathname } from "@/i18n/navigation";
@@ -15,6 +13,7 @@ import { factSentences } from "@/lib/facts";
 import { llmsTxt, type LlmsDocument, type LlmsLink } from "@/lib/llms";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
+import { loadPublishedFaq } from "./home";
 import { getAboutPage, getSiteContacts } from "./site";
 
 /** The locales `llms.txt` is published in, and where (#29). */
@@ -39,17 +38,13 @@ const pages = [
   { href: "/mexfilik-siyaseti", nav: "privacy", namespace: "Privacy" },
 ] as const;
 
-/** Published FAQ entries in the console's order, in one locale. */
+/** Published FAQ entries in the console's order, as the home page lists them, in one locale. */
 async function getFaq(locale: Locale): Promise<Array<{ question: string; answer: string }>> {
   "use cache";
   cacheTag(publicTags.content);
   cacheLife("days");
 
-  const rows = await getDb()
-    .select({ question: faq.question, answer: faq.answer })
-    .from(faq)
-    .where(eq(faq.status, "published"))
-    .orderBy(asc(faq.sortOrder));
+  const rows = await loadPublishedFaq(getDb());
   return rows.map((row) => ({
     question: localize(row.question, locale).value,
     answer: localize(row.answer, locale).value,
