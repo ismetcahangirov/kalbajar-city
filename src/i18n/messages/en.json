@@ -100,6 +100,27 @@
     },
     "priceOnRequest": "Price on request"
   },
+  "Complex": {
+    "title": "The complex",
+    "description": "An interactive plan of Kalbajar City: choose a block, a floor and an apartment, and see each apartment's rooms, area and status.",
+    "lead": "Choose a block, then a floor, to see where each apartment is, how many rooms it has, its area and its status.",
+    "schematic": "Schematic view, not a picture of the buildings; renders and floor plans will be added.",
+    "blocksNav": "Blocks",
+    "floorsNav": "Floors",
+    "trail": "Selection",
+    "allBlocks": "All blocks",
+    "headingBlocks": "Choose a block",
+    "headingFloors": "{block}: choose a floor",
+    "headingApartments": "{block}, floor {floor}",
+    "figureBlocks": "Plan of the complex, blocks",
+    "figureFloors": "{block} plan, floors",
+    "figureApartments": "{block}, floor {floor} plan, apartments",
+    "available": "{count, plural, one {# apartment available} other {# apartments available}}",
+    "legend": "Status",
+    "listTitle": "List",
+    "listLead": "The same information as the plan, as a list.",
+    "empty": "There are no apartments to show yet."
+  },
   "ApartmentPage": {
     "metaTitle": "{name}: {rooms, plural, one {# room} other {# rooms}}, {area}",
     "description": "{name} at Kalbajar City: {rooms, plural, one {# room} other {# rooms}}, {area} in total, floor {floor}. Plan, room areas and status.",

@@ -1,0 +1,79 @@
+/*
+ * The complex selector on /kompleks (src/components/complex). Hotspots are
+ * SVG links; their state changes are instant (only transform, opacity and
+ * clip-path may animate, and nothing here needs to).
+ */
+
+@layer components {
+  .kompleks-plan {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1000 / 625;
+    font-family: var(--font-sans);
+  }
+
+  .kompleks-hotspot {
+    cursor: pointer;
+    /* The visible ring is the shape's own stroke (below): an outline on an
+       SVG element follows its bounding box, not the polygon. */
+    outline: none;
+  }
+
+  .kompleks-hotspot .kompleks-shape {
+    fill: var(--color-surface-raised);
+    stroke: var(--color-border-strong);
+    stroke-width: 2;
+  }
+
+  .kompleks-hotspot:hover .kompleks-shape {
+    fill: var(--color-surface-alt);
+  }
+
+  .kompleks-hotspot:focus-visible .kompleks-focus {
+    stroke: var(--color-focus);
+    stroke-width: 6;
+  }
+
+  .kompleks-focus {
+    fill: none;
+    stroke: none;
+    pointer-events: none;
+  }
+
+  /* Status: a word and a stroke style and a fill pattern, never colour alone. */
+  .kompleks-hotspot[data-status="available"] .kompleks-shape {
+    stroke: var(--color-status-available);
+    stroke-width: 4;
+  }
+
+  .kompleks-hotspot[data-status="reserved"] .kompleks-shape {
+    stroke: var(--color-status-reserved);
+    stroke-width: 3;
+    stroke-dasharray: 14 8;
+  }
+
+  .kompleks-hotspot[data-status="sold"] .kompleks-shape {
+    stroke: var(--color-status-sold);
+    stroke-width: 2;
+    stroke-dasharray: 3 6;
+  }
+
+  /* Hover and focus swap the summary for the details; touch shows both in
+     the list below the plan, and every link's name carries them too. */
+  .kompleks-detail {
+    opacity: 0;
+  }
+
+  .kompleks-hotspot:is(:hover, :focus-visible) .kompleks-summary {
+    opacity: 0;
+  }
+
+  .kompleks-hotspot:is(:hover, :focus-visible) .kompleks-detail {
+    opacity: 1;
+  }
+
+  .kompleks-hotspot text {
+    pointer-events: none;
+  }
+}
