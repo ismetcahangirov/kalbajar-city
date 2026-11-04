@@ -213,8 +213,12 @@ the component's `uppercase`, not the token's.
 | `--text-small-t`  | Garamond 13                  | Regular, tracking .02em     | 13/15 | 13/15   | —       | —       |
 | `--text-label`    | Halvar 500 10, caps .2em     | Medium, caps, tracking .2em | 10/16 | 11/18   | —       | 12/20   |
 | `--text-label-xs` | Halvar 500 8, caps .2em      | Medium, caps, tracking .2em | 10/12 | 10/12   | —       | —       |
+| `--text-logo`     | Header logo (an image there) | Light, caps, tracking .2em  | 15/15 | 20/20   | —       | —       |
+| `--text-logo-lg`  | Footer and curtain logo      | Light, caps, tracking .2em  | 22/22 | 37/37   | —       | —       |
 
-Sizes are px size / line height. "—" holds the previous value.
+Sizes are px size / line height. "—" holds the previous value. The logo is
+set as text in Alethia Next until the owner sends a vector logo; it replaces
+the old `--text-wordmark`.
 
 Deviations from the reference, all for legibility:
 
@@ -378,16 +382,38 @@ The #67 components (`ArrowBlock`, `FlatCard`, `RangeHairline`, `RoundButton`,
 through the `@/components/ui` barrel: the shell's client components import the
 barrel, and anything exported there reaches the JS every public route shares.
 
-Chrome (#64): header (fixed 50 px, 40 px mobile, 66 px from 2400 px; frosted
-after scrolling; never hides), menu (540 px cream panel over a 50 % ink
-backdrop, image cards with sepia on the others), preloader, page transition,
-footer and the 480 px next-page teaser, bottom tab bar, inquiry modal (right
-half, sand panel, 90 × 90 taupe close tab). Pages: spec §7.
+Chrome (#64, `src/components/shell/`): header (fixed 50 px, 40 px mobile,
+66 px from 2400 px; frosted after scrolling; never hides), menu (540 px cream
+panel over a 50 % ink backdrop, image cards with sepia on the others; a
+full-screen list on mobile), preloader, page transition, footer and the
+480 px next-page teaser, bottom tab bar, inquiry modal (right half, sand
+panel, 90 × 90 taupe close tab). Pages: spec §7. The contracts pages use:
 
-Current components (`Container`, `Section`, `Heading`, `Text`, `Button`,
-`Card`, `Badge`, `Stat`, the form fields, `Header`, `MobileMenu`, `Footer`,
-`Wordmark` …) stay on the semantic tokens and the legacy type steps until
-their page's PR replaces them.
+- **Theme under the header** (A10): a section off the default light ground
+  carries `data-theme` (`dark`, `darker`, `dark-alt`, `sand`, `light`; the
+  legacy `data-tone="night"` counts as dark) on an element inside `main`.
+  `observeThemeAt()` (`src/lib/shell/theme-observer.ts`) picks the last
+  themed element in document order under the header's middle line; nothing
+  is measured per frame. Elements are collected on each route change
+- **Next-page teaser:** a chapter page renders `<NextChapter current="/x" />`
+  last in its content; the order and images (`page.<slug>` slots) are
+  `chapters` in `src/components/shell/navigation.ts`. `/elaqe` has none
+- **Bottom tab bar:** `<ChapterTabs label="…" tabs={[{ id, label }]} />`,
+  each `id` a section's `id`; the active tab follows the scroll and the bar
+  fades out over the footer
+- **Inquiry modal:** any element with `data-dialog-open="inquiry"` opens it
+  (make it a link to `/elaqe`, so it works before hydration and in a new
+  tab), or `openShellDialog("inquiry")` from `src/lib/shell/dialogs.ts`.
+  The form loads only when the modal opens (or a trigger is hovered)
+- **Links:** `RollLink` (`as` link / `a` / `button`) and the
+  `underline-link` class; `BrandLink` is the text logo. A link with
+  `data-no-transition` skips the page curtain
+- **Fixed round buttons** sit at `bottom: var(--floating-bottom)` and lift by
+  `--locale-suggestion-space` while `[data-locale-suggestion]` shows
+
+The other current components (`Container`, `Section`, `Heading`, `Text`,
+`Button`, `Card`, `Badge`, `Stat`, the old form fields …) stay on the semantic
+tokens and the legacy type steps until their page's PR replaces them.
 
 ## Legacy tokens
 
@@ -399,7 +425,6 @@ components.
 | `--text-display-xl`, `--text-display`, `--text-heading`, `--text-stat`                     | Sizes of `--text-word`, `--text-title`, `--text-lead`, `--text-numeral`             |
 | `--text-body-lg`, `--text-small`, `--text-eyebrow`                                         | Sizes of `--text-lead`, `--text-small-t`, `--text-label`                            |
 | `--text-legacy-title`                                                                      | The old 18–22 px `title`, unchanged (the name `--text-title` is the new caps title) |
-| `--text-wordmark`                                                                          | Unchanged, until the vector logo (#64)                                              |
 | `--spacing-gutter`, `--spacing-block`, `--spacing-section`, `--container-*`                | Unchanged                                                                           |
 | `--shadow-raised`, `--shadow-frame`                                                        | Unchanged, in ink                                                                   |
 | The semantic `--color-*` tokens and `data-tone="night"`                                    | Remapped to the new palette (above)                                                 |

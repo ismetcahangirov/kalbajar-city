@@ -13,7 +13,7 @@ picking an issue.
 | #65   | Default images: `src/content/defaults/`, `defaultImage(slot, locale)`, 33 slots, originals in `assets/defaults/originals/` (PR #71)                                                    | Merged                                      |
 | #63   | Scroll-scene engine and primitives                                                                                                                                                     | Open, next                                  |
 | #67   | Catalogue and apartment page                                                                                                                                                           | Open, next (parallel with #63)              |
-| #64   | Header, menu, preloader, page transition, footer                                                                                                                                       | Open, after #63                             |
+| #64   | Header, menu, preloader, page transition, footer; shell contracts in `docs/ui-kit.md` → Chrome                                                                                         | PR open (`feat/redesign-shell`)             |
 | #66   | Home page as reference scenes                                                                                                                                                          | Open, after #63 and #64                     |
 | #68   | Inner pages                                                                                                                                                                            | Open, after #63 and #64 (parallel with #66) |
 
@@ -110,6 +110,19 @@ even where the reference ignores them.
   `data-layer` until the legacy one is deleted
 - Text over photos in scenes: pick a dark default (dominant colours are in
   `src/content/defaults/encoded.json`); overlays on photos are not allowed
+- (#64) With `cacheComponents`, Next keeps up to three visited routes in the
+  DOM, hidden (`display: none`). Query the visible `main h1`, not the first
+  one, and beware `:has()` on `html`: it matches the hidden pages too
+- (#64) Next's `Link` ignores a click whose default is prevented, and React
+  listens on the document: a listener that must win (the dialog controller,
+  the page transition) goes on `window` in the capture phase
+- (#64) `zod` is in the shared JS through the UTM helpers the tracking island
+  imports. Moving it out cut shared to 156 KB but pushed `/menziller` and
+  `/elaqe` over the 40 KB per-route cap, because each then carried its own
+  copy; left for a follow-up that splits the schemas
+- (#64) The E2E suite skips the preloader with the `kc-skip-preloader=1`
+  cookie (`playwright.config.ts`); `tests/e2e/shell.spec.ts` clears it to test
+  the preloader itself
 
 ---
 
