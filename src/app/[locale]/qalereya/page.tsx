@@ -14,6 +14,7 @@ import { cx } from "@/lib/cx";
 import { getGallery } from "@/lib/public/gallery";
 import { categoryParam } from "@/lib/public/query";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // The filter is in the query string and the data in the database: rendered
 // per request and sent complete (CLAUDE.md → Data and state).
@@ -76,52 +77,55 @@ export default async function GalleryPage({ searchParams }: PageProps<"/[locale]
   ];
 
   return (
-    <Section>
-      <Container className="flex flex-col gap-block">
-        <PageHead title={t("title")} lead={t("lead")} />
+    <>
+      <Section>
+        <Container className="flex flex-col gap-block">
+          <PageHead title={t("title")} lead={t("lead")} />
 
-        {items.length === 0 ? (
-          <EmptyState title={t("emptyTitle")} body={t("emptyBody")} />
-        ) : (
-          <>
-            {gallery.categories.length > 1 && (
-              // Filters never animate (motion-system.md).
-              <nav aria-label={t("filter")}>
-                <ul className="flex flex-wrap gap-2">
-                  {filters.map((filter) => (
-                    <li key={filter.key}>
-                      <Link
-                        href={filter.href}
-                        aria-current={filter.current ? "page" : undefined}
-                        className={cx(
-                          chip,
-                          filter.current
-                            ? "border-action bg-action text-action-text"
-                            : "border-border-strong hover:bg-surface-alt",
-                        )}
-                      >
-                        <span lang={filter.lang}>{filter.label}</span>
-                        <span className="text-small">{formatNumber(filter.count, locale)}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-            {/* Keyed by the filter, so the lightbox's state starts over with the new set. */}
-            <Lightbox
-              key={active ?? "all"}
-              layout="masonry"
-              items={items}
-              sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
-            />
-          </>
-        )}
-      </Container>
-      <StructuredData
-        locale={locale}
-        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/qalereya" }])]}
-      />
-    </Section>
+          {items.length === 0 ? (
+            <EmptyState title={t("emptyTitle")} body={t("emptyBody")} />
+          ) : (
+            <>
+              {gallery.categories.length > 1 && (
+                // Filters never animate (motion-system.md).
+                <nav aria-label={t("filter")}>
+                  <ul className="flex flex-wrap gap-2">
+                    {filters.map((filter) => (
+                      <li key={filter.key}>
+                        <Link
+                          href={filter.href}
+                          aria-current={filter.current ? "page" : undefined}
+                          className={cx(
+                            chip,
+                            filter.current
+                              ? "border-action bg-action text-action-text"
+                              : "border-border-strong hover:bg-surface-alt",
+                          )}
+                        >
+                          <span lang={filter.lang}>{filter.label}</span>
+                          <span className="text-small">{formatNumber(filter.count, locale)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              )}
+              {/* Keyed by the filter, so the lightbox's state starts over with the new set. */}
+              <Lightbox
+                key={active ?? "all"}
+                layout="masonry"
+                items={items}
+                sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
+              />
+            </>
+          )}
+        </Container>
+        <StructuredData
+          locale={locale}
+          nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/qalereya" }])]}
+        />
+      </Section>
+      <NextChapter current="/qalereya" />
+    </>
   );
 }

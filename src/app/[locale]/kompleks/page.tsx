@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { getComplexSelector } from "@/lib/public/complex";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import { hasSelectionParams, resolveSelection } from "@/shared/complex";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // The selection is read from searchParams, so the page renders per request
 // and is sent complete. The inventory loader is cached and tagged.
@@ -37,20 +38,23 @@ export default async function ComplexPage({ searchParams }: PageProps<"/[locale]
   const selection = resolveSelection(data, await searchParams);
 
   return (
-    <Container className="flex flex-col gap-block pt-block pb-section">
-      <header className="flex flex-col gap-4">
-        <Heading as="h1" size="display">
-          {t("title")}
-        </Heading>
-        <Text size="body-lg" tone="muted" className="max-w-(--container-prose)">
-          {t("lead")}
-        </Text>
-      </header>
-      <ComplexSelector data={data} selection={selection} locale={locale} />
-      <StructuredData
-        locale={locale}
-        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/kompleks" }])]}
-      />
-    </Container>
+    <>
+      <Container className="flex flex-col gap-block pt-block pb-section">
+        <header className="flex flex-col gap-4">
+          <Heading as="h1" size="display">
+            {t("title")}
+          </Heading>
+          <Text size="body-lg" tone="muted" className="max-w-(--container-prose)">
+            {t("lead")}
+          </Text>
+        </header>
+        <ComplexSelector data={data} selection={selection} locale={locale} />
+        <StructuredData
+          locale={locale}
+          nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/kompleks" }])]}
+        />
+      </Container>
+      <NextChapter current="/kompleks" />
+    </>
   );
 }

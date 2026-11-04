@@ -19,7 +19,28 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   // An Azerbaijani browser by default, so the locale suggestion stays hidden
   // unless a test asks for another language.
-  use: { baseURL, trace: "retain-on-failure", locale: "az-AZ" },
+  // The home preloader is skipped with a test cookie (src/lib/shell/preloader.ts),
+  // so tests start on the page; tests/e2e/shell.spec.ts clears it to test it.
+  use: {
+    baseURL,
+    trace: "retain-on-failure",
+    locale: "az-AZ",
+    storageState: {
+      cookies: [
+        {
+          name: "kc-skip-preloader",
+          value: "1",
+          domain: "localhost",
+          path: "/",
+          expires: -1,
+          httpOnly: false,
+          secure: false,
+          sameSite: "Lax",
+        },
+      ],
+      origins: [],
+    },
+  },
   projects: [
     {
       name: "desktop",

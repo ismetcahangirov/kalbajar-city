@@ -12,6 +12,7 @@ import type { Locale } from "@/i18n/routing";
 import { getLocationPage, getSiteContacts } from "@/lib/public/site";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import type { LeadType } from "@/shared/leads";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // Contacts come from the console's settings: rendered per request and sent
 // complete (CLAUDE.md → Data and state); the data itself is cached and tagged.
@@ -95,6 +96,7 @@ export default async function ContactPage() {
         locale={locale}
         nodes={[await breadcrumbs(locale, [{ name: nav("contact"), href: "/elaqe" }])]}
       />
+      <NextChapter current="/elaqe" />
     </>
   );
 }

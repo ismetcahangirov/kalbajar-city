@@ -7,9 +7,13 @@ import { AnalyticsScripts } from "@/components/analytics/analytics-scripts";
 import { SiteTracking } from "@/components/analytics/site-tracking";
 import { LocaleSuggestion } from "@/components/i18n/locale-suggestion";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { FixedButtons } from "@/components/shell/fixed-buttons";
 import { Footer } from "@/components/shell/footer";
 import { Header } from "@/components/shell/header";
-import { MobileActionBar } from "@/components/shell/mobile-action-bar";
+import { InquiryDialog } from "@/components/shell/inquiry-dialog";
+import { Menu } from "@/components/shell/menu";
+import { PageTransition } from "@/components/shell/page-transition";
+import { ShellDialogs } from "@/components/shell/shell-dialogs";
 import { SkipLink } from "@/components/shell/skip-link";
 import { routing } from "@/i18n/routing";
 import { siteOrigin } from "@/lib/seo/url";
@@ -32,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Edge to edge, so the action bar can sit above the home indicator with
+// Edge to edge, so fixed UI can sit above the home indicator with
 // env(safe-area-inset-bottom).
 export const viewport: Viewport = { viewportFit: "cover" };
 
@@ -56,7 +60,13 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
             {children}
           </main>
           <Footer />
-          <MobileActionBar />
+          <FixedButtons />
+          {/* Server-rendered dialogs and curtain; ShellDialogs and
+              PageTransition drive them. */}
+          <Menu />
+          <InquiryDialog />
+          <PageTransition />
+          <ShellDialogs />
           <LocaleSuggestion />
           <SmoothScroll />
           <SiteTracking />

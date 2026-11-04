@@ -282,16 +282,24 @@
     "openMenu": "Menyunu aç",
     "closeMenu": "Menyunu bağla",
     "menu": "Menyu",
-    "quickContact": "Tez əlaqə",
     "contacts": "Əlaqə",
     "phone": "Telefon",
     "instagram": "Instagram",
-    "columnComplex": "Kompleks",
-    "columnUpdates": "Yeniliklər",
     "place": "Kəlbəcər, Azərbaycan",
     "developer": "Tikinti şirkəti: {developer}",
     "rights": "© {year} Kalbajar City",
-    "whatsappMessage": "Salam! Kalbajar City-dəki mənzillərlə maraqlanıram."
+    "whatsappMessage": "Salam! Kalbajar City-dəki mənzillərlə maraqlanıram.",
+    "chooseApartment": "Mənzil seç",
+    "inquire": "Müraciət et",
+    "tagline": "Kəlbəcərdə yaşayış kompleksi",
+    "salesOffice": "Satış ofisi",
+    "pages": "Səhifələr",
+    "next": "Növbəti",
+    "go": "Keç",
+    "toTop": "Yuxarı qayıt",
+    "closeInquiry": "Müraciət formasını bağla",
+    "loading": "Yüklənir",
+    "sections": "Səhifənin bölmələri"
   },
   "Placeholder": {
     "body": "Bu səhifə hazırlanır."

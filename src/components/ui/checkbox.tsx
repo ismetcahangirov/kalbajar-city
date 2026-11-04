@@ -11,14 +11,49 @@ type CheckboxProps = Omit<ComponentPropsWithoutRef<"input">, "type" | "id" | "si
   /**
    * `form`: the 24 px box of the current forms (semantic tokens), until the
    * inquiry form is rebuilt with `FieldBox` (#64). `filter`: the hairline
-   * 15 × 15 box of the catalogue's filters, on the theme tokens
-   * (ui-kit.md → Checkbox). Both sit in a 44 px hit area and change instantly.
+   * 15 × 15 box of the catalogue's filters, and `box` the 20 × 20 hairline
+   * box beside a `FieldBox` (the inquiry dialog), both on the theme tokens
+   * (ui-kit.md → Checkbox). All sit in a 44 px hit area and change instantly.
    */
-  size?: "form" | "filter";
+  size?: "form" | "filter" | "box";
 };
 
 export function Checkbox({ size = "form", ...props }: CheckboxProps) {
-  return size === "filter" ? <FilterCheckbox {...props} /> : <FormCheckbox {...props} />;
+  if (size === "filter") return <FilterCheckbox {...props} />;
+  if (size === "box") return <BoxCheckbox {...props} />;
+  return <FormCheckbox {...props} />;
+}
+
+/** The hairline 20 px form box; its label may hold a link, so only the box is the input. */
+function BoxCheckbox({ id, label, error, className, ...props }: Omit<CheckboxProps, "size">) {
+  return (
+    <div className={cx("flex items-start gap-3", className)}>
+      <span className="relative grid size-target shrink-0 place-items-center">
+        <input
+          id={id}
+          type="checkbox"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className="peer absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+          {...props}
+        />
+        <span
+          aria-hidden
+          className={cx(
+            "pointer-events-none grid size-5 place-items-center border border-(--t-control) text-transparent",
+            "peer-checked:border-(--t-text) peer-checked:text-(--t-text) peer-hover:border-(--t-text)",
+            "peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-offset-(--focus-ring-width) peer-focus-visible:outline-(--t-text) peer-focus-visible:outline-solid",
+            "peer-aria-invalid:border-error peer-aria-invalid:outline-1 peer-aria-invalid:outline-error peer-aria-invalid:outline-solid",
+          )}
+        >
+          <Check width={14} height={14} strokeWidth={1.5} aria-hidden focusable={false} />
+        </span>
+      </span>
+      <label htmlFor={id} className="cursor-pointer py-2.5 text-small-t text-(--t-text)">
+        {label}
+      </label>
+    </div>
+  );
 }
 
 function FormCheckbox({ id, label, error, className, ...props }: Omit<CheckboxProps, "size">) {

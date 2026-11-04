@@ -17,6 +17,7 @@ import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getConstructionTimeline, type PublicConstructionMedia } from "@/lib/public/construction";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // Reads the database per request and sends the page complete, not streamed
 // behind Suspense (CLAUDE.md → Data and state). The data is cached and
@@ -56,97 +57,100 @@ export default async function ConstructionPage() {
     });
 
   return (
-    <Section>
-      <Container className="flex flex-col gap-block">
-        <PageHead title={t("title")} lead={t("lead")}>
-          {latest && (
-            <div className="flex max-w-(--container-prose) flex-col gap-2 pt-4">
-              <Text size="small" tone="muted">
-                {t("overall")} · {t("asOf", { month: monthName(latest.month) })}
-              </Text>
-              <ProgressBar
-                id="umumi-irelileyis"
-                value={latest.progressPercent}
-                label={t("progress", { percent: formatPercent(latest.progressPercent, locale) })}
-              />
-            </div>
-          )}
-        </PageHead>
+    <>
+      <Section>
+        <Container className="flex flex-col gap-block">
+          <PageHead title={t("title")} lead={t("lead")}>
+            {latest && (
+              <div className="flex max-w-(--container-prose) flex-col gap-2 pt-4">
+                <Text size="small" tone="muted">
+                  {t("overall")} · {t("asOf", { month: monthName(latest.month) })}
+                </Text>
+                <ProgressBar
+                  id="umumi-irelileyis"
+                  value={latest.progressPercent}
+                  label={t("progress", { percent: formatPercent(latest.progressPercent, locale) })}
+                />
+              </div>
+            )}
+          </PageHead>
 
-        {updates.length === 0 ? (
-          <EmptyState
-            title={t("emptyTitle")}
-            body={t("emptyBody")}
-            action={
-              <Button
-                href={`${getPathname({ href: "/elaqe", locale })}#baxis`}
-                variant="link"
-                trailingIcon={<Icon icon={ArrowRight} />}
-              >
-                {t("emptyAction")}
-              </Button>
-            }
-          />
-        ) : (
-          <ol aria-label={t("timeline")} className="flex flex-col">
-            {updates.map((update) => {
-              const month = monthName(update.month);
-              const id = `ay-${update.month.slice(0, 7)}`;
-              const images = update.media.flatMap((item) =>
-                item.kind === "image"
-                  ? [{ id: item.id, image: item.image, caption: item.caption }]
-                  : [],
-              );
-              const videos = update.media.filter((item): item is Video => item.kind === "video");
-              return (
-                <li
-                  key={update.id}
-                  aria-labelledby={id}
-                  className="grid gap-6 border-t border-border py-block lg:grid-cols-12 lg:gap-gutter"
+          {updates.length === 0 ? (
+            <EmptyState
+              title={t("emptyTitle")}
+              body={t("emptyBody")}
+              action={
+                <Button
+                  href={`${getPathname({ href: "/elaqe", locale })}#baxis`}
+                  variant="link"
+                  trailingIcon={<Icon icon={ArrowRight} />}
                 >
-                  <FadeUp className="flex flex-col gap-3 lg:col-span-4">
-                    <Heading as="h2" size="heading" id={id}>
-                      <time dateTime={update.month.slice(0, 7)}>{month}</time>
-                    </Heading>
-                    <Heading as="h3" size="title">
-                      <Localized text={update.title} />
-                    </Heading>
-                    <Text size="small" tone="muted">
-                      {t("monthProgress", {
-                        percent: formatPercent(update.progressPercent, locale),
-                      })}
-                    </Text>
-                  </FadeUp>
-                  <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
-                    {update.body && (
-                      <RichText text={update.body} className="max-w-(--container-prose)" />
-                    )}
-                    {images.length > 0 && (
-                      <Lightbox
-                        layout="grid"
-                        items={images}
-                        sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 50vw, 100vw"
-                      />
-                    )}
-                    {videos.map((video) => (
-                      <ConstructionVideo
-                        key={video.id}
-                        video={video}
-                        fallbackLabel={t("video", { month })}
-                      />
-                    ))}
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        )}
-      </Container>
-      <StructuredData
-        locale={locale}
-        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/tikinti" }])]}
-      />
-    </Section>
+                  {t("emptyAction")}
+                </Button>
+              }
+            />
+          ) : (
+            <ol aria-label={t("timeline")} className="flex flex-col">
+              {updates.map((update) => {
+                const month = monthName(update.month);
+                const id = `ay-${update.month.slice(0, 7)}`;
+                const images = update.media.flatMap((item) =>
+                  item.kind === "image"
+                    ? [{ id: item.id, image: item.image, caption: item.caption }]
+                    : [],
+                );
+                const videos = update.media.filter((item): item is Video => item.kind === "video");
+                return (
+                  <li
+                    key={update.id}
+                    aria-labelledby={id}
+                    className="grid gap-6 border-t border-border py-block lg:grid-cols-12 lg:gap-gutter"
+                  >
+                    <FadeUp className="flex flex-col gap-3 lg:col-span-4">
+                      <Heading as="h2" size="heading" id={id}>
+                        <time dateTime={update.month.slice(0, 7)}>{month}</time>
+                      </Heading>
+                      <Heading as="h3" size="title">
+                        <Localized text={update.title} />
+                      </Heading>
+                      <Text size="small" tone="muted">
+                        {t("monthProgress", {
+                          percent: formatPercent(update.progressPercent, locale),
+                        })}
+                      </Text>
+                    </FadeUp>
+                    <div className="flex min-w-0 flex-col gap-6 lg:col-span-8">
+                      {update.body && (
+                        <RichText text={update.body} className="max-w-(--container-prose)" />
+                      )}
+                      {images.length > 0 && (
+                        <Lightbox
+                          layout="grid"
+                          items={images}
+                          sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 50vw, 100vw"
+                        />
+                      )}
+                      {videos.map((video) => (
+                        <ConstructionVideo
+                          key={video.id}
+                          video={video}
+                          fallbackLabel={t("video", { month })}
+                        />
+                      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </Container>
+        <StructuredData
+          locale={locale}
+          nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/tikinti" }])]}
+        />
+      </Section>
+      <NextChapter current="/tikinti" />
+    </>
   );
 }
 

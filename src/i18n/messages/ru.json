@@ -282,16 +282,24 @@
     "openMenu": "Открыть меню",
     "closeMenu": "Закрыть меню",
     "menu": "Меню",
-    "quickContact": "Быстрая связь",
     "contacts": "Контакты",
     "phone": "Телефон",
     "instagram": "Instagram",
-    "columnComplex": "Комплекс",
-    "columnUpdates": "Обновления",
     "place": "Кельбаджар, Азербайджан",
     "developer": "Застройщик: {developer}",
     "rights": "© {year} Kalbajar City",
-    "whatsappMessage": "Здравствуйте! Меня интересуют квартиры в Kalbajar City."
+    "whatsappMessage": "Здравствуйте! Меня интересуют квартиры в Kalbajar City.",
+    "chooseApartment": "Выбрать квартиру",
+    "inquire": "Оставить заявку",
+    "tagline": "Жилой комплекс в Кельбаджаре",
+    "salesOffice": "Офис продаж",
+    "pages": "Страницы",
+    "next": "Далее",
+    "go": "Перейти",
+    "toTop": "Наверх",
+    "closeInquiry": "Закрыть форму заявки",
+    "loading": "Загрузка",
+    "sections": "Разделы страницы"
   },
   "Placeholder": {
     "body": "Страница готовится."
