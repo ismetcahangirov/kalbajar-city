@@ -13,6 +13,7 @@ import {
   serializeJsonLd,
   type JsonLdNode,
 } from "@/lib/seo/json-ld";
+import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
 import type { PageHref } from "@/lib/seo/metadata";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
@@ -27,7 +28,10 @@ export async function StructuredData({
   locale: Locale;
   nodes?: Array<JsonLdNode | null>;
 }) {
-  const [contacts, developer] = await Promise.all([getSiteContacts(locale), getDeveloper()]);
+  const [contacts, developer] = await Promise.all([
+    getSiteContacts(locale).then(confirmedContacts),
+    getDeveloper(),
+  ]);
   const { socials } = contacts;
   const organization = organizationNode({
     origin: siteOrigin(),
@@ -70,12 +74,12 @@ export async function breadcrumbs(
 
 /**
  * The complex as `ApartmentComplex`. Its address and coordinates appear only
- * once the owner has set them (#7); both are null today.
+ * once the owner has set or confirmed them (#7), never as stand-ins.
  */
 export async function complexNode(locale: Locale): Promise<JsonLdNode> {
   const [about, contacts, t] = await Promise.all([
     getAboutPage(locale),
-    getSiteContacts(locale),
+    getSiteContacts(locale).then(confirmedContacts),
     getTranslations({ locale, namespace: "Metadata" }),
   ]);
   const origin = siteOrigin();

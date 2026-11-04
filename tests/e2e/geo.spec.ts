@@ -2,6 +2,8 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 
 import { answerCrawlers } from "@/lib/seo/robots";
 
+import { flaggedPaths } from "./settings";
+
 // Plain-text and head checks: the viewport does not matter.
 test.skip(({ isMobile }) => isMobile, "crawler-facing output does not depend on the viewport");
 
@@ -64,4 +66,26 @@ test("no analytics script loads until the console sets an ID", async ({ request 
   const html = await (await request.get("/")).text();
   expect(html).not.toContain("googletagmanager.com/gtag");
   expect(html).not.toContain("fbevents.js");
+});
+
+test("seeded stand-ins never reach the geo meta, the structured data or llms.txt", async ({
+  request,
+}) => {
+  // Other specs save the contacts for a moment (#27), which clears these
+  // flags until they restore them: check only what is still a stand-in.
+  const standIns = await flaggedPaths();
+  const html = await (await request.get("/en", { headers: { "user-agent": googlebot } })).text();
+  const head = html.slice(0, html.indexOf("</head>"));
+  const llms = await (await request.get("/llms.txt")).text();
+  if (standIns.includes("contacts.coordinates")) {
+    expect(head).not.toContain('name="geo.position"');
+    expect(head).not.toContain('name="ICBM"');
+    expect(html).not.toContain('"GeoCoordinates"');
+  }
+  if (standIns.includes("contacts.email")) {
+    expect(html).not.toContain('"email":');
+    expect(llms).not.toMatch(/^- E-mail:/m);
+  }
+  if (standIns.includes("contacts.hours")) expect(llms).not.toMatch(/^- (Office )?hours:/im);
+  if (standIns.includes("contacts.address")) expect(html).not.toContain('"PostalAddress"');
 });
