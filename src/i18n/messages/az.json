@@ -52,8 +52,6 @@
       "list": "Siyahı"
     },
     "filters": {
-      "title": "Filtrlər və sıralama",
-      "open": "Filtrlər",
       "active": "{count, plural, one {# filtr seçilib} other {# filtr seçilib}}",
       "close": "Filtrləri bağla",
       "rooms": "Otaq sayı",
@@ -80,7 +78,6 @@
       "apply": "{count, plural, one {# mənzili göstər} other {# mənzili göstər}}",
       "applyPending": "Göstər",
       "matches": "{count, plural, one {# mənzil uyğundur} other {# mənzil uyğundur}}",
-      "reset": "Filtrləri təmizlə",
       "heading": "Filtr",
       "resetShort": "Sıfırla",
       "sliderFrom": "Ən az, sürgü",

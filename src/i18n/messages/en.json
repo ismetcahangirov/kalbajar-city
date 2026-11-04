@@ -52,8 +52,6 @@
       "list": "List"
     },
     "filters": {
-      "title": "Filters and sorting",
-      "open": "Filters",
       "active": "{count, plural, one {# filter set} other {# filters set}}",
       "close": "Close filters",
       "rooms": "Rooms",
@@ -80,7 +78,6 @@
       "apply": "Show {count, plural, one {# apartment} other {# apartments}}",
       "applyPending": "Show",
       "matches": "{count, plural, one {# apartment matches} other {# apartments match}}",
-      "reset": "Clear filters",
       "heading": "Filter",
       "resetShort": "Reset",
       "sliderFrom": "Minimum, slider",
