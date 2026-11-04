@@ -95,7 +95,7 @@ export async function PageHero({
         className={cx(
           "flex flex-1 flex-col pt-[calc(var(--header-height)+var(--u)*4)]",
           framed
-            ? "justify-start desk:pt-[calc(var(--header-height)+var(--u)*6)]"
+            ? "justify-center desk:justify-start desk:pt-[calc(var(--header-height)+var(--u)*6)]"
             : "justify-center",
         )}
       >
