@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/admin/giri
   if (await getSessionUser()) redirect(safeAdminRedirect(target));
   return (
     <>
-      <h1 className="text-title">{t("login.title")}</h1>
+      <h1 className="text-legacy-title">{t("login.title")}</h1>
       <p className="mt-2 mb-6 text-small text-text-muted">{t("login.lead")}</p>
       <LoginForm next={target} />
     </>

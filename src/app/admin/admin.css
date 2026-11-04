@@ -36,6 +36,21 @@
   --sidebar-accent-foreground: var(--color-text);
   --sidebar-border: var(--color-border);
   --sidebar-ring: var(--color-focus);
+
+  /* The public site is square and its small type follows the reference's
+     scale; the console keeps its own radii and type (tokens.css → console). */
+  --radius-xs: var(--console-radius-xs);
+  --radius-sm: var(--console-radius-sm);
+  --radius-md: var(--console-radius-md);
+  --radius-lg: var(--console-radius-lg);
+  --text-eyebrow: var(--console-text-xs);
+  --text-eyebrow--line-height: var(--console-text-xs--line-height);
+  --text-eyebrow--letter-spacing: var(--console-text-xs--letter-spacing);
+  --text-small: var(--console-text-sm);
+  --text-small--line-height: var(--console-text-sm--line-height);
+  --text-body: var(--console-text-base);
+  --text-body--line-height: var(--console-text-base--line-height);
+  --text-body--letter-spacing: 0;
 }
 
 @theme inline {
@@ -73,8 +88,8 @@
   --text-sm--line-height: var(--text-small--line-height);
   --text-base: var(--text-body);
   --text-base--line-height: var(--text-body--line-height);
-  --text-lg: var(--text-title);
-  --text-lg--line-height: var(--text-title--line-height);
+  --text-lg: var(--text-legacy-title);
+  --text-lg--line-height: var(--text-legacy-title--line-height);
   --font-weight-semibold: var(--font-weight-medium);
   --radius-xl: var(--radius-lg);
   --shadow-sm: var(--shadow-raised);

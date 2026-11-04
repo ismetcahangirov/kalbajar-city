@@ -128,13 +128,14 @@ html.lenis body {
     pointer-events: none;
   }
 
-  /* ImageFrame (ui-kit.md): a chalk border around the card. The outer radius
-     adds the border, so the inside matches the card's clip radius. */
+  /* ImageFrame (ui-kit.md): a raised-surface border around the card. The
+     outer radius adds the border, so the inside matches the card's clip
+     radius. */
   [data-scene-frame] {
     --frame-width: calc(var(--spacing) * 2.5);
     position: absolute;
     inset: calc(var(--frame-width) * -1);
-    border: var(--frame-width) solid var(--color-chalk);
+    border: var(--frame-width) solid var(--color-surface-raised);
     border-radius: calc(var(--radius-md) + var(--frame-width));
     box-shadow: var(--shadow-frame);
   }

@@ -227,7 +227,7 @@ function Filters({ facets, applied, total, locale }: Props) {
         className="hidden lg:block"
         data-print-hidden=""
       >
-        <h2 id="catalogue-filters-title" className="mb-6 text-title">
+        <h2 id="catalogue-filters-title" className="mb-6 text-legacy-title">
           {t("filters.title")}
         </h2>
         {form("sidebar")}
@@ -245,7 +245,7 @@ function Filters({ facets, applied, total, locale }: Props) {
       >
         <div className="flex min-h-full flex-col">
           <div className="sticky top-0 z-10 flex min-h-(--header-height) items-center justify-between gap-4 border-b border-border bg-surface px-page">
-            <h2 id="catalogue-filters-dialog-title" className="text-title">
+            <h2 id="catalogue-filters-dialog-title" className="text-legacy-title">
               {t("filters.title")}
             </h2>
             <button

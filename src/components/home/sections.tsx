@@ -306,7 +306,7 @@ export async function Construction({ title, update, tone, align }: Props<"constr
             <Heading as="h3" size="heading">
               <Localized text={update.title} />
             </Heading>
-            <p className="text-title">
+            <p className="text-legacy-title">
               {t("progress", { percent: formatPercent(update.progress, locale) })}
             </p>
             <div aria-hidden className="h-1 overflow-hidden rounded-full bg-border">
@@ -374,7 +374,7 @@ export function Faq({ title, items, tone, align }: Props<"faq">) {
         <FadeUp className="flex flex-col border-b border-border">
           {items.map((item) => (
             <details key={item.question.value} className="group border-t border-border">
-              <summary className="flex min-h-target cursor-pointer items-center justify-between gap-4 py-5 text-title">
+              <summary className="flex min-h-target cursor-pointer items-center justify-between gap-4 py-5 text-legacy-title">
                 <Localized text={item.question} />
                 <span data-accordion-icon="" className="shrink-0 text-text-muted">
                   <Icon icon={Plus} size={24} />

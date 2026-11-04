@@ -19,7 +19,7 @@ export function ProgressBar({
 }) {
   return (
     <div className={cx("flex flex-col gap-3", className)}>
-      <p id={id} className="text-title">
+      <p id={id} className="text-legacy-title">
         {label}
       </p>
       <div

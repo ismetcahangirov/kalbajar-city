@@ -37,13 +37,13 @@ test.describe("desktop", () => {
     const layer = header.locator("[data-header-layer]");
 
     await expect(layer).toHaveCSS("opacity", "0");
-    // Paper text over the hero, from the night set of tokens.
-    await expect(header).toHaveCSS("color", "rgb(245, 242, 236)");
+    // Cream text over the hero, from the night set of tokens.
+    await expect(header).toHaveCSS("color", "rgb(247, 242, 232)");
 
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 2));
     await expect(header).toHaveAttribute("data-solid", "");
     await expect(layer).toHaveCSS("opacity", "1");
-    await expect(header).toHaveCSS("color", "rgb(34, 32, 29)");
+    await expect(header).toHaveCSS("color", "rgb(18, 16, 14)");
   });
 
   test("a page without a hero gets the solid header", async ({ page }) => {

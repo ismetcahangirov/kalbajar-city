@@ -45,7 +45,7 @@ function blocks(list: RichBlock[], renderImage: RenderImage, prefix: string): Re
             {inlines(block.content)}
           </h2>
         ) : (
-          <h3 key={key} className="pt-2 text-title text-balance">
+          <h3 key={key} className="pt-2 text-legacy-title text-balance">
             {inlines(block.content)}
           </h3>
         );

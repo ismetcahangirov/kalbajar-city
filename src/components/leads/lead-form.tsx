@@ -227,7 +227,7 @@ function LeadFormBody({ type, apartment, labelledBy, className }: LeadFormProps)
           <p
             ref={successRef}
             tabIndex={-1}
-            className="flex items-center gap-3 text-title text-text outline-none"
+            className="flex items-center gap-3 text-legacy-title text-text outline-none"
           >
             <span className="text-status-available">
               <Icon icon={CircleCheck} size={24} />

@@ -157,12 +157,13 @@ Read both before touching UI.
 - **Alethia Next** is the only display and text face on public pages. At most
   four weights ship (Light, Regular, Medium, Italic). The console uses the
   system font stack
-- **One scroll-entry animation** everywhere. A second is a design change
-- Animate only `transform`, `opacity` and `clip-path`
+- **Motion follows the catalogue** in `docs/motion-system.md`. A new
+  animation is a design change to that document first
+- Animate only `transform`, `opacity` and `clip-path`, plus `filter: blur()`
+  for the text and image reveals named in `docs/motion-system.md`
 - Forms and the inquiry flow do not animate
 - `prefers-reduced-motion` is mandatory, not a nice-to-have
-- The Pinterest reference is a vocabulary, not a template. Never copy its
-  colours, copy or proportions
+- **pyzhevsky.ru is the reference.** Copy its system, never its content
 
 ### Imagery
 

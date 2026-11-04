@@ -14,7 +14,7 @@ export function BrandLink({ className }: { className?: string }) {
       href="/"
       aria-label={t("home")}
       className={cx(
-        "inline-flex min-h-target shrink-0 items-center text-title font-normal whitespace-nowrap",
+        "inline-flex min-h-target shrink-0 items-center text-legacy-title font-normal whitespace-nowrap",
         className,
       )}
     >

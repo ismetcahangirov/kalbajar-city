@@ -6,7 +6,7 @@ import { adminPaths } from "@/lib/auth/paths";
 export default function NotFound() {
   return (
     <main className="flex min-h-svh flex-col items-start justify-center gap-4 px-gutter py-section sm:items-center sm:text-center">
-      <h1 className="text-title">{t("notFound.title")}</h1>
+      <h1 className="text-legacy-title">{t("notFound.title")}</h1>
       <p className="text-text-muted">{t("error.notFound")}</p>
       <Button href={adminPaths.home} variant="secondary">
         {t("forbidden.back")}

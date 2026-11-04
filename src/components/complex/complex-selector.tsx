@@ -616,7 +616,7 @@ function BlocksList({ data, locale }: { data: ComplexSelectorData; locale: Local
           <Link
             href={selectorHref(block.code)}
             scroll={false}
-            className={cx("text-title", rowLink)}
+            className={cx("text-legacy-title", rowLink)}
           >
             {block.name.value}
           </Link>
@@ -638,7 +638,7 @@ function FloorsList({ block, locale }: { block: SelectorBlock; locale: Locale })
           <Link
             href={selectorHref(block.code, floor.number)}
             scroll={false}
-            className={cx("text-title", rowLink)}
+            className={cx("text-legacy-title", rowLink)}
           >
             {labels.floor(floor.number)}
           </Link>
@@ -666,7 +666,7 @@ function ApartmentsList({
           <span className="flex flex-col">
             <Link
               href={{ pathname: "/menziller/[slug]", params: { slug: apartment.slug } }}
-              className={cx("text-title", rowLink)}
+              className={cx("text-legacy-title", rowLink)}
             >
               {labels.apartmentName(block, apartment)}
             </Link>

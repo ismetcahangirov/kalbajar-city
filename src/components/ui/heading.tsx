@@ -8,7 +8,7 @@ const sizeClass: Record<HeadingSize, string> = {
   "display-xl": "text-display-xl",
   display: "text-display",
   heading: "text-heading",
-  title: "text-title",
+  title: "text-legacy-title",
 };
 
 type HeadingProps = ComponentProps<"h2"> & {

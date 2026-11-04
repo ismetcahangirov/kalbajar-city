@@ -50,7 +50,7 @@ export function Card({
       )}
       {chips && <div className="flex flex-wrap gap-2">{chips}</div>}
       <div className="flex flex-col gap-1">
-        <Title className="text-title text-text">
+        <Title className="text-legacy-title text-text">
           {href ? (
             <Link
               href={href}

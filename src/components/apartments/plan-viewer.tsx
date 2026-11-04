@@ -220,7 +220,7 @@ export function PlanViewer({
       >
         <div className="flex h-full flex-col">
           <div className="flex min-h-(--header-height) flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-border py-2 px-page">
-            <h2 id={titleId} className="min-w-0 text-title">
+            <h2 id={titleId} className="min-w-0 text-legacy-title">
               {t("planDialog", { name })}
             </h2>
             <div className="flex items-center gap-1">

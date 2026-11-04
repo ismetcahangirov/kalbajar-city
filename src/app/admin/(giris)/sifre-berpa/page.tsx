@@ -18,7 +18,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/ad
   if (typeof token === "string" && token) {
     return (
       <>
-        <h1 className="text-title">{t("reset.newTitle")}</h1>
+        <h1 className="text-legacy-title">{t("reset.newTitle")}</h1>
         <p className="mt-2 mb-6 text-small text-text-muted">{t("reset.newLead")}</p>
         <NewPasswordForm token={token} />
       </>
@@ -27,7 +27,7 @@ export default async function ResetPasswordPage({ searchParams }: PageProps<"/ad
 
   return (
     <>
-      <h1 className="text-title">{t("reset.title")}</h1>
+      <h1 className="text-legacy-title">{t("reset.title")}</h1>
       <p className="mt-2 mb-6 text-small text-text-muted">{t("reset.lead")}</p>
       {error ? <FormAlert message={t("error.invalidToken")} className="mb-5" /> : null}
       <ResetRequestForm />
