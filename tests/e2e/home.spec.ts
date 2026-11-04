@@ -3,13 +3,14 @@ import { expect, test, type Page } from "@playwright/test";
 // The home page (#17) against the seeded database: every section, in the
 // console's order, complete without JavaScript and with reduced motion. The
 // location section shows because the seed fills its distances with stand-ins
-// (#27).
+// (#27); the card-zoom section shows its default scenes (#65).
 
 const headings = {
   "/": [
     "Biz öz yuvamıza daha uca bir səviyyədə qayıdırıq.",
     "Öz mənzilinizi seçin",
     "Rahatlıq və təhlükəsizlik",
+    "İnteryer və mənzərələr",
     "Yerləşmə",
     "Yeni evinizə yol",
     "Tez-tez verilən suallar",
@@ -19,6 +20,7 @@ const headings = {
     "We are coming home, to a higher standard.",
     "Choose your apartment",
     "Comfort and safety",
+    "Interiors and views",
     "Location",
     "The path to your new home",
     "Frequently asked questions",
@@ -28,6 +30,7 @@ const headings = {
     "Мы возвращаемся домой — на новом уровне.",
     "Выберите свою квартиру",
     "Комфорт и безопасность",
+    "Интерьеры и виды",
     "Расположение",
     "Путь к новому дому",
     "Частые вопросы",
@@ -66,7 +69,7 @@ test.describe("without JavaScript", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       "Sizin də dağ mənzərəli mənziliniz olsun!",
     );
-    expect(await sectionHeadings(page)).toHaveLength(7);
+    expect(await sectionHeadings(page)).toHaveLength(8);
 
     const stats = page.getByLabel("Rəqəmlərlə Kalbajar City");
     await expect(stats).toContainText("22 634");
