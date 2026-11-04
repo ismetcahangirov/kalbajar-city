@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { roomLabels } from "@/components/apartments/area-table";
-import { formatPrice } from "@/i18n/format";
+import { formatPrice, formatPricePerArea } from "@/i18n/format";
 import { apartmentListQuerySchema, withPriceVisibility } from "@/shared/apartments";
 import {
   activeGroups,
@@ -267,5 +267,14 @@ describe("formatPrice", () => {
     expect(formatPrice("12345678901234", "AZN", "az")).toBe(
       `123${NBSP}456${NBSP}789${NBSP}012,34${NBSP}AZN`,
     );
+  });
+});
+
+describe("formatPricePerArea", () => {
+  it("divides the price by the area and rounds to whole manat", () => {
+    expect(formatPricePerArea("15000000", "AZN", 72.5, "az")).toBe(`2${NBSP}069${NBSP}AZN/m²`);
+    expect(formatPricePerArea("15000000", "AZN", 72.5, "en")).toBe(`2,069${NBSP}AZN/m²`);
+    expect(formatPricePerArea("15000000", "AZN", 72.5, "ru")).toBe(`2${NBSP}069${NBSP}AZN/м²`);
+    expect(formatPricePerArea("15000000", "AZN", 0, "az")).toBeNull();
   });
 });

@@ -1,0 +1,159 @@
+/*
+ * The hairline components in src/components/ui that read the theme tokens
+ * (--t-*): Segmented, RangeHairline, the filter Checkbox, FlatCard, Tabs,
+ * ArrowBlock, RoundButton (ui-kit.md → Components). What utilities cannot
+ * say lives here: pseudo-element fills and the range inputs' thumbs.
+ * Hovers follow motion-system.md → Components; controls change instantly.
+ */
+
+@layer base {
+  /* Inside a themed section the focus ring takes the theme's text colour,
+     so it shows on dark themes too (ui-kit.md → Focus). */
+  [data-theme] :focus-visible {
+    outline-color: var(--t-text);
+  }
+}
+
+@layer components {
+  /* ArrowBlock: the hover colour is a layer whose opacity fades in
+     (motion-system.md → ArrowBlock, filled buttons). */
+  .arrow-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--arrow-block-hover);
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-wipe);
+  }
+
+  @media (hover: hover) {
+    .arrow-block:hover::before {
+      opacity: 1;
+    }
+  }
+
+  /* RoundButton: the circle is a pseudo-element that grows on hover (A37). */
+  .round-button::before {
+    content: "";
+    position: absolute;
+    inset: 50% auto auto 50%;
+    z-index: -1;
+    width: 1.875rem;
+    height: 1.875rem;
+    translate: -50% -50%;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--round-button-border);
+    background-color: var(--round-button-fill);
+    transition: scale var(--duration-normal) var(--ease-wipe);
+  }
+
+  @media (hover: hover) {
+    .round-button:hover::before {
+      scale: 1.0667;
+    }
+  }
+
+  /* FlatCard: the cream ground grows under still content. */
+  .flat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--t-bg);
+    transition: scale var(--duration-normal) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .flat-card:hover::before {
+      scale: 1.023 1.018;
+    }
+  }
+
+  /* RangeHairline: two native range inputs over one track. Only their
+     thumbs take pointer input, so either end can be dragged; each thumb is
+     a 44 px square drawing a 1 × 10 px tick in its centre. */
+  .range-hairline__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: none;
+    pointer-events: none;
+    appearance: none;
+  }
+
+  .range-hairline__input::-webkit-slider-runnable-track {
+    height: 100%;
+    background: none;
+  }
+
+  .range-hairline__input::-moz-range-track {
+    height: 100%;
+    background: none;
+  }
+
+  .range-hairline__input::-webkit-slider-thumb {
+    width: var(--spacing-target);
+    height: var(--spacing-target);
+    border: 0;
+    background: linear-gradient(var(--t-text), var(--t-text)) center / 1px 10px no-repeat;
+    pointer-events: auto;
+    cursor: ew-resize;
+    appearance: none;
+  }
+
+  .range-hairline__input::-moz-range-thumb {
+    width: var(--spacing-target);
+    height: var(--spacing-target);
+    border: 0;
+    border-radius: 0;
+    background: linear-gradient(var(--t-text), var(--t-text)) center / 1px 10px no-repeat;
+    pointer-events: auto;
+    cursor: ew-resize;
+  }
+
+  /* The ring goes on the thumb's tick area, not on the whole track. */
+  .range-hairline__input:focus-visible {
+    outline: none;
+  }
+
+  .range-hairline__input:focus-visible::-webkit-slider-thumb {
+    outline: var(--focus-ring-width) solid var(--t-text);
+    outline-offset: calc(var(--focus-ring-width) * -4);
+  }
+
+  .range-hairline__input:focus-visible::-moz-range-thumb {
+    outline: var(--focus-ring-width) solid var(--t-text);
+    outline-offset: calc(var(--focus-ring-width) * -4);
+  }
+
+  /* Number inputs without the spin buttons: the hairline field is text. */
+  .range-hairline__field {
+    appearance: textfield;
+  }
+
+  .range-hairline__field::-webkit-inner-spin-button,
+  .range-hairline__field::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  /* Tabs: the panels share one cell and crossfade (motion-system.md → Tabs
+     content); the hidden one is out of the accessibility tree and focus. */
+  .tabs__panel {
+    grid-area: 1 / 1;
+    transition:
+      opacity var(--duration-normal) var(--ease-out),
+      visibility 0s linear;
+  }
+
+  .tabs__panel[data-inactive] {
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity var(--duration-normal) var(--ease-exit),
+      visibility 0s linear var(--duration-normal);
+  }
+}

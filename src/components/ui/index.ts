@@ -1,3 +1,7 @@
+// The hairline components (ArrowBlock, FlatCard, RangeHairline, RoundButton,
+// Segmented, Tabs) are imported by path, not through this barrel: the shell's
+// client components import the barrel, and its exports would otherwise reach
+// the JS every public route shares.
 export { Badge, type BadgeVariant } from "./badge";
 export {
   Button,
