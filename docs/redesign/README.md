@@ -378,10 +378,6 @@ parallel with #66.
   `html:has([data-header-overlay])` (#64, shell.css) also matches while a
   hidden page has a hero. Pages without an overlay looked right in testing,
   but the selector should be scoped to the visible route if that changes
-- `Reveal kind="clip-*" group` never revealed: Chrome clips an
-  IntersectionObserver rect by the target's own `clip-path`, so a wiped-shut
-  member never reached the group's 0.5 threshold. Clipped members now
-  register without the group threshold (`reveal.tsx`)
 - `ChapterTabs`: the active underline sat at `bottom-u` and struck through the
   labels; it is now half a unit from the bottom
 - `ScreenSlider` (`/qalereya`) takes the first five gallery items, only when
@@ -390,8 +386,11 @@ parallel with #66.
 - The lightbox imports `Reveal` and the UI pieces by path; it no longer uses
   `ImageReveal` or the `@/components/motion` and `@/components/ui` barrels.
   Inner pages no longer use `FadeUp`, `LineReveal`, `ImageReveal`,
-  `PageHead` (both removed), `SectionHead` or the home `About`/`Amenities`
-  sections; those primitives stay for #66 to remove
+  `Parallax`, `PinnedCardZoom` or `CountUp`. `PageHead` (both),
+  `home/sections.tsx` (`About`, `Amenities`) and `home/section-head.tsx` are
+  removed, since nothing renders them any more. The legacy primitives stay:
+  `/menziller/[slug]` still uses `FadeUp` and `ImageReveal`, and the
+  `/primitivler/hereket/kohne` fixture shows them all
 - Not built: the `/kompleks` collage and the scattered `/yerlesme` photos
   (no image slots in `docs/defaults.md`), team cards on `/haqqimizda` (the
   content has one developer), an illustrated street map (the map is a drawn
