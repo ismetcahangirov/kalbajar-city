@@ -101,6 +101,26 @@ The inquiry, viewing and call-back forms are one component,
   e-mail never loses the lead: the attempt is recorded on its timeline as a
   `notified` event with `ok: false`
 
+## Content
+
+News and construction updates are drafts, scheduled or published. The
+console's article editor (`/admin/xeberler`) writes rich text with TipTap,
+which loads only in the console: the site renders the stored JSON with plain
+React elements, and `pnpm budget:js` fails if ProseMirror code reaches a
+public route's first load.
+
+Public pages are cached until a console write revalidates them, so a
+scheduled entry cannot appear on its own. A cron must call the trigger every
+few minutes; it publishes what is due, dated at its scheduled time, audited as
+the system, and revalidates the `content` tag:
+
+```bash
+*/5 * * * * curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<site>/api/v1/internal/scheduled-publications
+```
+
+Without `CRON_SECRET` the endpoint refuses every call, and scheduled entries
+wait.
+
 ## Database
 
 The schema lives in `src/db/schema`, one file per area (inventory, media,

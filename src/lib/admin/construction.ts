@@ -18,8 +18,9 @@ import type {
   contentListQuerySchema,
   publicationSchema,
 } from "@/shared/content";
+import { contentState } from "@/shared/content";
 
-import { assertMedia, publicationDate, resolveSlug } from "./content";
+import { assertMedia, publicationChange, resolveSlug, stateFilter } from "./content";
 
 type Row = typeof constructionUpdates.$inferSelect;
 
@@ -36,7 +37,9 @@ function toAdmin(row: Row, mediaIds: string[]): AdminConstructionUpdate {
     body: row.body,
     progressPercent: row.progressPercent,
     status: row.status,
+    state: contentState(row),
     publishedAt: row.publishedAt?.toISOString() ?? null,
+    scheduledAt: row.scheduledAt?.toISOString() ?? null,
     mediaIds,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -92,9 +95,7 @@ export async function listConstructionUpdates(
   db: Executor,
   query: z.output<typeof contentListQuerySchema>,
 ): Promise<Page<AdminConstructionUpdate>> {
-  const where: SQL | undefined = query.status.length
-    ? inArray(constructionUpdates.status, query.status)
-    : undefined;
+  const where: SQL | undefined = stateFilter(constructionUpdates, query.status);
   const [rows, [totals]] = await Promise.all([
     db
       .select()
@@ -229,7 +230,10 @@ export async function setConstructionUpdateMedia(
   return result;
 }
 
-/** Publishes (`publish: true`) or withdraws an update. */
+/**
+ * Publishes (`publish: true`), schedules (a future `publishedAt`), or
+ * withdraws an update or cancels its schedule (`publish: false`).
+ */
 export async function setConstructionUpdatePublished(
   db: Executor,
   {
@@ -242,21 +246,15 @@ export async function setConstructionUpdatePublished(
 ): Promise<AdminConstructionUpdate> {
   const result = await db.transaction(async (tx) => {
     const before = await locked(tx, id);
+    const change = publish ? publicationChange(before, input?.publishedAt) : null;
     const [after] = await tx
       .update(constructionUpdates)
-      .set(
-        publish
-          ? {
-              status: "published",
-              publishedAt: publicationDate(before.publishedAt, input?.publishedAt),
-            }
-          : { status: "draft" },
-      )
+      .set(change ?? { status: "draft", scheduledAt: null })
       .where(eq(constructionUpdates.id, id))
       .returning();
     await audit(tx, {
       actorId: user.id,
-      action: `${entityType}.${publish ? "publish" : "unpublish"}`,
+      action: `${entityType}.${change ? (change.status === "draft" ? "schedule" : "publish") : "unpublish"}`,
       entityType,
       entityId: id,
       before,

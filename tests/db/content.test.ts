@@ -40,6 +40,8 @@ const updatePublicationRoute =
 const newsListRoute = await import("@/app/api/v1/admin/news/route");
 const newsRoute = await import("@/app/api/v1/admin/news/[id]/route");
 const newsPublicationRoute = await import("@/app/api/v1/admin/news/[id]/publication/route");
+const scheduledRoute = await import("@/app/api/v1/internal/scheduled-publications/route");
+const { publishScheduled } = await import("@/lib/admin/scheduled");
 const { loadConstructionTimeline } = await import("@/lib/public/construction");
 const { loadGallery } = await import("@/lib/public/gallery");
 const { loadNewsArticle, loadNewsPage } = await import("@/lib/public/news");
@@ -259,15 +261,20 @@ describe("construction updates", () => {
     expect(again.publishedAt).toBe("2026-10-01T05:00:00.000Z");
   });
 
-  it("refuses a future publication date, a second update for a month and unknown files", async () => {
+  it("schedules on a future date, refuses a second update for a month and unknown files", async () => {
     const created = (await (await createUpdate({})).json()) as AdminConstructionUpdate;
-    const future = await publishUpdate(created.id, {
-      publishedAt: new Date(Date.now() + 86_400_000).toISOString(),
+    const at = new Date(Date.now() + 86_400_000).toISOString();
+    const future = await publishUpdate(created.id, { publishedAt: at });
+    expect(future.status).toBe(200);
+    expect(await future.json()).toMatchObject({
+      status: "draft",
+      state: "scheduled",
+      scheduledAt: at,
+      publishedAt: null,
     });
-    expect(future.status).toBe(422);
-    expect(((await future.json()) as ErrorBody).error.fields).toEqual({
-      publishedAt: ["The publication date cannot be in the future."],
-    });
+    expect(await auditOf(created.id, "construction_update.schedule")).toHaveLength(1);
+    const timeline = await loadConstructionTimeline(db, "az");
+    expect(JSON.stringify(timeline)).not.toContain(created.slug);
 
     const same = await updatesRoute.POST(
       request("/admin/construction-updates", {
@@ -484,6 +491,108 @@ describe("news", () => {
       request("/admin/news", { body: article("Mətn", { coverMediaId: randomUUID() }) }),
     );
     expect(cover.status).toBe(422);
+  });
+});
+
+describe("scheduled publication", () => {
+  const cron = (token?: string) =>
+    scheduledRoute.POST(
+      new Request(`${origin}/api/v1/internal/scheduled-publications`, {
+        method: "POST",
+        headers: token ? { authorization: `Bearer ${token}` } : {},
+      }),
+    );
+
+  it("schedules an article, lists it as scheduled, and cancels the schedule", async () => {
+    const draft = await createArticle(article("Planlı"));
+    const at = new Date(Date.now() + 3_600_000).toISOString();
+    const scheduled = await publishArticle(draft.id, { publishedAt: at });
+    expect(scheduled.status).toBe(200);
+    expect(await scheduled.json()).toMatchObject({ state: "scheduled", scheduledAt: at });
+    expect(await auditOf(draft.id, "news.schedule")).toHaveLength(1);
+    expect(await loadNewsArticle(db, "az", draft.slug)).toBeNull();
+
+    const listed = (await (
+      await newsListRoute.GET(request("/admin/news?status=scheduled&pageSize=100"))
+    ).json()) as { items: AdminNews[] };
+    expect(listed.items.map((item) => item.id)).toContain(draft.id);
+    const drafts = (await (
+      await newsListRoute.GET(request("/admin/news?status=draft&pageSize=100"))
+    ).json()) as { items: AdminNews[] };
+    expect(drafts.items.map((item) => item.id)).not.toContain(draft.id);
+
+    // A scheduled article cannot be emptied either.
+    const emptied = await newsRoute.PATCH(
+      request(`/admin/news/${draft.id}`, {
+        method: "PATCH",
+        body: { body: { az: { type: "doc", content: [] } } },
+      }),
+      context(draft.id),
+    );
+    expect(emptied.status).toBe(422);
+
+    const cancelled = await newsPublicationRoute.DELETE(
+      request(`/admin/news/${draft.id}/publication`, { method: "DELETE" }),
+      context(draft.id),
+    );
+    expect(await cancelled.json()).toMatchObject({ state: "draft", scheduledAt: null });
+  });
+
+  it("refuses to schedule a published article until it is withdrawn", async () => {
+    const draft = await createArticle(article("Dərc"));
+    expect((await publishArticle(draft.id)).status).toBe(200);
+    const refused = await publishArticle(draft.id, {
+      publishedAt: new Date(Date.now() + 3_600_000).toISOString(),
+    });
+    expect(refused.status).toBe(422);
+    expect(((await refused.json()) as ErrorBody).error.fields).toHaveProperty("publishedAt");
+  });
+
+  it("publishes due entries at their scheduled time, audited as the system, and revalidates", async () => {
+    const article1 = await createArticle(article("Vaxtı çatıb"));
+    const later = await createArticle(article("Hələ tezdir"));
+    const update = (await (await createUpdate({})).json()) as AdminConstructionUpdate;
+    const soon = new Date(Date.now() + 60_000);
+    await publishArticle(article1.id, { publishedAt: soon.toISOString() });
+    await publishUpdate(update.id, { publishedAt: soon.toISOString() });
+    await publishArticle(later.id, {
+      publishedAt: new Date(Date.now() + 86_400_000).toISOString(),
+    });
+
+    cache.revalidated.length = 0;
+    const early = await publishScheduled(db);
+    expect(early.news).not.toContain(article1.id);
+
+    const run = await publishScheduled(db, { now: new Date(soon.getTime() + 1000) });
+    expect(run.news).toContain(article1.id);
+    expect(run.news).not.toContain(later.id);
+    expect(run.constructionUpdates).toContain(update.id);
+    expect(cache.revalidated).toContainEqual(["content", { expire: 0 }]);
+
+    const shown = await loadNewsArticle(db, "az", article1.slug);
+    expect(shown?.publishedAt).toBe(soon.toISOString());
+    const [row] = await db.select().from(news).where(eq(news.id, article1.id));
+    expect(row).toMatchObject({ status: "published", scheduledAt: null });
+    const [entry] = await auditOf(article1.id, "news.publish");
+    expect(entry?.actorId).toBeNull();
+
+    // A second run finds nothing left to do.
+    const again = await publishScheduled(db, { now: new Date(soon.getTime() + 2000) });
+    expect(again.news).not.toContain(article1.id);
+    expect(again.constructionUpdates).not.toContain(update.id);
+  });
+
+  it("lets only a caller with the cron secret trigger a run", async () => {
+    vi.stubEnv("CRON_SECRET", "");
+    expect((await cron("anything")).status).toBe(401);
+    vi.stubEnv("CRON_SECRET", "a-cron-secret-for-tests");
+    expect((await cron()).status).toBe(401);
+    expect((await cron("wrong")).status).toBe(401);
+    const ok = await cron("a-cron-secret-for-tests");
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toMatchObject({ news: expect.any(Array) });
+    vi.unstubAllEnvs();
+    vi.stubEnv("S3_PUBLIC_URL", "http://localhost:9010/test");
   });
 });
 
