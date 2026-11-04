@@ -144,7 +144,8 @@ export function PageTransition() {
         <CurtainLines />
       </div>
       <div className="absolute inset-0 grid place-items-center">
-        <span data-curtain-logo="" className="text-logo-lg text-(--t-primary) uppercase">
+        {/* English, so the capitals read "CITY", not "CİTY" (see BrandLink). */}
+        <span data-curtain-logo="" lang="en" className="text-logo-lg text-(--t-primary) uppercase">
           {t("brand")}
         </span>
       </div>

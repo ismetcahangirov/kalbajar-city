@@ -24,12 +24,17 @@
 
 @layer base {
   /* Content starts below the fixed header, except under a hero, which runs
-     beneath the transparent header. */
+     beneath the transparent header. Only the visible route counts: with
+     cacheComponents, Next keeps previously visited routes in the document
+     inside a hidden React <Activity>, which hides its top elements with an
+     inline `display: none !important`; a hero on such a route must not
+     take the padding from the page on screen. */
   [data-site-main] {
     padding-top: var(--header-height);
   }
 
-  html:has([data-header-overlay]) [data-site-main] {
+  html:has([data-header-overlay]:not([style*="display: none"], [style*="display: none"] *))
+    [data-site-main] {
     padding-top: 0;
   }
 
