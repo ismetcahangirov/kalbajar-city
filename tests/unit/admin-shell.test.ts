@@ -28,6 +28,7 @@ describe("the role-aware menu", () => {
       "/admin/xeberler",
       "/admin/media",
       "/admin/yonlendirmeler",
+      "/admin/seo",
     ]);
   });
 
