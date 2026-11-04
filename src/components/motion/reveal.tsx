@@ -77,6 +77,7 @@ export function Reveal({
     return whileMotion("desktop", () => {
       let cancelled = false;
       const cleanups: Array<() => void> = [];
+      const clips = kind === "clip-down" || kind === "clip-up";
       const items: Item[] = (group ? [...root.children] : [root])
         .filter((element): element is HTMLElement => element instanceof HTMLElement)
         .map((element) => ({ element, split: null, width: 0 }));
@@ -150,7 +151,10 @@ export function Reveal({
                 enter: (wait) => show(item, wait, !reversible),
                 leave: reversible ? () => hide(item, false) : undefined,
               },
-              { group },
+              // A wipe's start state clips the element to nothing, and the
+              // observer measures the clipped box: its ratio never reaches
+              // the group threshold, so wipes enter at the edge instead.
+              { group: group && !clips },
             ),
           );
         }
