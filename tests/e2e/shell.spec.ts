@@ -67,6 +67,44 @@ test.describe("header", () => {
       .evaluate((teaser) => window.scrollBy(0, teaser.getBoundingClientRect().top + 100));
     await expect(header).toHaveAttribute("data-theme", "dark");
   });
+
+  test("spells the brand CITY in Azerbaijani capitals too", async ({ page }) => {
+    // innerText applies text-transform, so it reads what is painted. Under
+    // lang="az" an uppercased "City" would read "CİTY".
+    await page.goto("/haqqimizda");
+    await expect(page.locator("html")).toHaveAttribute("lang", "az");
+    const brand = page.locator("[data-site-header] [data-header-logo]:visible");
+    await expect(brand).toHaveCount(1);
+    expect(await brand.innerText()).toBe("KALBAJAR CITY");
+    // The curtain is hidden between transitions, so innerText is empty there.
+    await expect(page.locator("[data-curtain-logo]")).toHaveAttribute("lang", "en");
+  });
+
+  test("clears the header again after leaving a hero for a page without one", async ({ page }) => {
+    // The catalogue's title runs under the transparent header; the apartment
+    // page has no hero, so its content starts below the header. The
+    // catalogue stays in the document, hidden, once the apartment shows.
+    await page.goto("/menziller");
+    await waitForHydration(page);
+    const main = page.locator("[data-site-main]");
+    await expect(main).toHaveCSS("padding-top", "0px");
+    const card = page
+      .getByRole("region", { name: az.Catalogue.resultsLabel })
+      .locator('a[href^="/menziller/"]')
+      .first();
+    const href = await card.getAttribute("href");
+    await card.click();
+    await expect(page).toHaveURL(new RegExp(`${href}$`));
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(page.locator("[data-header-overlay]")).toBeAttached();
+    await expect(page.locator("[data-header-overlay]")).toBeHidden();
+
+    const headerHeight = await page
+      .locator("[data-site-header]")
+      .evaluate((header) => header.getBoundingClientRect().height);
+    await expect(main).toHaveCSS("padding-top", `${headerHeight}px`);
+    await expect(page.locator("[data-site-header]")).toHaveAttribute("data-theme", "light");
+  });
 });
 
 test.describe("menu", () => {

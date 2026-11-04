@@ -192,7 +192,9 @@ styles ship:
 Alethia Next has old-style, proportional figures and no `lnum` or `tnum`
 feature: right-align numbers in lists so units line up. It has no manat sign
 (`₼`): prices show `AZN`. Azerbaijani text is set with `lang="az"` so `İ`/`i`
-and `I`/`ı` case correctly under `uppercase`.
+and `I`/`ı` case correctly under `uppercase`. The brand, "Kalbajar City", is a
+proper name and is marked `lang="en"` wherever it is uppercased, so it reads
+"CITY", never "CİTY".
 
 ### Type scale
 

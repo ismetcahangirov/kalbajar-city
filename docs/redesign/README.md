@@ -324,8 +324,8 @@ and screenshots `reference-shots/home/*`. Needs #63 and #64.
 - Stats pair two stats per `StatSwap` set (left and right label/value, the
   set number in the centre), so six stats make three sets
 - The wordmark is rendered with `lang="en"` so CSS uppercasing keeps
-  "CITY" rather than the Azerbaijani "CİTY"; the header's brand (#64) still
-  shows "CİTY" in az
+  "CITY" rather than the Azerbaijani "CİTY"; the shell's brand (header,
+  menu, footer, page-transition curtain) is marked the same way
 - Home no longer uses the legacy motion primitives (FadeUp, LineReveal,
   ImageReveal, Parallax, PinnedCardZoom, CountUp), the legacy ui components
   (Section, Container, Heading, Text, Button, Card, Stat, Eyebrow, Icon) or
@@ -376,8 +376,9 @@ parallel with #66.
   visually hidden; the giant word is `Pages.words.*`, one per locale
 - With `cacheComponents` a visited route stays in the DOM hidden, so
   `html:has([data-header-overlay])` (#64, shell.css) also matches while a
-  hidden page has a hero. Pages without an overlay looked right in testing,
-  but the selector should be scoped to the visible route if that changes
+  hidden page has a hero. The selector now ignores overlays inside a subtree
+  React's `<Activity>` hides (inline `display: none`), so the apartment page
+  keeps its header padding after the catalogue (`shell.spec.ts`)
 - `ChapterTabs`: the active underline sat at `bottom-u` and struck through the
   labels; it is now half a unit from the bottom
 - `ScreenSlider` (`/qalereya`) takes the first five gallery items, only when

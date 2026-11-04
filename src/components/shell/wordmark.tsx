@@ -6,6 +6,11 @@ import { cx } from "@/lib/cx";
 /**
  * The typeset name, linking home: the header's and the menu's logo, until
  * the owner supplies the vector logo (#7). `large` is the footer's.
+ *
+ * The name is set in capitals by CSS, and capitals follow the language: in
+ * an Azerbaijani document `i` becomes `İ`. The name is a proper name, read
+ * "CITY" in every locale, so its text is marked English. The link's
+ * accessible name (`aria-label`) stays in the page's language.
  */
 export function BrandLink({
   className,
@@ -28,7 +33,7 @@ export function BrandLink({
       )}
       {...rest}
     >
-      {t("brand")}
+      <span lang="en">{t("brand")}</span>
     </Link>
   );
 }
