@@ -282,16 +282,24 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "menu": "Menu",
-    "quickContact": "Quick contact",
     "contacts": "Contact",
     "phone": "Phone",
     "instagram": "Instagram",
-    "columnComplex": "The complex",
-    "columnUpdates": "Updates",
     "place": "Kalbajar, Azerbaijan",
     "developer": "Developer: {developer}",
     "rights": "© {year} Kalbajar City",
-    "whatsappMessage": "Hello! I am interested in an apartment at Kalbajar City."
+    "whatsappMessage": "Hello! I am interested in an apartment at Kalbajar City.",
+    "chooseApartment": "Choose an apartment",
+    "inquire": "Send a request",
+    "tagline": "A residential complex in Kalbajar",
+    "salesOffice": "Sales office",
+    "pages": "Pages",
+    "next": "Next",
+    "go": "Go",
+    "toTop": "Back to top",
+    "closeInquiry": "Close the request form",
+    "loading": "Loading",
+    "sections": "Sections of the page"
   },
   "Placeholder": {
     "body": "This page is being prepared."

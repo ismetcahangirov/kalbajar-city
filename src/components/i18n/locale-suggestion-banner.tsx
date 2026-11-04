@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { Icon } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { locales, type Locale } from "@/i18n/routing";
 
 import { useLocaleHref } from "./use-locale-href";

@@ -261,6 +261,16 @@ animated property; the layer moves by `transform`.
 | Tab bar          | Active tab follows the scroll; fades out over the footer                                                                                                                                                                                                                                               | `--duration-normal`                                                                                    |
 | Fixed buttons    | Fade in after load                                                                                                                                                                                                                                                                                     | `--duration-slow` `--ease-wipe`, 400 ms delay                                                          |
 
+Implementation notes (#64): A8 (home logo fade, mobile phone fade) and A42
+(footer rise), the teaser fade and the tab bar's fade over the footer are CSS
+scroll-driven animations (`animation-timeline: scroll(root)` / `view()`,
+`src/styles/shell.css`), so they add no shared JS; browsers without them show
+the final state. The menu, inquiry modal and curtain are server-rendered and
+open with `@starting-style` transitions; one delegated client controller
+(`src/components/shell/shell-dialogs.tsx`) opens and closes them. The
+preloader's inline script sets `html[data-preloader="on"]` before the first
+paint, and a CSS failsafe removes the overlay after 8 s if script never runs.
+
 The page transition intercepts same-origin navigations from
 `@/i18n/navigation` links only (`useRouter().push` after IN, OUT on the
 pathname change). Browser back and forward skip it. It never blocks a

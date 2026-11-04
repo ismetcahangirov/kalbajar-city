@@ -474,7 +474,7 @@ function FilterForm({
       <div
         className={
           drawer
-            ? "sticky bottom-0 mt-auto grid grid-cols-[3fr_2fr] bg-ink/60 px-layout pt-u2 pb-(--action-bar-inset) backdrop-blur-[10px]"
+            ? "sticky bottom-0 mt-auto grid grid-cols-[3fr_2fr] bg-ink/60 px-layout pt-u2 pb-(--safe-bottom) backdrop-blur-[10px]"
             : "flex flex-col"
         }
       >

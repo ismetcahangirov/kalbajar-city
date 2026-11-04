@@ -46,7 +46,7 @@ export async function Hero({ title, subtitle, poster, video, chips }: HeroProps)
           />
         </>
       )}
-      <Container className="flex w-full flex-col gap-block pt-[calc(var(--header-height)+var(--spacing-block))] pb-[calc(var(--action-bar-space)+var(--spacing-block))]">
+      <Container className="flex w-full flex-col gap-block pt-[calc(var(--header-height)+var(--spacing-block))] pb-block">
         <div className="flex flex-col gap-6">
           <Heading as="h1" size="display-xl" lang={title.fallback ? title.locale : undefined}>
             {title.value}

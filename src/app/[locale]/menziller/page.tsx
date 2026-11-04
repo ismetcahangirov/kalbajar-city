@@ -28,6 +28,7 @@ import {
   type CatalogueState,
   type FilterGroup,
 } from "@/shared/catalogue";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // Filtered views are real URLs read from searchParams, so the page renders
 // per request and is sent complete, not streamed behind Suspense (CLAUDE.md
@@ -89,85 +90,88 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
     : apartments("title");
 
   return (
-    <div
-      data-theme="dark"
-      className="relative isolate flex flex-1 flex-col bg-umber bg-(image:--gradient-curtain) bg-no-repeat text-(--t-text)"
-    >
-      <CurtainLines />
-      {/* The header runs transparent over the title, as over a hero. */}
-      <header
-        data-header-overlay=""
-        className="flex flex-col items-center gap-u2 px-layout pt-[calc(var(--header-height)+var(--u)*6)] pb-u6 text-center desk:pt-[calc(var(--header-height)+var(--u)*6)] desk:pb-u4"
+    <>
+      <div
+        data-theme="dark"
+        className="relative isolate flex flex-1 flex-col bg-umber bg-(image:--gradient-curtain) bg-no-repeat text-(--t-text)"
       >
-        <h1 className="text-title text-(--t-primary) uppercase">{title}</h1>
-        <p className="max-w-(--container-prose) text-body text-(--t-small)">{t("lead")}</p>
-      </header>
-
-      {/* Below the curtain's top 70svh sand fails 4.5 : 1 for small text,
-          so the filters and results set it in the text colour. */}
-      <div className="grid gap-y-u2 pb-[calc(var(--floating-bottom)+var(--u)*8)] [--t-small:var(--t-text)] lg:grid-cols-3 lg:pb-u12">
-        <div className="px-layout">
-          <CatalogueFilters facets={facets} applied={state} total={page.total} locale={locale} />
-        </div>
-
-        <section
-          aria-labelledby="catalogue-results"
-          className="flex min-w-0 flex-col gap-u2 px-layout lg:col-span-2"
+        <CurtainLines />
+        {/* The header runs transparent over the title, as over a hero. */}
+        <header
+          data-header-overlay=""
+          className="flex flex-col items-center gap-u2 px-layout pt-[calc(var(--header-height)+var(--u)*6)] pb-u6 text-center desk:pt-[calc(var(--header-height)+var(--u)*6)] desk:pb-u4"
         >
-          <div className="flex flex-wrap items-center justify-between gap-x-u2 border-b border-(--t-line) pb-u">
-            <h2 id="catalogue-results" className="sr-only">
-              {t("resultsLabel")}
-            </h2>
-            {/* Announced when applying filters re-renders the page in place. */}
-            <p role="status" className="text-label text-(--t-small) uppercase">
-              {t("results", { count: page.total })}
-              {page.pageCount > 1 && (
-                <span>
-                  {" · "}
-                  {t("pageOf", {
-                    page: formatNumber(state.page, locale),
-                    pages: formatNumber(page.pageCount, locale),
-                  })}
-                </span>
-              )}
-            </p>
-            <div className="ms-auto flex flex-wrap items-center justify-end gap-x-u2">
-              <ViewSwitch state={state} />
-              <CatalogueSort applied={state} pricesVisible={pricesVisible} locale={locale} />
-            </div>
+          <h1 className="text-title text-(--t-primary) uppercase">{title}</h1>
+          <p className="max-w-(--container-prose) text-body text-(--t-small)">{t("lead")}</p>
+        </header>
+
+        {/* Below the curtain's top 70svh sand fails 4.5 : 1 for small text,
+            so the filters and results set it in the text colour. */}
+        <div className="grid gap-y-u2 pb-[calc(var(--floating-bottom)+var(--u)*8)] [--t-small:var(--t-text)] lg:grid-cols-3 lg:pb-u12">
+          <div className="px-layout">
+            <CatalogueFilters facets={facets} applied={state} total={page.total} locale={locale} />
           </div>
 
-          {page.items.length === 0 ? (
-            <EmptyState state={state} locale={locale} pricesVisible={pricesVisible} />
-          ) : state.view === "list" ? (
-            <ul>
-              {page.items.map((apartment) => (
-                <ApartmentRow
-                  key={apartment.slug}
-                  apartment={apartment}
-                  locale={locale}
-                  pricesVisible={pricesVisible}
-                />
-              ))}
-            </ul>
-          ) : (
-            <ul className="grid gap-u2 desk:grid-cols-2">
-              {page.items.map((apartment) => (
-                <li key={apartment.slug}>
-                  <FlatCard apartment={apartment} locale={locale} pricesVisible={pricesVisible} />
-                </li>
-              ))}
-            </ul>
-          )}
+          <section
+            aria-labelledby="catalogue-results"
+            className="flex min-w-0 flex-col gap-u2 px-layout lg:col-span-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-x-u2 border-b border-(--t-line) pb-u">
+              <h2 id="catalogue-results" className="sr-only">
+                {t("resultsLabel")}
+              </h2>
+              {/* Announced when applying filters re-renders the page in place. */}
+              <p role="status" className="text-label text-(--t-small) uppercase">
+                {t("results", { count: page.total })}
+                {page.pageCount > 1 && (
+                  <span>
+                    {" · "}
+                    {t("pageOf", {
+                      page: formatNumber(state.page, locale),
+                      pages: formatNumber(page.pageCount, locale),
+                    })}
+                  </span>
+                )}
+              </p>
+              <div className="ms-auto flex flex-wrap items-center justify-end gap-x-u2">
+                <ViewSwitch state={state} />
+                <CatalogueSort applied={state} pricesVisible={pricesVisible} locale={locale} />
+              </div>
+            </div>
 
-          <Pagination state={state} pageCount={page.pageCount} locale={locale} />
-        </section>
+            {page.items.length === 0 ? (
+              <EmptyState state={state} locale={locale} pricesVisible={pricesVisible} />
+            ) : state.view === "list" ? (
+              <ul>
+                {page.items.map((apartment) => (
+                  <ApartmentRow
+                    key={apartment.slug}
+                    apartment={apartment}
+                    locale={locale}
+                    pricesVisible={pricesVisible}
+                  />
+                ))}
+              </ul>
+            ) : (
+              <ul className="grid gap-u2 desk:grid-cols-2">
+                {page.items.map((apartment) => (
+                  <li key={apartment.slug}>
+                    <FlatCard apartment={apartment} locale={locale} pricesVisible={pricesVisible} />
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Pagination state={state} pageCount={page.pageCount} locale={locale} />
+          </section>
+        </div>
+        <StructuredData
+          locale={locale}
+          nodes={[await breadcrumbs(locale, [{ name: apartments("title"), href: "/menziller" }])]}
+        />
       </div>
-      <StructuredData
-        locale={locale}
-        nodes={[await breadcrumbs(locale, [{ name: apartments("title"), href: "/menziller" }])]}
-      />
-    </div>
+      <NextChapter current="/menziller" />
+    </>
   );
 }
 

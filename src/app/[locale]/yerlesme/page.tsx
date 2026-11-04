@@ -15,6 +15,7 @@ import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { getLocationPage, getSiteContacts } from "@/lib/public/site";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // Reads the console's location copy and settings per request and sends the
 // page complete (CLAUDE.md → Data and state).
@@ -122,6 +123,7 @@ export default async function LocationPage() {
         locale={locale}
         nodes={[await breadcrumbs(locale, [{ name: nav("location"), href: "/yerlesme" }])]}
       />
+      <NextChapter current="/yerlesme" />
     </>
   );
 }

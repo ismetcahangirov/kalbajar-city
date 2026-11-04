@@ -1,6 +1,8 @@
 /*
- * The site shell: fixed header, mobile menu and mobile action bar
- * (src/components/shell). Values come from tokens.css.
+ * The site shell (src/components/shell): header, burger and menu, inquiry
+ * dialog, page transition, preloader, footer and its next-chapter teaser,
+ * the chapter tab bar and the fixed buttons. Values come from tokens.css;
+ * motion follows docs/motion-system.md → Chrome.
  */
 
 /* Page side padding that also clears a notch in landscape (viewport-fit=cover). */
@@ -10,19 +12,14 @@
 }
 
 :root {
-  /* Space under the action bar: the home indicator, or a small gap. */
-  --action-bar-inset: max(calc(var(--spacing) * 3), env(safe-area-inset-bottom));
-  /* What the action bar covers at the bottom of the viewport. */
-  --action-bar-space: calc(var(--spacing-control-lg) + var(--action-bar-inset));
-  /* Where other floating UI (the locale suggestion) sits: above the bar. */
-  --floating-bottom: calc(var(--action-bar-space) + var(--spacing) * 3);
-}
-
-@media (width >= 64rem) {
-  :root {
-    --action-bar-space: 0px;
-    --floating-bottom: var(--spacing-gutter);
-  }
+  /* The bottom edge of fixed UI: the layout padding, or the home indicator. */
+  --safe-bottom: max(var(--pad-layout), env(safe-area-inset-bottom));
+  /* Where floating UI sits (the locale suggestion, the fixed buttons, the
+     catalogue's filter button, the tab bar). */
+  --floating-bottom: var(--safe-bottom);
+  /* How far fixed buttons rise while the locale suggestion shows: its
+     tallest, two lines at 320 px. */
+  --locale-suggestion-space: 5.5rem;
 }
 
 @layer base {
@@ -36,34 +33,584 @@
     padding-top: 0;
   }
 
-  /* Over the hero: no background layer, and the night set of tokens (paper
-     text) from tokens.css. The layer fades in when the hero has passed. */
-  html:has([data-header-overlay]) [data-site-header]:not([data-solid]) [data-header-layer] {
-    opacity: 0;
+  /* An open shell dialog (menu, inquiry) covers the page; the page behind
+     it does not scroll. */
+  html:has(dialog[data-shell-dialog][open]) {
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  /* --- RollLink (A36) ------------------------------------------------- */
+
+  .roll-link {
+    position: relative;
+    display: inline-flex;
+    min-height: var(--spacing-target);
+    align-items: center;
+    font-size: var(--text-label);
+    line-height: var(--text-label--line-height);
+    letter-spacing: var(--text-label--letter-spacing);
+    font-weight: var(--text-label--font-weight);
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--t-small);
   }
 
-  /* The open menu covers the page; the page behind it does not scroll. */
-  html:has([data-mobile-menu][open]) {
+  /* The reference's hit area: 15 px past each side. */
+  .roll-link::before {
+    content: "";
+    position: absolute;
+    inset: 0 -15px;
+  }
+
+  .roll-link__clip {
+    position: relative;
+    display: grid;
     overflow: hidden;
   }
 
-  /* The menu wipes down from the top (motion-system.md → UI transitions).
-     Browsers without @starting-style open it instantly. */
-  [data-mobile-menu] {
-    clip-path: inset(0 0 100% 0);
-    transition-property: clip-path, display, overlay;
-    transition-duration: var(--duration-base);
-    transition-timing-function: var(--ease-in-out);
+  .roll-link__row {
+    grid-area: 1 / 1;
+    display: flex;
+  }
+
+  .roll-link__row > span {
+    display: block;
+    transition: translate var(--duration-button) var(--ease-wipe);
+    transition-delay: calc(var(--i) * var(--stagger-roll));
+  }
+
+  .roll-link__row[data-roll-row="2"] > span {
+    translate: 0 100%;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .roll-link:hover .roll-link__row[data-roll-row="1"] > span {
+      translate: 0 -100%;
+    }
+
+    .roll-link:hover .roll-link__row[data-roll-row="2"] > span {
+      translate: 0 0;
+    }
+  }
+
+  /* Reduced motion: no roll, an instant underline. */
+  @media (hover: hover) and (prefers-reduced-motion: reduce) {
+    .roll-link:hover .roll-link__row[data-roll-row="1"] {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  .roll-link[aria-current="page"] .roll-link__row[data-roll-row="1"] {
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
+  }
+
+  /* --- UnderlineLink -------------------------------------------------- */
+
+  /* The underline is redrawn on hover: the drawn one shrinks to the right
+     while a new one grows from the left, 50 ms behind. */
+  .underline-link {
+    position: relative;
+    display: inline-flex;
+    min-height: var(--spacing-target);
+    align-items: center;
+    gap: calc(var(--spacing) * 2);
+  }
+
+  .underline-link::before,
+  .underline-link::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 calc(var(--spacing) * 2.5);
+    height: 1px;
+    background-color: currentColor;
+    transition: scale var(--duration-button) var(--ease-wipe);
+  }
+
+  .underline-link::after {
+    transform-origin: right;
+  }
+
+  .underline-link::before {
+    transform-origin: left;
+    scale: 0 1;
+    transition-delay: 50ms;
+  }
+
+  @media (hover: hover) {
+    .underline-link:hover::after {
+      scale: 0 1;
+    }
+
+    .underline-link:hover::before {
+      scale: 1 1;
+    }
+  }
+
+  /* --- Burger (A38) --------------------------------------------------- */
+
+  .burger {
+    position: relative;
+    display: grid;
+    min-width: var(--spacing-target);
+    height: var(--spacing-target);
+    align-content: center;
+    gap: 3px;
+    color: var(--t-text);
+  }
+
+  .burger__line {
+    position: relative;
+    display: block;
+    width: 60px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .burger__line > span {
+    position: absolute;
+    inset: 0;
+    background-color: currentColor;
+    transition: translate var(--duration-slow) var(--ease-out);
+  }
+
+  /* The clone waiting on the left, which the hover brings in. */
+  .burger__line > span::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    right: calc(100% + 7px);
+    left: auto;
+    width: 100%;
+    background-color: currentColor;
+  }
+
+  .burger__line:first-child > span {
+    transition-delay: 80ms;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .burger:hover .burger__line > span {
+      translate: calc(100% + 7px) 0;
+    }
+
+    .burger:hover .burger__line:first-child > span {
+      transition-delay: 0ms;
+    }
+
+    .burger:hover .burger__line:last-child > span {
+      transition-delay: 120ms;
+    }
+  }
+
+  /* --- Header (A8–A10) ------------------------------------------------ */
+
+  /* Fixed and themed from the section under it (data-theme, set by
+     HeaderFrame): the text colour changes at once. The click-through frame
+     lets the page take pointer input between the controls. */
+  [data-site-header] {
+    pointer-events: none;
+    color: var(--t-small);
+  }
+
+  [data-site-header] :is(a, button) {
+    pointer-events: auto;
+  }
+
+  /* The frosted layer slides in once the page has scrolled (A9). */
+  [data-header-layer] {
+    translate: 0 -102%;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 0 1px var(--t-line-alt);
+    transition: translate var(--duration-slow) var(--ease-out);
+  }
+
+  [data-site-header][data-collapsed] [data-header-layer] {
+    translate: 0 0;
+  }
+
+  /* Home: the wordmark fades in over 18–23svh and, on phones, the phone
+     number fades out over 13–18svh (A8). CSS scroll-driven, so no script is
+     involved; browsers without scroll timelines, reduced motion and the
+     other pages show the final state. */
+  [data-header-phone-text] {
+    display: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      [data-site-header][data-home] [data-header-logo] {
+        animation: shell-appear linear both;
+        animation-timeline: scroll(root);
+        animation-range: 18svh 23svh;
+      }
+
+      [data-site-header][data-home] [data-header-phone-text] {
+        display: flex;
+        animation: shell-appear linear both reverse;
+        animation-timeline: scroll(root);
+        animation-range: 13svh 18svh;
+      }
+    }
+  }
+
+  /* Hidden (out of focus and pointer reach) only at the start. */
+  @keyframes shell-appear {
+    from {
+      opacity: 0;
+      visibility: hidden;
+    }
+    to {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  @keyframes shell-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* --- Shell dialogs: menu and inquiry --------------------------------- */
+
+  dialog[data-shell-dialog] {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+    transition-property: display, overlay;
+    transition-duration: var(--duration-slow);
     transition-behavior: allow-discrete;
   }
 
-  [data-mobile-menu][open] {
+  dialog[data-shell-dialog]::backdrop {
+    background-color: var(--color-ink);
+    opacity: 0;
+    transition-property: opacity, display, overlay;
+    transition-duration: var(--duration-slow);
+    transition-timing-function: var(--ease-out);
+    transition-behavior: allow-discrete;
+  }
+
+  /* Menu: the panel unrolls from the top over a 50 % ink backdrop; links
+     drop in from −20 %, the close button fades in. Reversed on close.
+     Browsers without @starting-style open and close at once. */
+  dialog[data-menu][open]::backdrop {
+    opacity: 0.5;
+  }
+
+  [data-menu-panel] {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path var(--duration-slow) var(--ease-out);
+  }
+
+  [data-menu-panel] [data-menu-item] {
+    translate: 0 -20%;
+    transition: translate var(--duration-slow) var(--ease-out);
+  }
+
+  [data-menu-panel] [data-dialog-close] {
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+
+  dialog[data-menu][open] [data-menu-panel] {
     clip-path: inset(0);
   }
 
+  dialog[data-menu][open] [data-menu-item] {
+    translate: 0 0;
+  }
+
+  dialog[data-menu][open] [data-dialog-close] {
+    opacity: 1;
+  }
+
   @starting-style {
-    [data-mobile-menu][open] {
+    dialog[data-menu][open]::backdrop {
+      opacity: 0;
+    }
+
+    dialog[data-menu][open] [data-menu-panel] {
       clip-path: inset(0 0 100% 0);
+    }
+
+    dialog[data-menu][open] [data-menu-item] {
+      translate: 0 -20%;
+    }
+
+    dialog[data-menu][open] [data-dialog-close] {
+      opacity: 0;
+    }
+  }
+
+  /* Menu cards: the cards not under the pointer turn sepia. A grayscale copy
+     of the image over the sepia tile (screen blend) fades in by opacity; no
+     filter is animated. */
+  [data-menu-sepia] {
+    opacity: 0;
+    transition: opacity var(--duration-slow) var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    [data-menu-cards]:hover [data-menu-card]:not(:hover) [data-menu-sepia] {
+      opacity: 1;
+    }
+  }
+
+  [data-menu-sepia] img {
+    filter: grayscale(1);
+    mix-blend-mode: screen;
+  }
+
+  /* Inquiry: the sand panel wipes in from the right with its close tab,
+     the content follows from 10 %, the backdrop darkens to 90 %. The form's
+     own states never animate. Full screen below lg, in --duration-normal. */
+  dialog[data-inquiry][open]::backdrop {
+    opacity: 0.9;
+  }
+
+  [data-inquiry-wipe] {
+    clip-path: inset(0 0 0 100%);
+    transition: clip-path var(--duration-normal) var(--ease-out);
+  }
+
+  [data-inquiry-content] {
+    translate: 10% 0;
+    transition: translate var(--duration-normal) var(--ease-out);
+  }
+
+  dialog[data-inquiry] [data-dialog-close] {
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  dialog[data-inquiry][open] [data-inquiry-wipe] {
+    clip-path: inset(0);
+  }
+
+  dialog[data-inquiry][open] [data-inquiry-content] {
+    translate: 0 0;
+  }
+
+  dialog[data-inquiry][open] [data-dialog-close] {
+    opacity: 1;
+  }
+
+  @media (width >= 64rem) {
+    [data-inquiry-wipe],
+    [data-inquiry-content],
+    dialog[data-inquiry] [data-dialog-close] {
+      transition-duration: var(--duration-slow);
+    }
+
+    dialog[data-inquiry][open] [data-inquiry-wipe] {
+      clip-path: inset(0 0 0 calc(50% - var(--inquiry-tab)));
+    }
+  }
+
+  @starting-style {
+    dialog[data-inquiry][open]::backdrop {
+      opacity: 0;
+    }
+
+    dialog[data-inquiry][open] [data-inquiry-wipe] {
+      clip-path: inset(0 0 0 100%);
+    }
+
+    dialog[data-inquiry][open] [data-inquiry-content] {
+      translate: 10% 0;
+    }
+
+    dialog[data-inquiry][open] [data-dialog-close] {
+      opacity: 0;
+    }
+  }
+
+  /* The close tab's cross turns a quarter on hover. */
+  [data-dialog-close] svg {
+    transition: rotate var(--duration-button) var(--ease-wipe);
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    [data-dialog-close]:hover svg {
+      rotate: -90deg;
+    }
+  }
+
+  /* --- Page transition ------------------------------------------------- */
+
+  /* The curtain is idle and out of the way until PageTransition plays it:
+     IN wipes it up over the page (clip from the bottom, background and
+     wordmark rising at their own pace, front lines drawing), OUT wipes it
+     off upward. */
+  [data-page-curtain] {
+    visibility: hidden;
+    clip-path: inset(100% 0 0 0);
+    pointer-events: none;
+  }
+
+  [data-page-curtain][data-state] {
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  [data-page-curtain] [data-curtain-bg] {
+    translate: 0 100svh;
+  }
+
+  [data-page-curtain] [data-curtain-logo] {
+    translate: 0 10svh;
+  }
+
+  [data-page-curtain] [data-curtain-front] [data-grid-line] {
+    scale: 1 0;
+    transform-origin: bottom;
+  }
+
+  [data-page-curtain][data-state="in"],
+  [data-page-curtain][data-state="hold"] {
+    clip-path: inset(0);
+    transition: clip-path var(--duration-slow) var(--ease-wipe);
+  }
+
+  [data-page-curtain]:is([data-state="in"], [data-state="hold"])
+    :is([data-curtain-bg], [data-curtain-logo]) {
+    translate: 0 0;
+    transition: translate var(--duration-slow) var(--ease-wipe);
+  }
+
+  [data-page-curtain]:is([data-state="in"], [data-state="hold"])
+    [data-curtain-front]
+    [data-grid-line] {
+    scale: 1 1;
+    transition: scale var(--duration-normal) linear var(--duration-normal);
+  }
+
+  [data-page-curtain][data-state="out"] {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path var(--duration-slow) var(--ease-wipe);
+  }
+
+  [data-page-curtain][data-state="out"] [data-curtain-bg] {
+    translate: 0 -100svh;
+    transition: translate var(--duration-slow) var(--ease-wipe);
+  }
+
+  [data-page-curtain][data-state="out"] [data-curtain-logo] {
+    translate: 0 -10svh;
+    transition: translate var(--duration-slow) var(--ease-wipe);
+  }
+
+  [data-page-curtain][data-state="out"] [data-curtain-front] [data-grid-line] {
+    scale: 1 1;
+  }
+
+  /* --- Preloader (home, first visit) ----------------------------------- */
+
+  /* Shown only when the inline script in Preloader has decided, before the
+     first paint, that this is the first visit and motion is allowed; without
+     script it never appears. If its driver never runs, it lets go after 8 s. */
+  [data-preloader-overlay] {
+    display: none;
+  }
+
+  html[data-preloader="on"] [data-preloader-overlay],
+  html[data-preloader="out"] [data-preloader-overlay] {
+    display: block;
+    animation: shell-preloader-failsafe 1ms 8s both;
+  }
+
+  html[data-preloader="on"] {
+    overflow: hidden;
+  }
+
+  html[data-preloader="out"] [data-preloader-overlay] {
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  [data-preloader-bg] {
+    translate: 0 100%;
+  }
+
+  @keyframes shell-preloader-failsafe {
+    to {
+      visibility: hidden;
+    }
+  }
+
+  /* --- Footer rise (A42) and the next-chapter teaser ------------------- */
+
+  /* The footer's content rises 5svh as the footer enters. CSS scroll-driven
+     like A8: without scroll timelines it simply stands. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) and (pointer: fine) {
+      [data-footer-rise] {
+        animation: shell-footer-rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 100%;
+      }
+    }
+  }
+
+  @keyframes shell-footer-rise {
+    from {
+      translate: 0 5svh;
+    }
+    to {
+      translate: 0 0;
+    }
+  }
+
+  /* The teaser's copy fades in once 80 % of it is in view. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      [data-teaser-copy] {
+        animation: shell-fade-in linear both;
+        animation-timeline: view();
+        animation-range: entry 70% entry 90%;
+      }
+    }
+  }
+
+  /* --- Chapter tabs and fixed buttons ---------------------------------- */
+
+  /* Both share the floating slot with the locale suggestion and rise above
+     it while it shows; both fade out over the footer. */
+  html:has([data-locale-suggestion]) :is([data-chapter-tabs], [data-fixed-buttons]) {
+    translate: 0 calc(-1 * var(--locale-suggestion-space));
+  }
+
+  [data-chapter-tabs],
+  [data-fixed-buttons] {
+    transition: opacity var(--duration-normal) var(--ease-out);
+  }
+
+  [data-chapter-tabs][data-over-footer],
+  [data-fixed-buttons][data-over-footer] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* The fixed buttons fade in after load. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-fixed-buttons] {
+      animation: shell-fade-in var(--duration-slow) var(--ease-wipe) 400ms backwards;
     }
   }
 }

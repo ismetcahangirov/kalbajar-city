@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { underlineLinkClass } from "@/components/shell/link-class";
+import { underlineLinkClass } from "@/components/shell/underline-link";
 import { Icon, Picture } from "@/components/ui";
 import { mapAppLinks, osmEmbedUrl, type LatLng, type MapApp } from "@/lib/maps";
 import type { PublicImage } from "@/lib/public/media";

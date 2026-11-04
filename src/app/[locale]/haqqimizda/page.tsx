@@ -15,6 +15,7 @@ import type { Locale } from "@/i18n/routing";
 import { factSentences } from "@/lib/facts";
 import { getAboutPage } from "@/lib/public/site";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { NextChapter } from "@/components/shell/next-chapter";
 
 // The copy, facts and amenities are console data: rendered per request and
 // sent complete (CLAUDE.md → Data and state).
@@ -140,6 +141,7 @@ export default async function AboutPage() {
           await breadcrumbs(locale, [{ name: nav("about"), href: "/haqqimizda" }]),
         ]}
       />
+      <NextChapter current="/haqqimizda" />
     </>
   );
 }

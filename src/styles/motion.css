@@ -143,8 +143,8 @@ html.lenis body {
   [data-pinned] [data-scene-caption] {
     position: absolute;
     inset-inline-start: var(--spacing-gutter);
-    /* Clear of the mobile action bar (shell.css). */
-    bottom: calc(var(--action-bar-space) + var(--spacing-gutter));
+    /* Above the bottom edge. */
+    bottom: var(--spacing-gutter);
     max-width: min(calc(100% - 2 * var(--spacing-gutter)), var(--container-prose));
     margin: 0;
     padding: calc(var(--spacing) * 5) calc(var(--spacing) * 6);

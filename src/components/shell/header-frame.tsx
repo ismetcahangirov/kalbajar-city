@@ -1,45 +1,59 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import { usePathname } from "@/i18n/navigation";
+import { onScrollFrame } from "@/lib/motion/frame";
+import { observeThemeAt } from "@/lib/shell/theme-observer";
 
 /**
- * The fixed header element. On a page whose hero carries
- * `data-header-overlay`, the header starts transparent over it (CSS, so it is
- * right from the first paint and without JavaScript) and turns solid once the
- * hero has passed under it. Pages without a hero get the solid header.
+ * The fixed header element (A8–A10). It never hides. It takes the theme of
+ * the section under its middle (`data-theme`, see observeThemeAt), and once
+ * the page has scrolled past its height the frosted layer slides in
+ * (`data-collapsed`), until the page is back within 10 px of the top. On
+ * the home page (`data-home`) the wordmark fades in with the scroll, in CSS
+ * (src/styles/shell.css). The attributes are written to the element, not
+ * rendered, so a scroll or a theme change never re-renders the header.
  */
 export function HeaderFrame({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLElement>(null);
   const pathname = usePathname();
-  const [solid, setSolid] = useState(false);
 
   useEffect(() => {
     const header = ref.current;
-    const hero = document.querySelector("[data-header-overlay]");
-    if (!header || !hero) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setSolid(entry ? !entry.isIntersecting : false),
-      // The hero counts as gone once its bottom edge is under the header.
-      { rootMargin: `-${header.offsetHeight}px 0px 0px 0px` },
+    if (!header) return;
+    return observeThemeAt(
+      () => header.offsetHeight / 2,
+      (theme) => header.setAttribute("data-theme", theme),
     );
-    observer.observe(hero);
-    return () => observer.disconnect();
   }, [pathname]);
+
+  useEffect(() => {
+    const header = ref.current;
+    if (!header) return;
+    let height = header.offsetHeight;
+    const onResize = () => (height = header.offsetHeight);
+    window.addEventListener("resize", onResize);
+    let collapsed = false;
+    const stop = onScrollFrame((scrollY) => {
+      const next = scrollY > height ? true : scrollY < 10 ? false : collapsed;
+      if (next === collapsed) return;
+      collapsed = next;
+      header.toggleAttribute("data-collapsed", next);
+    });
+    return () => {
+      stop();
+      window.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   return (
     <header
       ref={ref}
       data-site-header=""
-      data-solid={solid ? "" : undefined}
-      className="fixed inset-x-0 top-0 z-40 h-(--header-height) text-text"
+      data-home={pathname === "/" ? "" : undefined}
+      className="fixed inset-x-0 top-0 z-40 h-(--header-height)"
     >
-      <span
-        aria-hidden="true"
-        data-header-layer=""
-        className="absolute inset-0 border-b border-border bg-surface transition-opacity duration-(--duration-fast) ease-standard"
-      />
       {children}
     </header>
   );

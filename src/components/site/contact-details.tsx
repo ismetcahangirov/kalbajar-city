@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import { Localized } from "@/components/home/localized";
-import { underlineLinkClass } from "@/components/shell/link-class";
+import { underlineLinkClass } from "@/components/shell/underline-link";
 import { Icon } from "@/components/ui";
 import { whatsappHref } from "@/config/contacts";
 import { formatPhone, telHref } from "@/i18n/format";

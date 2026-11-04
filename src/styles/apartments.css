@@ -11,10 +11,6 @@
     translate: 0 calc(-1 * var(--locale-suggestion-space));
   }
 
-  :root {
-    --locale-suggestion-space: 5.5rem;
-  }
-
   /* An open full-screen dialog (filters, the floor plan) covers the page;
      the page behind it does not scroll. */
   html:has(dialog[data-scroll-lock][open]) {

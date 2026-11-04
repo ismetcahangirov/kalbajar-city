@@ -16,6 +16,7 @@ import {
   Stats,
 } from "@/components/home/sections";
 import { complexNode, StructuredData } from "@/components/seo/structured-data";
+import { Preloader } from "@/components/shell/preloader";
 import type { Tone } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getHomePage, type HomeSection } from "@/lib/public/home";
@@ -50,6 +51,8 @@ export default async function Home() {
 
   return (
     <>
+      {/* First, so its inline script decides before anything paints. */}
+      <Preloader />
       {hero && <Hero {...hero} />}
       {rest.map((section, i) =>
         // Surfaces alternate paper and limestone and heads alternate start

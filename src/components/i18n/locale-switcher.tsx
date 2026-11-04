@@ -46,10 +46,11 @@ function Links({ className, search }: { className?: string; search: string }) {
               aria-current={locale === current ? "true" : undefined}
               aria-label={t(locale)}
               className={cx(
-                "inline-flex min-h-target min-w-target items-center justify-center text-eyebrow uppercase",
+                "inline-flex min-h-target min-w-target items-center justify-center text-label uppercase",
+                // The current language is underlined, not only coloured.
                 locale === current
-                  ? "text-text underline decoration-1 underline-offset-4"
-                  : "text-text-muted hover:text-text",
+                  ? "text-(--t-text) underline decoration-1 underline-offset-4"
+                  : "text-(--t-small) hover:underline hover:decoration-1 hover:underline-offset-4",
               )}
             >
               {locale}

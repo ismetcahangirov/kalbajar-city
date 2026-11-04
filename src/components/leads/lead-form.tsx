@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
 import { Button, Checkbox, Icon, Input, Text, Textarea } from "@/components/ui";
+import { ArrowBlock } from "@/components/ui/arrow-block";
+import { FieldBox, FieldBoxInput, FieldNote } from "@/components/ui/field-box";
 import { formatPhone } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
@@ -27,6 +29,12 @@ export type LeadFormProps = {
   apartment?: { slug: string; label: string };
   /** The id of the heading that names the form. */
   labelledBy?: string;
+  /**
+   * `hairline`: the reference's `FieldBox` form on the theme tokens, with
+   * the `ArrowBlock` submit (the inquiry dialog). `default`: the current
+   * pages' fields, until #66/#68 move them over.
+   */
+  appearance?: "default" | "hairline";
   className?: string;
 };
 
@@ -75,7 +83,14 @@ export function LeadForm(props: LeadFormProps) {
   );
 }
 
-function LeadFormBody({ type, apartment, labelledBy, className }: LeadFormProps) {
+function LeadFormBody({
+  type,
+  apartment,
+  labelledBy,
+  appearance = "default",
+  className,
+}: LeadFormProps) {
+  const hairline = appearance === "hairline";
   const t = useTranslations("LeadForm");
   const locale = useLocale();
   const id = useId();
@@ -210,12 +225,32 @@ function LeadFormBody({ type, apartment, labelledBy, className }: LeadFormProps)
 
   const field = (name: Field) => ({ id: fieldId(name), error: errors[name] });
 
+  const consentLabel = t.rich("consent", {
+    link: (chunks) => (
+      <Link
+        href="/mexfilik-siyaseti"
+        target="_blank"
+        rel="noopener"
+        className="underline decoration-1 underline-offset-4"
+      >
+        {chunks}
+        <span className="sr-only"> {t("newTab")}</span>
+      </Link>
+    ),
+  });
+
   return (
     <div className={cx("flex flex-col gap-6", className)}>
       {/* Always rendered, so what is put in it is announced. Success moves focus instead. */}
       <div role="status" aria-live="polite" aria-atomic="true">
         {notice && (
-          <p className="flex items-start gap-2 border-s-2 border-error ps-4 text-body text-error">
+          <p
+            className={cx(
+              "flex items-start gap-2 border-s-2 border-error ps-4 text-body",
+              // On sand the error colour fails as text: it marks the rule and the icon.
+              hairline ? "text-(--t-text) [&_svg]:text-error" : "text-error",
+            )}
+          >
             <Icon icon={CircleAlert} className="mt-1" />
             <span>{notice.text}</span>
           </p>
@@ -227,18 +262,169 @@ function LeadFormBody({ type, apartment, labelledBy, className }: LeadFormProps)
           <p
             ref={successRef}
             tabIndex={-1}
-            className="flex items-center gap-3 text-legacy-title text-text outline-none"
+            className={cx(
+              "flex items-center gap-3 outline-none",
+              hairline ? "text-lead text-(--t-text)" : "text-legacy-title text-text",
+            )}
           >
-            <span className="text-status-available">
+            <span className={hairline ? undefined : "text-status-available"}>
               <Icon icon={CircleCheck} size={24} />
             </span>
             {t("success.title")}
           </p>
-          <Text tone="muted">{t("success.body")}</Text>
-          <Button variant="secondary" onClick={again}>
-            {t("success.again")}
-          </Button>
+          {hairline ? (
+            <>
+              <p className="text-body">{t("success.body")}</p>
+              <ArrowBlock as="button" tone="ink" onClick={again}>
+                {t("success.again")}
+              </ArrowBlock>
+            </>
+          ) : (
+            <>
+              <Text tone="muted">{t("success.body")}</Text>
+              <Button variant="secondary" onClick={again}>
+                {t("success.again")}
+              </Button>
+            </>
+          )}
         </div>
+      ) : hairline ? (
+        <form
+          method="post"
+          noValidate
+          aria-labelledby={labelledBy}
+          onSubmit={onSubmit}
+          className="@container flex flex-col gap-u2"
+        >
+          {apartment && <p className="text-body">{t("apartment", { label: apartment.label })}</p>}
+          <div className="flex flex-col gap-u">
+            <FieldBox columns={2}>
+              <FieldBoxInput
+                {...field("name")}
+                label={label.name}
+                name="name"
+                autoComplete="name"
+                required
+                maxLength={120}
+                value={values.name}
+                onChange={(event) => set("name", event.target.value)}
+              />
+              <FieldBoxInput
+                {...field("phone")}
+                label={label.phone}
+                helper={t("phoneHelper")}
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                required
+                maxLength={32}
+                value={values.phone}
+                onChange={(event) => set("phone", event.target.value)}
+                onBlur={() => {
+                  const e164 = normalizePhone(values.phone);
+                  if (e164) set("phone", formatPhone(e164));
+                }}
+              />
+              {fields.includes("email") && (
+                <FieldBoxInput
+                  {...field("email")}
+                  label={label.email}
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  maxLength={254}
+                  value={values.email}
+                  onChange={(event) => set("email", event.target.value)}
+                  // Alone on its row when no date follows it.
+                  className={fields.includes("preferredAt") ? undefined : "@lg:col-span-full"}
+                />
+              )}
+              {fields.includes("preferredAt") && (
+                <FieldBoxInput
+                  {...field("preferredAt")}
+                  label={label.preferredAt}
+                  helper={t("preferredAtHelper")}
+                  name="preferredAt"
+                  type="datetime-local"
+                  required
+                  min={minAt}
+                  step={900}
+                  value={values.preferredAt}
+                  onChange={(event) => set("preferredAt", event.target.value)}
+                />
+              )}
+              {fields.includes("message") && (
+                <FieldBoxInput
+                  {...field("message")}
+                  multiline
+                  label={label.message}
+                  name="message"
+                  maxLength={2000}
+                  value={values.message}
+                  onChange={(event) => set("message", event.target.value)}
+                />
+              )}
+            </FieldBox>
+            {(["name", "phone", "email", "preferredAt", "message"] as const)
+              .filter((name) => fields.includes(name) && errors[name])
+              .map((name) => (
+                <FieldNote key={name} id={`${fieldId(name)}-error`} tone="error">
+                  {errors[name]}
+                </FieldNote>
+              ))}
+            <FieldNote id={`${fieldId("phone")}-helper`}>{t("phoneHelper")}</FieldNote>
+            {fields.includes("preferredAt") && (
+              <FieldNote id={`${fieldId("preferredAt")}-helper`}>
+                {t("preferredAtHelper")}
+              </FieldNote>
+            )}
+          </div>
+
+          <div aria-hidden className="sr-only">
+            <label htmlFor={`${id}-website`}>{t("honeypot")}</label>
+            <input
+              ref={website}
+              id={`${id}-website`}
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              defaultValue=""
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Checkbox
+              id={fieldId("consent")}
+              size="box"
+              name="consent"
+              required
+              checked={consent}
+              error={errors.consent}
+              onChange={(event) => {
+                setConsent(event.target.checked);
+                clearError("consent");
+              }}
+              label={consentLabel}
+            />
+            {errors.consent && (
+              <FieldNote id={`${fieldId("consent")}-error`} tone="error">
+                {errors.consent}
+              </FieldNote>
+            )}
+          </div>
+
+          <ArrowBlock
+            as="button"
+            type="submit"
+            tone="ink"
+            aria-disabled={isLoading || undefined}
+            className="self-center"
+          >
+            {isLoading ? t("submitting") : t(`submit.${type}`)}
+          </ArrowBlock>
+        </form>
       ) : (
         <form
           method="post"
@@ -343,19 +529,7 @@ function LeadFormBody({ type, apartment, labelledBy, className }: LeadFormProps)
               setConsent(event.target.checked);
               clearError("consent");
             }}
-            label={t.rich("consent", {
-              link: (chunks) => (
-                <Link
-                  href="/mexfilik-siyaseti"
-                  target="_blank"
-                  rel="noopener"
-                  className="underline decoration-1 underline-offset-4"
-                >
-                  {chunks}
-                  <span className="sr-only"> {t("newTab")}</span>
-                </Link>
-              ),
-            })}
+            label={consentLabel}
           />
 
           <div>

@@ -157,11 +157,17 @@
   --text-eyebrow--letter-spacing: 0.2em;
   --text-eyebrow--font-weight: 500;
 
-  /* 100cqi: the Wordmark component's wrapper is an inline-size container. */
-  --text-wordmark: min(100cqi / 6, 15rem);
-  --text-wordmark--line-height: 0.9;
-  --text-wordmark--letter-spacing: -0.03em;
-  --text-wordmark--font-weight: 300;
+  /* The typeset wordmark until the vector logo arrives (#7): the header's
+     (the reference's 200 × 20 logo) and the footer's larger one. */
+  --text-logo: clamp(0.9375rem, 0.8259rem + 0.4571vw, 1.25rem);
+  --text-logo--line-height: 1;
+  --text-logo--letter-spacing: 0.2em;
+  --text-logo--font-weight: 300;
+
+  --text-logo-lg: clamp(1.375rem, 1.0179rem + 1.4286vw, 2.3125rem);
+  --text-logo-lg--line-height: 1;
+  --text-logo-lg--letter-spacing: 0.2em;
+  --text-logo-lg--font-weight: 300;
 
   /* Spacing and layout. The Tailwind base (--spacing: 0.25rem) stays.
      The reference unit and the layout padding switch at 668 px and 2400 px
@@ -260,6 +266,8 @@
   /* Gradients (ui-kit.md → Colour). The curtain: hero, preloader, page
      transition, catalogue. The facade: the render panel. */
   --gradient-curtain: linear-gradient(180deg, var(--color-ink), var(--color-umber) 100svh);
+  /* The next-chapter teaser's scrim under its copy (ui-kit.md → Imagery). */
+  --gradient-teaser-scrim: linear-gradient(180deg, transparent 60%, rgb(18 16 14 / 0.2));
   --gradient-facade: linear-gradient(
     180deg,
     var(--color-graphite) -4.81%,
@@ -282,7 +290,8 @@
   --focus-ring-offset: 3px;
   --opacity-disabled: 0.45;
 
-  --header-height: 4.5rem;
+  /* The fixed header: 40 px, 50 px from lg, 66 px from 2400 px. */
+  --header-height: 2.5rem;
 
   /* The console's own shape and type, which the public tokens above no
      longer match. admin.css points the shared names at these. */
@@ -309,7 +318,7 @@
 
 @media (width >= 64rem) {
   :root {
-    --header-height: 5.5rem;
+    --header-height: 3.125rem;
   }
 }
 
@@ -341,6 +350,7 @@
     --text-label--line-height: 1.25rem;
     --pad-layout: 30px;
     --u: 30px;
+    --header-height: 4.125rem;
   }
 }
 
@@ -366,6 +376,10 @@
   --t-control: var(--color-taupe);
 }
 
+/* Before the header's observer has run (first paint, no script), a page
+   that opens on a dark hero gives the header the dark set. */
+html:has([data-header-overlay]:is([data-tone="night"], [data-theme="dark"], [data-theme="darker"]))
+  [data-site-header]:not([data-theme]),
 [data-theme="dark"] {
   --t-bg: var(--color-ink);
   --t-text: var(--color-cream);
@@ -417,10 +431,8 @@
 }
 
 /* Dark set for a section and its subtree (legacy: new sections use
-   data-theme). Components never branch on tone. The header uses it too
-   while it is transparent over a hero (shell.css). */
-[data-tone="night"],
-html:has([data-header-overlay]) [data-site-header]:not([data-solid]) {
+   data-theme). Components never branch on tone. */
+[data-tone="night"] {
   --color-surface: var(--color-ink);
   --color-surface-alt: var(--color-graphite);
   --color-surface-raised: var(--color-ink-hover);

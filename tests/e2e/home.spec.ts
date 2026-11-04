@@ -94,6 +94,8 @@ test.describe("with reduced motion", () => {
       [...document.querySelectorAll<HTMLElement>("main *")]
         .filter((element) => Number(getComputedStyle(element).opacity) < 1)
         .filter((element) => !element.closest("[data-hero-video]"))
+        // The preloader never shows under reduced motion; its overlay stays out of the layout.
+        .filter((element) => !element.closest("[data-preloader-overlay]"))
         // `Checkbox` draws its own box over the native input, transparent by design.
         .filter((element) => !element.matches('input[type="checkbox"]'))
         .map((element) => element.outerHTML.slice(0, 80)),
