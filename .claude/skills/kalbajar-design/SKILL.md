@@ -23,6 +23,7 @@ Alethia Next.
 | [`references/pyzhevsky-pages.md`](references/pyzhevsky-pages.md)                   | The measured chrome, inner pages, hover, focus and form states                        |
 | [`references/motion-recipes.md`](references/motion-recipes.md)                     | How the engine and primitives are built and used                                      |
 | The redesign spec `docs/superpowers/specs/2026-11-04-pyzhevsky-redesign-design.md` | What is copied, what is not, and which scene each of our sections becomes             |
+| [`docs/redesign/README.md`](../../../docs/redesign/README.md)                      | Status, order and the brief for each remaining redesign issue; reference screenshots  |
 | pyzhevsky.ru itself                                                                | System only. Never take its renders, photos, copy, logo, map art or typefaces         |
 
 Read both docs before writing UI. This file is the checklist, not the source

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Response } from "@playwright/test";
 
 import { ensureAccount, signIn, waitForShell } from "./console";
 
@@ -78,11 +78,15 @@ test.describe("desktop", () => {
 
   test("public pages load none of the console's code", async ({ page }) => {
     const scripts: Promise<string>[] = [];
-    page.on("response", (response) => {
+    const collect = (response: Response) => {
       if (response.url().endsWith(".js")) scripts.push(response.text());
-    });
+    };
+    page.on("response", collect);
     await page.goto("/");
     await page.waitForLoadState("load");
+    // A chunk requested after load (a deferred island) would otherwise still
+    // be reading its body when the test ends, which fails the test.
+    page.off("response", collect);
     const bodies = await Promise.all(scripts);
     expect(bodies.length).toBeGreaterThan(0);
     for (const body of bodies) {

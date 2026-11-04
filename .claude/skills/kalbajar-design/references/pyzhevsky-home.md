@@ -1,6 +1,6 @@
 # pyzhevsky.ru: home page measured
 
-Reference: https://pyzhevsky.ru/ (landing only). Measured 2026-11-04 in Chrome via DevTools. Desktop 1440×900 @1x; mobile 390×844 @2x touch. Sources: ref/index.html, global.css, landing.css, landing.js, shared.js. Screenshots: ref/shots/home/*.jpeg (mobile files start with m).
+Reference: https://pyzhevsky.ru/ (landing only). Measured 2026-11-04 in Chrome via DevTools. Desktop 1440×900 @1x; mobile 390×844 @2x touch. Sources: ref/index.html, global.css, landing.css, landing.js, shared.js. Screenshots: `docs/redesign/reference-shots/home/*.jpeg` (mobile files start with m).
 
 Conventions: y = Lenis scroll position at 1440×900 (1 vh = 900px). "(inferred)" = not read from code or measured. Scroll ranges use the site's keys "parallax-A-B": point B% of the element (0 top, 100 bottom) sits at A% of the viewport. 100-0 = element top at viewport bottom; 0-0 = top at top; 0-100 = bottom at top (gone); -100-0 = top one viewport above top. "90svh" = element top crosses 90% of viewport height.
 
