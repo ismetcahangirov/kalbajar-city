@@ -118,6 +118,14 @@
   --text-label-xs--letter-spacing: 0.2em;
   --text-label-xs--font-weight: 500;
 
+  /* The home hero's wordmark (#66): the brand spread glyph by glyph over
+     two thirds of the width at 390 px and half of it at 1440 px
+     (pyzhevsky-home.md → S0), linear in the viewport width. */
+  --text-hero-mark: calc(0.636rem + 4.89vw);
+  --text-hero-mark--line-height: 1;
+  --text-hero-mark--letter-spacing: 0;
+  --text-hero-mark--font-weight: 300;
+
   /* Legacy type steps, aliased to the nearest new step. */
   --text-display-xl: var(--text-word);
   --text-display-xl--line-height: 1;

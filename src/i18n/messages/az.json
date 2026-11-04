@@ -8,8 +8,6 @@
     "title": "Kalbajar City",
     "tagline": "Kəlbəcərin ilk özəl yaşayış kompleksi",
     "hero": {
-      "apartments": "Mənzillərə baxın",
-      "viewing": "Baxışa yazılın",
       "chips": "Qısa məlumat",
       "chipApartments": "{count, plural, one {# mənzil} other {# mənzil}}",
       "chipRooms": "{min}–{max} otaq",
@@ -21,7 +19,8 @@
     "layouts": {
       "rooms": "{rooms} otaqlı mənzillər",
       "plans": "{count, plural, one {# plan} other {# plan}}",
-      "all": "Bütün mənzillər"
+      "all": "Bütün mənzillər",
+      "details": "{title}: ətraflı"
     },
     "construction": {
       "progress": "{percent} tamamlanıb",
@@ -30,7 +29,16 @@
     },
     "location": {
       "minutes": "{minutes} dəq",
-      "more": "Yerləşmə haqqında ətraflı"
+      "more": "Yerləşmə haqqında ətraflı",
+      "cards": "Yol vaxtı",
+      "unit": "dəq"
+    },
+    "words": {
+      "cardZoom": "MƏNZƏRƏ",
+      "amenities": "RAHATLIQ",
+      "location": "MƏKAN",
+      "construction": "TİKİNTİ",
+      "process": "ADDIMLAR"
     }
   },
   "Apartments": {

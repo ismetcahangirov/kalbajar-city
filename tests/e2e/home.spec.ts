@@ -39,8 +39,8 @@ const headings = {
 };
 
 /**
- * Section headings by accessible name: LineReveal splits a heading into line
- * spans and keeps its text in `aria-label`, so `textContent` loses spaces.
+ * Section headings by accessible name: a split heading keeps its text in
+ * `aria-label`, so `textContent` may lose spaces.
  *
  * The construction teaser (`#tikinti`) is left out: the seed has no published
  * update, and tests/e2e/content.spec.ts publishes one for a moment while
@@ -94,6 +94,10 @@ test.describe("with reduced motion", () => {
       [...document.querySelectorAll<HTMLElement>("main *")]
         .filter((element) => Number(getComputedStyle(element).opacity) < 1)
         .filter((element) => !element.closest("[data-hero-video]"))
+        // With a mouse, the layouts list shows one row's caption at a time (A33).
+        .filter((element) => !element.closest("[data-hover-caption]"))
+        // A ⊕ / ⊖ pair shows one of its two icons.
+        .filter((element) => !element.closest("[data-icon-open], [data-icon-closed]"))
         // The preloader never shows under reduced motion; its overlay stays out of the layout.
         .filter((element) => !element.closest("[data-preloader-overlay]"))
         // `Checkbox` draws its own box over the native input, transparent by design.
@@ -104,23 +108,35 @@ test.describe("with reduced motion", () => {
   });
 });
 
-test("the stat numeral and its unit do not overlap", async ({ page }) => {
-  await page.goto("/");
-  const total = page.getByLabel("Rəqəmlərlə Kalbajar City").locator("dd").first();
-  await total.scrollIntoViewIfNeeded();
-  await expect(total).toContainText("22 634");
-  const [numeral, unit] = await Promise.all([
-    total.locator("[data-stat-value]").boundingBox(),
-    total.getByText("m²").boundingBox(),
-  ]);
-  expect(numeral && unit && unit.x >= numeral.x + numeral.width).toBe(true);
+test("each stat value stays on one line inside the screen", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto("/ru");
+  const values = page.getByLabel("Kalbajar City в цифрах").locator("[data-stat-value]");
+  await expect(values.first()).toContainText("22 634");
+  const boxes = await values.evaluateAll((list) =>
+    list.map((value) => {
+      const box = value.getBoundingClientRect();
+      const line = parseFloat(getComputedStyle(value).lineHeight);
+      return { right: box.right, left: box.left, lines: Math.round(box.height / line) };
+    }),
+  );
+  for (const box of boxes) {
+    expect(box.left).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(320);
+    expect(box.lines).toBe(1);
+  }
 });
 
 test("layout cards lead to the filtered catalogue", async ({ page }) => {
   await page.goto("/en");
   const card = page.getByRole("link", { name: "2-room apartments" });
   await expect(card).toHaveAttribute("href", "/en/menziller?otaq=2");
-  await expect(page.getByText("74.4–102.17 m² · 2 layouts")).toBeVisible();
+  const caption = page.getByText("74.4–102.17 m² · 2 layouts");
+  // The second row: with a mouse its caption shows on hover, on touch its toggle opens it.
+  const mouse = await page.evaluate(() => matchMedia("(pointer: fine)").matches);
+  if (mouse) await card.hover();
+  else await page.getByRole("button", { name: "2-room apartments: details" }).click();
+  await expect(caption).toBeVisible();
 });
 
 test("hero chips summarise the inventory", async ({ page }) => {

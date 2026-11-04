@@ -202,19 +202,20 @@ measured 390 px and 1440 px values; above 1440 they hold, then step up at
 Tailwind `--text-*` token with its line height, tracking and weight; caps are
 the component's `uppercase`, not the token's.
 
-| Token             | Reference style              | Alethia Next                | 390   | 1440    | 1920    | 2400    |
-| ----------------- | ---------------------------- | --------------------------- | ----- | ------- | ------- | ------- |
-| `--text-word`     | `.h1` giant word, Halvar 400 | Light, caps, tracking 0     | 30/30 | 107/140 | 122/160 | 138/181 |
-| `--text-numeral`  | `.h2` numbers                | Light                       | 30/30 | 60/60   | —       | —       |
-| `--text-title`    | `.h3`                        | Light, caps, tracking .1em  | 30/30 | 45/60   | —       | —       |
-| `--text-lead-lg`  | Garamond 45                  | Light                       | 22/22 | 45/45   | 50/50   | 60/60   |
-| `--text-lead`     | Garamond 30                  | Light                       | 18/20 | 30/30   | 34/34   | 45/45   |
-| `--text-body`     | Garamond 16                  | Regular, tracking .02em     | 15/19 | 16/20   | 18/22   | 21/25   |
-| `--text-small-t`  | Garamond 13                  | Regular, tracking .02em     | 13/15 | 13/15   | —       | —       |
-| `--text-label`    | Halvar 500 10, caps .2em     | Medium, caps, tracking .2em | 10/16 | 11/18   | —       | 12/20   |
-| `--text-label-xs` | Halvar 500 8, caps .2em      | Medium, caps, tracking .2em | 10/12 | 10/12   | —       | —       |
-| `--text-logo`     | Header logo (an image there) | Light, caps, tracking .2em  | 15/15 | 20/20   | —       | —       |
-| `--text-logo-lg`  | Footer and curtain logo      | Light, caps, tracking .2em  | 22/22 | 37/37   | —       | —       |
+| Token              | Reference style                   | Alethia Next                | 390   | 1440    | 1920    | 2400    |
+| ------------------ | --------------------------------- | --------------------------- | ----- | ------- | ------- | ------- |
+| `--text-word`      | `.h1` giant word, Halvar 400      | Light, caps, tracking 0     | 30/30 | 107/140 | 122/160 | 138/181 |
+| `--text-numeral`   | `.h2` numbers                     | Light                       | 30/30 | 60/60   | —       | —       |
+| `--text-title`     | `.h3`                             | Light, caps, tracking .1em  | 30/30 | 45/60   | —       | —       |
+| `--text-lead-lg`   | Garamond 45                       | Light                       | 22/22 | 45/45   | 50/50   | 60/60   |
+| `--text-lead`      | Garamond 30                       | Light                       | 18/20 | 30/30   | 34/34   | 45/45   |
+| `--text-body`      | Garamond 16                       | Regular, tracking .02em     | 15/19 | 16/20   | 18/22   | 21/25   |
+| `--text-small-t`   | Garamond 13                       | Regular, tracking .02em     | 13/15 | 13/15   | —       | —       |
+| `--text-label`     | Halvar 500 10, caps .2em          | Medium, caps, tracking .2em | 10/16 | 11/18   | —       | 12/20   |
+| `--text-label-xs`  | Halvar 500 8, caps .2em           | Medium, caps, tracking .2em | 10/12 | 10/12   | —       | —       |
+| `--text-logo`      | Header logo (an image there)      | Light, caps, tracking .2em  | 15/15 | 20/20   | —       | —       |
+| `--text-logo-lg`   | Footer and curtain logo           | Light, caps, tracking .2em  | 22/22 | 37/37   | —       | —       |
+| `--text-hero-mark` | Home hero wordmark (an SVG there) | Light, caps, per glyph      | 29/29 | 81/81   | 104/104 | 128/128 |
 
 Sizes are px size / line height. "—" holds the previous value. The logo is
 set as text in Alethia Next until the owner sends a vector logo; it replaces
