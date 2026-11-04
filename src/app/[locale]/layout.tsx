@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { AnalyticsScripts } from "@/components/analytics/analytics-scripts";
@@ -15,7 +16,8 @@ import { Menu } from "@/components/shell/menu";
 import { PageTransition } from "@/components/shell/page-transition";
 import { ShellDialogs } from "@/components/shell/shell-dialogs";
 import { SkipLink } from "@/components/shell/skip-link";
-import { routing } from "@/i18n/routing";
+import { routing, type Locale } from "@/i18n/routing";
+import { getSiteContacts } from "@/lib/public/site";
 import { siteOrigin } from "@/lib/seo/url";
 
 import { alethia, alethiaItalic } from "../fonts";
@@ -41,7 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = { viewportFit: "cover" };
 
 export default async function LocaleLayout({ children }: LayoutProps<"/[locale]">) {
-  const locale = await getLocale();
+  // The shell shows the contacts from the console's settings (#27), so it is
+  // rendered per request; the settings themselves are cached and tagged.
+  await connection();
+  const locale = (await getLocale()) as Locale;
+  const contacts = await getSiteContacts(locale);
   return (
     <html
       lang={locale}
@@ -50,7 +56,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <SkipLink />
-          <Header />
+          <Header contacts={contacts} />
           <main
             id="main"
             tabIndex={-1}
@@ -59,11 +65,11 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
           >
             {children}
           </main>
-          <Footer />
-          <FixedButtons />
+          <Footer contacts={contacts} />
+          <FixedButtons contacts={contacts} />
           {/* Server-rendered dialogs and curtain; ShellDialogs and
               PageTransition drive them. */}
-          <Menu />
+          <Menu contacts={contacts} />
           <InquiryDialog />
           <PageTransition />
           <ShellDialogs />

@@ -2,7 +2,8 @@ import { MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { RoundButton } from "@/components/ui/round-button";
-import { contacts, whatsappHref } from "@/config/contacts";
+import { whatsappHref } from "@/config/contacts";
+import type { SiteContacts } from "@/lib/public/site";
 
 import { FixedButtonsFrame } from "./fixed-buttons-frame";
 
@@ -12,8 +13,9 @@ import { FixedButtonsFrame } from "./fixed-buttons-frame";
  * on every page (the call is in the header). It takes the theme of the
  * section under it, carries the one public shadow, rises above the locale
  * suggestion and fades out over the footer, which lists the same contact.
+ * The number comes from the console's settings (#27).
  */
-export function FixedButtons() {
+export function FixedButtons({ contacts }: { contacts: SiteContacts }) {
   const t = useTranslations("Shell");
   if (!contacts.whatsapp) return null;
   return (

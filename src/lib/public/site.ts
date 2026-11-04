@@ -25,6 +25,8 @@ export type Coordinates = NonNullable<SettingsValue<"contacts">["coordinates"]>;
 export type SiteContacts = {
   /** E.164; the first is the main line. */
   phones: string[];
+  /** The main line, which the call buttons in the header and menu dial. */
+  mainPhone: string;
   whatsapp: string | null;
   email: string | null;
   address: Localized | null;
@@ -82,8 +84,10 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
   ]);
   const maybe = (field: Translatable | null | undefined) =>
     field ? localize(field, locale) : null;
+  const phones = contacts?.phones.length ? contacts.phones : [...fallbackContacts.phones];
   return {
-    phones: contacts?.phones ?? [...fallbackContacts.phones],
+    phones,
+    mainPhone: phones[0] ?? fallbackContacts.phones[0],
     whatsapp: contacts ? contacts.whatsapp : fallbackContacts.whatsapp,
     email: contacts?.email ?? null,
     address: maybe(contacts?.address),

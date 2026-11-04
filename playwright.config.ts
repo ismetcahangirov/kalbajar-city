@@ -11,6 +11,9 @@ const baseURL = `http://localhost:${port}`;
 /** Where the E2E server sends lead e-mails; tests/e2e/leads.spec.ts reads them from Mailpit. */
 const leadsInbox = "sales@e2e.kalbajarcity.test";
 
+/** Specs that change site-wide values; see the `exclusive` project. */
+const exclusive = /\.exclusive\.spec\.ts$/;
+
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
@@ -44,9 +47,19 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
+      testIgnore: exclusive,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
-    { name: "mobile", use: { ...devices["Pixel 7"] } },
+    { name: "mobile", testIgnore: exclusive, use: { ...devices["Pixel 7"] } },
+    // Tests that change what every page shows (the main phone in the header,
+    // say) run alone, after the rest, so no other test sees their values.
+    {
+      name: "exclusive",
+      testMatch: exclusive,
+      dependencies: ["desktop", "mobile"],
+      fullyParallel: false,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
+    },
   ],
   // Runs the production build, not the dev server, so tests see what users get.
   webServer: {

@@ -3,9 +3,10 @@ import { cacheLife } from "next/cache";
 import { useTranslations } from "next-intl";
 
 import { RoundButton } from "@/components/ui/round-button";
-import { contacts, whatsappHref } from "@/config/contacts";
+import { whatsappHref } from "@/config/contacts";
 import { formatPhone, telHref } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
+import type { SiteContacts } from "@/lib/public/site";
 
 import { fullNav, privacyLink } from "./navigation";
 import { BrandLink } from "./wordmark";
@@ -24,16 +25,17 @@ async function currentYear(): Promise<number> {
  * The footer (reference pyzhevsky-pages.md §1.7) on light: the sales office
  * and contacts left, the up button, wordmark and tagline in the centre, the
  * site map right, the legal row below. Its content rises 5svh as it enters
- * (A42, CSS scroll-driven: src/styles/shell.css).
+ * (A42, CSS scroll-driven: src/styles/shell.css). The contacts come from
+ * the console's settings (#27).
  */
-export async function Footer() {
-  return <FooterContent year={await currentYear()} />;
+export async function Footer({ contacts }: { contacts: SiteContacts }) {
+  return <FooterContent year={await currentYear()} contacts={contacts} />;
 }
 
 const label = "text-label text-(--t-text) uppercase";
 const smallLink = "underline-link w-fit text-small-t";
 
-function FooterContent({ year }: { year: number }) {
+function FooterContent({ year, contacts }: { year: number; contacts: SiteContacts }) {
   const t = useTranslations("Shell");
   const nav = useTranslations("Navigation");
 
@@ -67,11 +69,17 @@ function FooterContent({ year }: { year: number }) {
                   </a>
                 </li>
               )}
-              <li>
-                <a href={contacts.instagram} rel="noopener noreferrer" className={smallLink}>
-                  {t("instagram")}
-                </a>
-              </li>
+              {contacts.socials.instagram && (
+                <li>
+                  <a
+                    href={contacts.socials.instagram}
+                    rel="noopener noreferrer"
+                    className={smallLink}
+                  >
+                    {t("instagram")}
+                  </a>
+                </li>
+              )}
             </ul>
             <p className="text-small-t">{t("place")}</p>
           </div>
