@@ -55,6 +55,7 @@ const usageLabels: Record<string, MessageKey> = {
   home_section: "media.usage.home_section",
   settings: "media.usage.settings",
   media: "media.usage.media",
+  selector_view: "media.usage.selector_view",
 };
 
 /** The console page where a usage is edited; the module's list until its editor exists. */
@@ -79,6 +80,8 @@ function usageHref(usage: MediaUsage): string | null {
       return adminModules.settings.href;
     case "media":
       return mediaItemHref(usage.entityId);
+    case "selector_view":
+      return `${adminModules.apartments.href}/secici`;
     default:
       return null;
   }

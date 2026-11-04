@@ -16,6 +16,7 @@ export const inventoryPages = {
   apartments: { href: base, label: "inventory.nav.apartments" },
   layouts: { href: `${base}/planlar`, label: "inventory.nav.layouts" },
   structure: { href: `${base}/struktur`, label: "inventory.nav.structure" },
+  selector: { href: `${base}/secici`, label: "inventory.nav.selector" },
   import: { href: `${base}/idxal`, label: "inventory.nav.import" },
 } as const satisfies Record<string, { href: string; label: MessageKey }>;
 
