@@ -15,12 +15,10 @@ import type { StaticPath } from "./navigation";
  */
 export function NextChapterLink({
   href,
-  label,
   go,
   children,
 }: {
   href: StaticPath;
-  label: string;
   go: string;
   children: ReactNode;
 }) {
@@ -32,7 +30,6 @@ export function NextChapterLink({
     <Link
       ref={area}
       href={href}
-      aria-label={label}
       className="relative isolate flex h-[18.75rem] flex-col items-center justify-end gap-u2 overflow-hidden px-layout pb-u4 desk:h-[30rem] desk:pb-u6"
     >
       {children}
