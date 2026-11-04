@@ -1,9 +1,8 @@
 "use client";
 
-import { Map as MapIcon } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { Button, Icon } from "@/components/ui";
+import { ArrowBlock } from "@/components/ui/arrow-block";
 
 type InteractiveMapProps = {
   /** The OpenStreetMap embed URL (`osmEmbedUrl`). */
@@ -12,15 +11,16 @@ type InteractiveMapProps = {
   title: string;
   /** The button that loads the map. */
   label: string;
-  /** What shows until then: the static map image, or nothing. */
+  /** What shows until then: the static map image, or the drawn ground and pin. */
   children?: ReactNode;
 };
 
 /**
  * Nothing third-party loads until the visitor asks for the map: the static
- * image (served with the site's media) and a button stand in for it, and only
- * the click puts the OpenStreetMap frame on the page. Focus moves to the frame,
- * so a keyboard user is not left on a button that no longer exists.
+ * image (served with the site's media), or the drawn ground with the pin,
+ * and a button stand in for it, and only the click puts the OpenStreetMap
+ * frame on the page. Focus moves to the frame, so a keyboard user is not
+ * left on a button that no longer exists.
  */
 export function InteractiveMap({ src, title, label, children }: InteractiveMapProps) {
   const [open, setOpen] = useState(false);
@@ -45,10 +45,10 @@ export function InteractiveMap({ src, title, label, children }: InteractiveMapPr
   return (
     <>
       {children}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <Button onClick={() => setOpen(true)} leadingIcon={<Icon icon={MapIcon} />}>
+      <div className="absolute inset-x-0 bottom-0 flex justify-end p-u">
+        <ArrowBlock tone="ink" onClick={() => setOpen(true)}>
           {label}
-        </Button>
+        </ArrowBlock>
       </div>
     </>
   );

@@ -2,15 +2,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ComponentProps } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Icon } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { Link } from "@/i18n/navigation";
 import { cx } from "@/lib/cx";
 import { pageWindow } from "@/shared/catalogue";
 
 type Href = ComponentProps<typeof Link>["href"];
 
+/** Caps labels in the theme's colours; the current page is filled, instantly. */
 const item =
-  "inline-flex min-h-target min-w-target items-center justify-center gap-1 rounded-full px-3 text-body";
+  "inline-flex min-h-target min-w-target items-center justify-center gap-1 border border-transparent px-u text-label uppercase";
 
 /**
  * Links to the other pages of a content list (#21). `href` gives each page's
@@ -33,7 +34,11 @@ export async function Pagination({
       <ul className="flex flex-wrap items-center gap-2">
         {page > 1 && (
           <li>
-            <Link href={href(page - 1)} rel="prev" className={cx(item, "hover:bg-surface-alt")}>
+            <Link
+              href={href(page - 1)}
+              rel="prev"
+              className={cx(item, "hover:border-(--t-control)")}
+            >
               <Icon icon={ChevronLeft} />
               <span className="sr-only sm:not-sr-only">{t("previous")}</span>
             </Link>
@@ -41,7 +46,7 @@ export async function Pagination({
         )}
         {pageWindow(page, pageCount).map((n, i) =>
           n === "gap" ? (
-            <li key={`gap-${i}`} aria-hidden className="px-1 text-text-muted">
+            <li key={`gap-${i}`} aria-hidden className="px-1">
               …
             </li>
           ) : (
@@ -52,7 +57,7 @@ export async function Pagination({
                 aria-current={n === page ? "page" : undefined}
                 className={cx(
                   item,
-                  n === page ? "bg-action text-action-text" : "hover:bg-surface-alt",
+                  n === page ? "bg-(--t-text) text-(--t-bg)" : "hover:border-(--t-control)",
                 )}
               >
                 {n}
@@ -62,7 +67,11 @@ export async function Pagination({
         )}
         {page < pageCount && (
           <li>
-            <Link href={href(page + 1)} rel="next" className={cx(item, "hover:bg-surface-alt")}>
+            <Link
+              href={href(page + 1)}
+              rel="next"
+              className={cx(item, "hover:border-(--t-control)")}
+            >
               <span className="sr-only sm:not-sr-only">{t("next")}</span>
               <Icon icon={ChevronRight} />
             </Link>

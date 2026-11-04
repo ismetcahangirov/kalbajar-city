@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Heading, Text } from "@/components/ui";
-
-/** What a content page shows before anything is published. */
+/** What a content page shows before anything is published: a hairline, a title, a line. */
 export function EmptyState({
   title,
   body,
@@ -13,13 +11,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-4 border-t border-border pt-block">
-      <Heading as="h2" size="heading">
-        {title}
-      </Heading>
-      <Text tone="muted" className="max-w-(--container-prose)">
-        {body}
-      </Text>
+    <div className="flex flex-col items-start gap-u2 border-t border-(--t-line) pt-u4">
+      <h2 className="text-title break-words hyphens-auto text-(--t-primary) uppercase">{title}</h2>
+      <p className="max-w-(--container-prose) text-body">{body}</p>
       {action}
     </div>
   );

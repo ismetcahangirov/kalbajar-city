@@ -20,18 +20,20 @@
     outline: none;
   }
 
+  /* Hairline shapes on the section's ground (#68): the theme's control
+     colour draws them (3 : 1), hover lays the 10 % line colour over them. */
   .kompleks-hotspot .kompleks-shape {
-    fill: var(--color-surface-raised);
-    stroke: var(--color-border-strong);
+    fill: var(--t-bg);
+    stroke: var(--t-control);
     stroke-width: 2;
   }
 
   .kompleks-hotspot:hover .kompleks-shape {
-    fill: var(--color-surface-alt);
+    fill: var(--t-line);
   }
 
   .kompleks-hotspot:focus-visible .kompleks-focus {
-    stroke: var(--color-focus);
+    stroke: var(--t-text);
     stroke-width: 6;
   }
 
