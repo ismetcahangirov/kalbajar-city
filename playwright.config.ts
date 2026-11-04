@@ -16,6 +16,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // Assertions wait up to 10 s, not 5: under a full parallel run (and on a
+  // laptop building other worktrees) a sign-out redirect or a catalogue
+  // query has taken longer than 5 s, failing tests that pass alone (#30).
+  expect: { timeout: 10_000 },
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   // An Azerbaijani browser by default, so the locale suggestion stays hidden
   // unless a test asks for another language.

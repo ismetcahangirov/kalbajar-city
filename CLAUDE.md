@@ -260,6 +260,21 @@ page adds on top: its own components. Code behind `next/dynamic` or
 islands (the inquiry form and its Redux store) are deferred. Lower the shared
 budget when the shell gets lighter; never raise it to fit a change.
 
+Lighthouse runs in CI (the `Lighthouse` job, `tests/lighthouse/`) on home,
+the catalogue, an apartment and an article, median of three, as a first
+visit against the production build. Desktop must score 93+ and CLS stay
+under 0.05 on both form factors. The mobile score is reported against the
+same 93 but does not fail CI yet: it is below budget (#30), and that job
+turns it into an error once it is met.
+
+Quality gates in E2E (#30), all part of `CI complete`: every public route ×
+`az`/`en`/`ru` × 320–1920 px without horizontal scroll
+(`quality-responsive.spec.ts`), axe-core with zero WCAG 2.2 AA violations
+(`quality-a11y.spec.ts`), every Tab stop visible with a focus indicator plus
+the inquiry journey by keyboard (`quality-keyboard.spec.ts`), and every route
+still and complete under reduced motion (`quality-reduced-motion.spec.ts`).
+A new public route is added to `tests/e2e/public-routes.ts`.
+
 ---
 
 ## 6. For agents
