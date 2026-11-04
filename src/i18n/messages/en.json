@@ -178,6 +178,62 @@
   "Media": {
     "illustrative": "Illustrative"
   },
+  "Defaults": {
+    "home": {
+      "hero": {
+        "poster": "A Kalbajar City residential building against the mountains at dusk (render)",
+        "panel": "The facade of a Kalbajar City building behind courtyard trees (render)"
+      },
+      "about": {
+        "image": "A facade with balconies and stone cladding (render)",
+        "background": "A street lined with Kalbajar City buildings (render)"
+      },
+      "stats": {
+        "background": "Linen draped over oak in soft daylight"
+      },
+      "layouts": {
+        "background": "Late sun on a plaster wall and an oak floor"
+      },
+      "cardZoom": {
+        "1": "A Kalbajar City building at sunset (render)",
+        "2": "A living room with a soft sofa and tall curtains (render)",
+        "3": "Close-up of a large window and timber details on the facade (render)",
+        "4": "A building seen through trees in evening light (render)"
+      },
+      "amenities": {
+        "window": "Mountains and a valley in soft light"
+      },
+      "location": {
+        "intro": "Kalbajar: a valley and a settlement beneath snow-capped peaks",
+        "moverLeft": "Close-up of mountain stone",
+        "moverRight": "Terrazzo and warm timber, close-up",
+        "card": {
+          "1": "A mountain river rushing between cliffs",
+          "2": "Green mountain slopes and a valley",
+          "3": "The peaks of the Kalbajar mountains",
+          "4": "A spring pool among coloured rocks",
+          "5": "Columnar cliffs and a cave",
+          "6": "Columnar basalt cliffs"
+        }
+      },
+      "construction": {
+        "background": "The construction site: a concrete frame and timber formwork"
+      },
+      "cta": {
+        "portrait": "An armchair and a plant in a sunlit room"
+      }
+    },
+    "page": {
+      "menziller": "A bedroom with a mountain view (render)",
+      "haqqimizda": "Mountain slopes in Kalbajar",
+      "kompleks": "The front facade of a Kalbajar City building (render)",
+      "yerlesme": "The Kalbajar valley and snowy mountains",
+      "qalereya": "A bright hallway with a writing desk (render)",
+      "tikinti": "The building under construction and the fenced path beside it",
+      "xeberler": "Construction: concrete floors and stacked timber",
+      "elaqe": "A wooden table under leaf shadows"
+    }
+  },
   "LocaleSwitcher": {
     "label": "Language",
     "az": "Azərbaycanca",

@@ -22,7 +22,8 @@
     "test:db": "vitest run --config vitest.db.config.mts",
     "auth:owner": "tsx scripts/auth-owner.mts",
     "storage:setup": "tsx scripts/storage-setup.mts",
-    "leads:retention": "tsx scripts/leads-retention.mts"
+    "leads:retention": "tsx scripts/leads-retention.mts",
+    "defaults:encode": "tsx scripts/defaults-encode.mts"
   },
   "dependencies": {
     "@dnd-kit/core": "6.3.1",
