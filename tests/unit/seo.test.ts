@@ -358,7 +358,7 @@ describe("sitemaps", () => {
         (entry) => new URL(entry.url).pathname,
       ),
     );
-    const fixtures = ["/primitivler", "/primitivler/hereket"];
+    const fixtures = ["/primitivler", "/primitivler/hereket", "/primitivler/hereket/kohne"];
     for (const route of Object.keys(pathnames)) {
       if (fixtures.includes(route)) continue;
       const sample = route.replace(
