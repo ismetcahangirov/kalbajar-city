@@ -62,7 +62,7 @@ export function LineReveal(props: ComponentProps<typeof Heading>) {
           const animations = (split?.inners ?? []).map((inner, i) => {
             inner.style.translate = "";
             return inner.animate([{ translate: hiddenLine }, { translate: "0 0" }], {
-              duration: duration.reveal,
+              duration: duration.entry,
               easing: ease.out,
               delay: delay + Math.min(i, stagger.max - 1) * stagger.block,
               fill: "backwards",

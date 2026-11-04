@@ -50,7 +50,7 @@ export type OgCard = {
   details?: string[];
 };
 
-/** A card: night background, gold eyebrow, the title large, details, the site's host. */
+/** A card: ink background, sand eyebrow, the title large, details, the site's host. */
 export async function ogImage({ eyebrow, title, details = [] }: OgCard): Promise<ImageResponse> {
   const { fonts, palette } = await loadAssets();
   const host = new URL(siteOrigin()).host;
@@ -65,8 +65,8 @@ export async function ogImage({ eyebrow, title, details = [] }: OgCard): Promise
         flexDirection: "column",
         justifyContent: "space-between",
         padding: "72px 80px",
-        backgroundColor: palette.night,
-        color: palette.paper,
+        backgroundColor: palette.ink,
+        color: palette.cream,
         fontFamily: "Alethia Next",
       }}
     >
@@ -77,7 +77,7 @@ export async function ogImage({ eyebrow, title, details = [] }: OgCard): Promise
           fontWeight: 500,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
-          color: palette["gold-light"],
+          color: palette["sand-hover"],
         }}
       >
         {eyebrow}
@@ -95,7 +95,7 @@ export async function ogImage({ eyebrow, title, details = [] }: OgCard): Promise
           {title}
         </div>
         {details.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", fontSize: 36, color: palette.mist }}>
+          <div style={{ display: "flex", flexWrap: "wrap", fontSize: 36, color: palette.sand }}>
             {details.join("  ·  ")}
           </div>
         )}
@@ -105,10 +105,10 @@ export async function ogImage({ eyebrow, title, details = [] }: OgCard): Promise
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderTop: `2px solid ${palette["stone-500"]}`,
+          borderTop: `2px solid ${palette.taupe}`,
           paddingTop: 28,
           fontSize: 28,
-          color: palette.mist,
+          color: palette.sand,
         }}
       >
         <span>{host}</span>

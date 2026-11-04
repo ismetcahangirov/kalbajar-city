@@ -152,7 +152,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
               {facts.map((fact) => (
                 <div key={fact.label} className="flex flex-col gap-1 border-b border-border py-4">
                   <dt className="text-small text-text-muted">{fact.label}</dt>
-                  <dd className="text-title">{fact.value}</dd>
+                  <dd className="text-legacy-title">{fact.value}</dd>
                 </div>
               ))}
             </dl>
@@ -201,7 +201,7 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
           </div>
 
           <figure className="flex flex-col gap-4 lg:order-1 lg:col-span-7">
-            <figcaption className="text-title">{t("plan")}</figcaption>
+            <figcaption className="text-legacy-title">{t("plan")}</figcaption>
             {apartment.plan ? (
               <PlanViewer image={apartment.plan} name={name} locale={locale} />
             ) : (

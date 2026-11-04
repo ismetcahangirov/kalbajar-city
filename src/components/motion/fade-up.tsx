@@ -47,7 +47,7 @@ export function FadeUp({ as = "div", group = false, ...props }: FadeUpProps) {
               { opacity: 0, translate: `0 ${rise}px` },
               { opacity: 1, translate: "0 0" },
             ],
-            { duration: duration.reveal, easing: ease.out, delay, fill: "backwards" },
+            { duration: duration.entry, easing: ease.out, delay, fill: "backwards" },
           );
           return () => animation.finish();
         },

@@ -39,7 +39,7 @@ export function Stat({
       <dt className="text-small text-text-muted">{label}</dt>
       <dd className="text-stat text-text">
         <span data-stat-value={value}>{numeral ?? formatted}</span>
-        {unit && <span className="ms-2 text-title text-text-muted">{unit}</span>}
+        {unit && <span className="ms-2 text-legacy-title text-text-muted">{unit}</span>}
       </dd>
     </div>
   );

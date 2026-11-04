@@ -17,7 +17,7 @@ import { Container, Eyebrow, Heading, Section, Stat, Text } from "@/components/u
 // 404 in production, so its sample copy does not go through the catalogues.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-type Swatch = "basalt" | "limestone" | "timber" | "moss" | "gold" | "stone-500";
+type Swatch = "ink" | "sand-hover" | "sepia" | "moss" | "sand" | "taupe";
 
 /** Striped stand-in media, so movement is visible until real photos exist. */
 function Placeholder({ from, to, label }: { from: Swatch; to: Swatch; label?: string }) {
@@ -29,7 +29,7 @@ function Placeholder({ from, to, label }: { from: Swatch; to: Swatch; label?: st
       }}
     >
       {label && (
-        <span data-tone="night" className="rounded-md px-4 py-2 text-title">
+        <span data-tone="night" className="rounded-md px-4 py-2 text-legacy-title">
           {label}
         </span>
       )}
@@ -40,25 +40,25 @@ function Placeholder({ from, to, label }: { from: Swatch; to: Swatch; label?: st
 const scenes: PinnedScene[] = [
   {
     key: "a",
-    swatch: ["basalt", "stone-500"],
+    swatch: ["ink", "taupe"],
     title: "Dağ havası",
     text: "Scene one fills the stage.",
   },
   {
     key: "b",
-    swatch: ["timber", "gold"],
+    swatch: ["sepia", "sand"],
     title: "Daş və taxta",
     text: "The card grows into scene two.",
   },
   {
     key: "c",
-    swatch: ["moss", "basalt"],
+    swatch: ["moss", "ink"],
     title: "Yaşamaq üçün",
     text: "Scene three appears as a card.",
   },
   {
     key: "d",
-    swatch: ["limestone", "stone-500"],
+    swatch: ["sand-hover", "taupe"],
     title: "Evə qayıdış",
     text: "The last scene, then the pin releases.",
   },
@@ -92,7 +92,7 @@ export default function MotionPlaygroundPage() {
         className="relative isolate flex min-h-[85svh] items-end overflow-hidden"
       >
         <Parallax variant="hero" className="absolute inset-0 -z-10">
-          <Placeholder from="basalt" to="stone-500" />
+          <Placeholder from="ink" to="taupe" />
         </Parallax>
         <Container className="pt-(--header-height) pb-block">
           <FadeUp data-testid="above-fold" className="flex flex-col gap-4">
@@ -145,20 +145,20 @@ export default function MotionPlaygroundPage() {
         <Container className="flex flex-col gap-block">
           <Eyebrow>ImageReveal</Eyebrow>
           <div className="grid gap-gutter md:grid-cols-3">
-            {(["timber", "moss", "basalt"] as const).map((swatch, i) => (
+            {(["sepia", "moss", "ink"] as const).map((swatch, i) => (
               <ImageReveal key={swatch} className="aspect-(--aspect-portrait) rounded-md">
-                <Placeholder from={swatch} to="gold" label={`Image ${i + 1}`} />
+                <Placeholder from={swatch} to="sand" label={`Image ${i + 1}`} />
               </ImageReveal>
             ))}
           </div>
           <ImageReveal className="aspect-(--aspect-hero) rounded-md">
-            <Placeholder from="limestone" to="stone-500" label="Wide image" />
+            <Placeholder from="sand-hover" to="taupe" label="Wide image" />
           </ImageReveal>
         </Container>
       </Section>
 
       <Parallax aria-label="Parallax" className="h-[70svh]">
-        <Placeholder from="moss" to="timber" label="Parallax" />
+        <Placeholder from="moss" to="sepia" label="Parallax" />
       </Parallax>
 
       <Section aria-label="CountUp">

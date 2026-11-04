@@ -3,8 +3,8 @@ import { extendTailwindMerge } from "tailwind-merge";
 
 /**
  * tailwind-merge only knows Tailwind's default scale. The project's type
- * tokens (`text-small`, `text-title`, …) would otherwise read as colours and
- * be dropped next to `text-text-muted`.
+ * tokens (`text-small`, `text-label`, …) would otherwise read as colours and be
+ * dropped next to `text-text-muted`.
  */
 const twMerge = extendTailwindMerge({
   extend: {
@@ -13,13 +13,21 @@ const twMerge = extendTailwindMerge({
         "display-xl",
         "display",
         "heading",
-        "title",
+        "legacy-title",
         "stat",
         "body-lg",
         "body",
         "small",
         "eyebrow",
         "wordmark",
+        "word",
+        "numeral",
+        "title",
+        "lead-lg",
+        "lead",
+        "small-t",
+        "label",
+        "label-xs",
       ],
     },
   },

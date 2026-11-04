@@ -5,6 +5,9 @@
  *
  * Tailwind's default palette, type scale, radii, shadows and easings are
  * cleared so that only these tokens exist as utilities.
+ *
+ * Tokens marked "legacy" exist only because a current component still uses
+ * them. #64–#68 rebuild those components on the new tokens and delete them.
  */
 
 @theme static {
@@ -17,44 +20,45 @@
   --ease-*: initial;
   --font-*: initial;
 
-  /* Palette: raw values. Components use the semantic tokens below. */
-  --color-chalk: #fbf9f5;
-  --color-paper: #f5f2ec;
-  --color-limestone: #eae4d9;
-  --color-stone-200: #d9d1c3;
-  --color-stone-500: #857b6d;
-  --color-stone-600: #655d52;
-  --color-basalt: #22201d;
-  --color-night: #161513;
-  --color-mist: #b9b1a4;
-  --color-gold: #b38b4d;
-  --color-gold-deep: #7e5f2c;
-  --color-gold-light: #d4b47c;
-  --color-timber: #7a4e31;
+  /* Palette: raw values, measured on pyzhevsky.ru (ui-kit.md → Colour).
+     Components use the theme tokens (--t-*) or the semantic tokens below. */
+  --color-ink: #12100e;
+  --color-ink-hover: #2f2b27;
+  --color-cream: #f7f2e8;
+  --color-cream-hover: #fffefb;
+  --color-sand: #bdb6a9;
+  --color-sand-hover: #d5cec1;
+  --color-taupe: #75736d;
+  --color-taupe-hover: #88857e;
+  --color-umber: #5f5a52;
+  --color-graphite: #1e1d1c;
+  --color-error: #a40000;
+  --color-sepia: #4e361f;
+  /* Not in the reference, which has no availability colour: the one colour
+     kept from the old palette, for the "available" status only. */
   --color-moss: #3f5a3c;
-  --color-brick: #9a2e22;
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  /* Semantic colours, light set. [data-tone="night"] redefines them. */
-  --color-surface: var(--color-paper);
-  --color-surface-alt: var(--color-limestone);
-  --color-surface-raised: var(--color-chalk);
-  --color-text: var(--color-basalt);
-  --color-text-muted: var(--color-stone-600);
-  --color-text-accent: var(--color-gold-deep);
-  --color-border: var(--color-stone-200);
-  --color-border-strong: var(--color-stone-500);
-  --color-action: var(--color-basalt);
-  --color-action-text: var(--color-paper);
-  --color-accent: var(--color-gold);
-  --color-focus: var(--color-gold-deep);
+  /* Semantic colours, light set. [data-tone="night"] redefines them. The
+     current components use these; new ones read the theme tokens. */
+  --color-surface: var(--color-cream);
+  --color-surface-alt: var(--color-cream-hover);
+  --color-surface-raised: var(--color-cream-hover);
+  --color-text: var(--color-ink);
+  --color-text-muted: var(--color-umber);
+  --color-text-accent: var(--color-umber);
+  --color-border: var(--color-sand);
+  --color-border-strong: var(--color-taupe);
+  --color-action: var(--color-ink);
+  --color-action-text: var(--color-cream);
+  --color-accent: var(--color-sand);
+  --color-focus: var(--color-ink);
   --color-status-available: var(--color-moss);
-  --color-status-reserved: var(--color-timber);
-  --color-status-sold: var(--color-stone-600);
-  --color-error: var(--color-brick);
-  /* The hero scrim: night from 0 % to 55 % opacity, hero only. */
-  --color-scrim: rgb(22 21 19 / 0.55);
+  --color-status-reserved: var(--color-sepia);
+  --color-status-sold: var(--color-umber);
+  /* The hero scrim: ink at 55 % opacity, hero only (legacy). */
+  --color-scrim: rgb(18 16 14 / 0.55);
 
   /* Type. --font-alethia is set by next/font on <html>. */
   --font-sans: var(--font-alethia), ui-sans-serif, system-ui, sans-serif;
@@ -66,43 +70,91 @@
   --font-weight-normal: 400;
   --font-weight-medium: 500;
 
-  --text-display-xl: clamp(3rem, 1.86rem + 5.71vw, 7rem);
-  --text-display-xl--line-height: 0.95;
-  --text-display-xl--letter-spacing: -0.025em;
+  /* The type scale (ui-kit.md → Type scale): fluid between the reference's
+     390 px and 1440 px values, stepping up at 1920 and 2400 px below.
+     Caps are set by the component (`uppercase`), not by the token. */
+  --text-word: clamp(1.875rem, 0.0875rem + 7.3333vw, 6.6875rem);
+  --text-word--line-height: clamp(1.875rem, -0.6786rem + 10.4762vw, 8.75rem);
+  --text-word--letter-spacing: 0;
+  --text-word--font-weight: 300;
+
+  --text-numeral: clamp(1.875rem, 1.1786rem + 2.8571vw, 3.75rem);
+  --text-numeral--line-height: clamp(1.875rem, 1.1786rem + 2.8571vw, 3.75rem);
+  --text-numeral--letter-spacing: 0;
+  --text-numeral--font-weight: 300;
+
+  --text-title: clamp(1.875rem, 1.5268rem + 1.4286vw, 2.8125rem);
+  --text-title--line-height: clamp(1.875rem, 1.1786rem + 2.8571vw, 3.75rem);
+  --text-title--letter-spacing: 0.1em;
+  --text-title--font-weight: 300;
+
+  --text-lead-lg: clamp(1.375rem, 0.8411rem + 2.1905vw, 2.8125rem);
+  --text-lead-lg--line-height: clamp(1.375rem, 0.8411rem + 2.1905vw, 2.8125rem);
+  --text-lead-lg--letter-spacing: 0;
+  --text-lead-lg--font-weight: 300;
+
+  --text-lead: clamp(1.125rem, 0.8464rem + 1.1429vw, 1.875rem);
+  --text-lead--line-height: clamp(1.25rem, 1.0179rem + 0.9524vw, 1.875rem);
+  --text-lead--letter-spacing: 0;
+  --text-lead--font-weight: 300;
+
+  --text-body: clamp(0.9375rem, 0.9143rem + 0.0952vw, 1rem);
+  --text-body--line-height: clamp(1.1875rem, 1.1643rem + 0.0952vw, 1.25rem);
+  --text-body--letter-spacing: 0.02em;
+  --text-body--font-weight: 400;
+
+  --text-small-t: 0.8125rem;
+  --text-small-t--line-height: 0.9375rem;
+  --text-small-t--letter-spacing: 0.02em;
+  --text-small-t--font-weight: 400;
+
+  --text-label: clamp(0.625rem, 0.6018rem + 0.0952vw, 0.6875rem);
+  --text-label--line-height: clamp(1rem, 0.9536rem + 0.1905vw, 1.125rem);
+  --text-label--letter-spacing: 0.2em;
+  --text-label--font-weight: 500;
+
+  --text-label-xs: 0.625rem;
+  --text-label-xs--line-height: 0.75rem;
+  --text-label-xs--letter-spacing: 0.2em;
+  --text-label-xs--font-weight: 500;
+
+  /* Legacy type steps, aliased to the nearest new step. */
+  --text-display-xl: var(--text-word);
+  --text-display-xl--line-height: 1;
+  --text-display-xl--letter-spacing: 0;
   --text-display-xl--font-weight: 300;
 
-  --text-display: clamp(2.25rem, 1.71rem + 2.68vw, 4.125rem);
-  --text-display--line-height: 1.05;
-  --text-display--letter-spacing: -0.02em;
+  --text-display: var(--text-title);
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: 0;
   --text-display--font-weight: 300;
 
-  --text-heading: clamp(1.5rem, 1.29rem + 1.07vw, 2.25rem);
+  --text-heading: var(--text-lead);
   --text-heading--line-height: 1.15;
-  --text-heading--letter-spacing: -0.01em;
+  --text-heading--letter-spacing: 0;
   --text-heading--font-weight: 300;
 
-  --text-title: clamp(1.125rem, 1.05rem + 0.36vw, 1.375rem);
-  --text-title--line-height: 1.3;
-  --text-title--letter-spacing: 0;
-  --text-title--font-weight: 400;
+  /* The old 18–22 px `title`: no new step is close, so it keeps its value
+     under a legacy name (the new --text-title is the 30–45 px caps title). */
+  --text-legacy-title: clamp(1.125rem, 1.05rem + 0.36vw, 1.375rem);
+  --text-legacy-title--line-height: 1.3;
+  --text-legacy-title--letter-spacing: 0;
+  --text-legacy-title--font-weight: 400;
 
-  --text-stat: clamp(2.5rem, 2.07rem + 2.14vw, 4rem);
+  --text-stat: var(--text-numeral);
   --text-stat--line-height: 1;
-  --text-stat--letter-spacing: -0.02em;
+  --text-stat--letter-spacing: 0;
   --text-stat--font-weight: 300;
 
-  --text-body-lg: clamp(1.125rem, 1.09rem + 0.18vw, 1.25rem);
-  --text-body-lg--line-height: 1.6;
+  --text-body-lg: var(--text-lead);
+  --text-body-lg--line-height: 1.3;
 
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.6;
+  --text-small: var(--text-small-t);
+  --text-small--line-height: 1.4;
 
-  --text-small: 0.9375rem;
-  --text-small--line-height: 1.5;
-
-  --text-eyebrow: 0.8125rem;
-  --text-eyebrow--line-height: 1.4;
-  --text-eyebrow--letter-spacing: 0.14em;
+  --text-eyebrow: var(--text-label);
+  --text-eyebrow--line-height: var(--text-label--line-height);
+  --text-eyebrow--letter-spacing: 0.2em;
   --text-eyebrow--font-weight: 500;
 
   /* 100cqi: the Wordmark component's wrapper is an inline-size container. */
@@ -111,7 +163,22 @@
   --text-wordmark--letter-spacing: -0.03em;
   --text-wordmark--font-weight: 300;
 
-  /* Spacing and layout. The Tailwind base (--spacing: 0.25rem) stays. */
+  /* Spacing and layout. The Tailwind base (--spacing: 0.25rem) stays.
+     The reference unit and the layout padding switch at 668 px and 2400 px
+     (:root below); these names make them utilities: `px-layout`, `pt-u6`.
+     Never name a spacing token `block`, `inline` or after a utility:
+     Tailwind derives `inline-<name>` and `block-<name>` sizes from it. */
+  --spacing-layout: var(--pad-layout);
+  --spacing-u: var(--u);
+  --spacing-u2: calc(var(--u) * 2);
+  --spacing-u3: calc(var(--u) * 3);
+  --spacing-u4: calc(var(--u) * 4);
+  --spacing-u6: calc(var(--u) * 6);
+  --spacing-u9: calc(var(--u) * 9);
+  --spacing-u12: calc(var(--u) * 12);
+
+  /* Legacy rhythm tokens. --spacing-block already collides with the
+     `inline-block` class (check-tokens.mjs forbids the class). */
   --spacing-gutter: clamp(1rem, 0.571rem + 2.143vw, 2.5rem);
   --spacing-block: clamp(2rem, 1.429rem + 2.857vw, 4rem);
   --spacing-section: clamp(5rem, 3.571rem + 7.143vw, 10rem);
@@ -121,14 +188,26 @@
   --container-page: 90rem;
   --container-prose: 40rem;
 
-  /* Shape and depth. */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  /* The reference's breakpoints on top of Tailwind's: `desk:` is its switch
+     from the 6-column mobile grid to 12 columns, `3xl:` and `4xl:` its large
+     type steps. */
+  --breakpoint-desk: 41.75rem;
+  --breakpoint-3xl: 120rem;
+  --breakpoint-4xl: 150rem;
+
+  /* Shape and depth. The public site is square: every radius is 0 except
+     round icon buttons (`rounded-full`). The console keeps its own radii
+     (:root below, mapped in admin.css). */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
   --radius-full: 9999px;
-  --shadow-raised: 0 1px 2px rgb(22 21 19 / 0.06), 0 12px 32px -16px rgb(22 21 19 / 0.18);
-  --shadow-frame: 0 24px 64px -24px rgb(22 21 19 / 0.45);
+  /* The only public shadow: the fixed round button. */
+  --drop-shadow-button: 0 10px 6px rgb(18 16 14 / 0.15);
+  /* Legacy, and the console's: cards, menus and the pinned frame. */
+  --shadow-raised: 0 1px 2px rgb(18 16 14 / 0.06), 0 12px 32px -16px rgb(18 16 14 / 0.18);
+  --shadow-frame: 0 24px 64px -24px rgb(18 16 14 / 0.45);
 
   /* Aspect ratios are CSS so images never shift layout. */
   --aspect-hero: 16 / 9;
@@ -136,8 +215,12 @@
   --aspect-grid: 4 / 3;
   --aspect-portrait: 3 / 4;
 
-  /* Easings (motion-system.md). */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Easings (motion-system.md → Tokens). */
+  --ease-out: cubic-bezier(0.25, 0.74, 0.22, 0.99);
+  --ease-wipe: cubic-bezier(0.7, 0, 0.4, 1);
+  --ease-exit: cubic-bezier(0.47, 0.04, 0.5, -0.06);
+  --ease-carousel: cubic-bezier(0.6, 0, 0.1, 1);
+  /* Legacy, used by the current primitives until #63 replaces them. */
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
@@ -146,9 +229,24 @@
   /* Durations and motion distances (motion-system.md). Mirrored in
      src/lib/motion/tokens.ts (a unit test keeps them in step). */
   --duration-fast: 200ms;
+  --duration-normal: 400ms;
+  --duration-button: 600ms;
+  --duration-slow: 800ms;
+  --duration-block: 1400ms;
+  --duration-reveal: 1600ms;
+  --stagger-line: 40ms;
+  --stagger-glyph: 50ms;
+  --stagger-char: 10ms;
+  --stagger-roll: 16ms;
+  --stagger-group: 180ms;
+  /* `filter: blur()` start values: text and image reveals, the slideshow. */
+  --motion-blur: 20px;
+  --motion-blur-soft: 10px;
+
+  /* Legacy motion tokens, used by the current primitives until #63. */
   --duration-base: 400ms;
   --duration-crossfade: 600ms;
-  --duration-reveal: 900ms;
+  --duration-entry: 900ms;
   --duration-wipe: 1200ms;
   --duration-count: 1600ms;
   --duration-settle: 2400ms;
@@ -157,11 +255,54 @@
   --motion-stagger-image: 120ms;
   --motion-parallax-scale: 1.16;
 
+  /* Gradients (ui-kit.md → Colour). The curtain: hero, preloader, page
+     transition, catalogue. The facade: the render panel. */
+  --gradient-curtain: linear-gradient(180deg, var(--color-ink), var(--color-umber) 100svh);
+  --gradient-facade: linear-gradient(
+    180deg,
+    var(--color-graphite) -4.81%,
+    var(--color-taupe) 72.11%
+  );
+
+  /* Grid and spacing (ui-kit.md → Grid). Mobile values; desktop below. */
+  --grid-columns: 6;
+  --pad-layout: 15px;
+  --u: 10px;
+  --grid-line-width: 1px;
+
+  /* Cap-height trimming fallback for browsers without `text-box`: Alethia
+     Next's ascender is 850 and its cap height 700 of 1000 units, its
+     descender 150, so the cap top and the baseline sit 0.15em inside the
+     content box on both sides (ui-kit.md → Cap-height trimming). */
+  --font-cap-trim: 0.15em;
+
   --focus-ring-width: 2px;
   --focus-ring-offset: 3px;
   --opacity-disabled: 0.45;
 
   --header-height: 4.5rem;
+
+  /* The console's own shape and type, which the public tokens above no
+     longer match. admin.css points the shared names at these. */
+  --console-radius-xs: 2px;
+  --console-radius-sm: 4px;
+  --console-radius-md: 8px;
+  --console-radius-lg: 16px;
+  --console-text-xs: 0.8125rem;
+  --console-text-xs--line-height: 1.4;
+  --console-text-xs--letter-spacing: 0.14em;
+  --console-text-sm: 0.9375rem;
+  --console-text-sm--line-height: 1.5;
+  --console-text-base: 1.0625rem;
+  --console-text-base--line-height: 1.6;
+}
+
+@media (width >= 41.75rem) {
+  :root {
+    --grid-columns: 12;
+    --pad-layout: 20px;
+    --u: 20px;
+  }
 }
 
 @media (width >= 64rem) {
@@ -170,20 +311,124 @@
   }
 }
 
-/* Dark set for a section and its subtree. Components never branch on tone.
-   The header uses it too while it is transparent over a hero (shell.css). */
+/* The reference's large steps (1920 px and 2400 px). */
+@media (width >= 120rem) {
+  :root {
+    --text-word: 7.625rem;
+    --text-word--line-height: 9.9766rem;
+    --text-lead-lg: 3.125rem;
+    --text-lead-lg--line-height: 3.125rem;
+    --text-lead: 2.125rem;
+    --text-lead--line-height: 2.125rem;
+    --text-body: 1.125rem;
+    --text-body--line-height: 1.375rem;
+  }
+}
+
+@media (width >= 150rem) {
+  :root {
+    --text-word: 8.625rem;
+    --text-word--line-height: 11.285rem;
+    --text-lead-lg: 3.75rem;
+    --text-lead-lg--line-height: 3.75rem;
+    --text-lead: 2.8125rem;
+    --text-lead--line-height: 2.8125rem;
+    --text-body: 1.3125rem;
+    --text-body--line-height: 1.5625rem;
+    --text-label: 0.75rem;
+    --text-label--line-height: 1.25rem;
+    --pad-layout: 30px;
+    --u: 30px;
+  }
+}
+
+/* Themes (ui-kit.md → Themes): a `data-theme` on a section sets the theme
+   tokens for its subtree, and new components read only these. Values follow
+   the reference's theme matrix, with its AA failures replaced by the nearest
+   palette colour that passes (tests/unit/contrast.test.ts). `--t-heading`,
+   `--t-primary` and `--t-secondary` are for text at 24 px and above (or
+   decoration); `--t-text` and `--t-small` pass at every size; `--t-control`
+   is the 3 : 1 boundary of inputs and checkboxes. */
+:root,
+[data-theme="light"] {
+  --t-bg: var(--color-cream);
+  --t-text: var(--color-ink);
+  --t-heading: var(--color-taupe);
+  --t-primary: var(--color-taupe);
+  /* Decoration only (1.80 : 1): aria-hidden giant words. */
+  --t-secondary: var(--color-sand);
+  /* The reference's 80 % taupe captions fail; ink passes. */
+  --t-small: var(--color-ink);
+  --t-line: rgb(18 16 14 / 0.1);
+  --t-line-alt: rgb(18 16 14 / 0.1);
+  --t-control: var(--color-taupe);
+}
+
+[data-theme="dark"] {
+  --t-bg: var(--color-ink);
+  --t-text: var(--color-cream);
+  --t-heading: var(--color-cream);
+  --t-primary: var(--color-sand);
+  --t-secondary: var(--color-taupe);
+  --t-small: var(--color-sand);
+  --t-line: rgb(247 242 232 / 0.1);
+  --t-line-alt: rgb(247 242 232 / 0.3);
+  --t-control: var(--color-sand);
+}
+
+[data-theme="darker"] {
+  --t-bg: var(--color-ink);
+  --t-text: var(--color-sand);
+  --t-heading: var(--color-cream);
+  --t-primary: var(--color-sand);
+  --t-secondary: var(--color-taupe);
+  --t-small: var(--color-sand);
+  --t-line: rgb(247 242 232 / 0.1);
+  --t-line-alt: rgb(247 242 232 / 0.3);
+  --t-control: var(--color-sand);
+}
+
+[data-theme="dark-alt"] {
+  --t-bg: var(--color-taupe);
+  /* The reference's cream on taupe is 4.25 : 1; cream-hover passes. */
+  --t-text: var(--color-cream-hover);
+  --t-heading: var(--color-cream);
+  --t-primary: var(--color-cream);
+  --t-secondary: var(--color-cream);
+  --t-small: var(--color-cream-hover);
+  --t-line: rgb(247 242 232 / 0.2);
+  --t-line-alt: rgb(247 242 232 / 0.2);
+  --t-control: var(--color-cream-hover);
+}
+
+[data-theme="sand"] {
+  --t-bg: var(--color-sand);
+  --t-text: var(--color-ink);
+  /* The reference sets headings on sand in ink; taupe would be 2.35 : 1. */
+  --t-heading: var(--color-ink);
+  --t-primary: var(--color-ink);
+  --t-secondary: var(--color-umber);
+  --t-small: var(--color-ink);
+  --t-line: rgb(18 16 14 / 0.1);
+  --t-line-alt: rgb(18 16 14 / 0.1);
+  --t-control: var(--color-umber);
+}
+
+/* Dark set for a section and its subtree (legacy: new sections use
+   data-theme). Components never branch on tone. The header uses it too
+   while it is transparent over a hero (shell.css). */
 [data-tone="night"],
 html:has([data-header-overlay]) [data-site-header]:not([data-solid]) {
-  --color-surface: var(--color-night);
-  --color-surface-alt: var(--color-basalt);
-  --color-surface-raised: var(--color-basalt);
-  --color-text: var(--color-paper);
-  --color-text-muted: var(--color-mist);
-  --color-text-accent: var(--color-gold-light);
-  --color-border: var(--color-stone-600);
-  --color-border-strong: var(--color-mist);
-  --color-action: var(--color-paper);
-  --color-action-text: var(--color-basalt);
-  --color-accent: var(--color-gold);
-  --color-focus: var(--color-gold-light);
+  --color-surface: var(--color-ink);
+  --color-surface-alt: var(--color-graphite);
+  --color-surface-raised: var(--color-ink-hover);
+  --color-text: var(--color-cream);
+  --color-text-muted: var(--color-sand);
+  --color-text-accent: var(--color-sand-hover);
+  --color-border: var(--color-umber);
+  --color-border-strong: var(--color-sand);
+  --color-action: var(--color-cream);
+  --color-action-text: var(--color-ink);
+  --color-accent: var(--color-sand);
+  --color-focus: var(--color-cream);
 }

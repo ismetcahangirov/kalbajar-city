@@ -89,7 +89,7 @@ export function ApartmentRow({ apartment, locale, pricesVisible }: Props) {
   const price = usePriceLabel(locale);
   return (
     <li className="relative flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-border py-4">
-      <h3 className="min-w-0 grow basis-full text-title sm:basis-auto">
+      <h3 className="min-w-0 grow basis-full text-legacy-title sm:basis-auto">
         <Link
           href={{ pathname: "/menziller/[slug]", params: { slug: apartment.slug } }}
           className={cx(
