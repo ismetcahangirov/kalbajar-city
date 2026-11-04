@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
+import { X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import {
@@ -12,27 +12,27 @@ import {
   useState,
   type FormEvent,
   type KeyboardEvent,
-  type ReactNode,
 } from "react";
 
 import { Localized } from "@/components/home/localized";
-import { Button, buttonClass, Checkbox, Icon, Input, Select } from "@/components/ui";
+import { Checkbox } from "@/components/ui";
+import { RangeHairline } from "@/components/ui/range-hairline";
+import { Segmented } from "@/components/ui/segmented";
 import type { Localized as LocalizedValue } from "@/i18n/content";
 import { formatNumber } from "@/i18n/format";
 import { getPathname, Link, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import { cx } from "@/lib/cx";
 import { publicApartmentStatuses } from "@/shared/apartments";
 import {
   activeGroups,
   catalogueKeys as keys,
-  catalogueSorts,
+  emptyFilters,
   parseCatalogueParams,
-  priceSorts,
   statusWord,
   toCatalogueQuery,
   withoutHiddenPrices,
   type CatalogueQuery,
-  type CatalogueSort,
   type CatalogueState,
 } from "@/shared/catalogue";
 
@@ -55,28 +55,27 @@ type Props = {
   locale: Locale;
 };
 
-const sortLabels: Record<CatalogueSort, string> = {
-  sahe: "areaAsc",
-  "-sahe": "areaDesc",
-  mertebe: "floorAsc",
-  "-mertebe": "floorDesc",
-  qiymet: "priceAsc",
-  "-qiymet": "priceDesc",
-};
-
 const FOCUSABLE = "a[href], button:not([disabled]), input:not([disabled]), select:not([disabled])";
 
+/** The caps buttons of the filter bar: show (cream) and reset (outlined). */
+const barButton =
+  "flex min-h-[3.125rem] items-center justify-center px-u text-center text-label uppercase";
+
 /**
- * The catalogue's filters: a sidebar from `lg`, a full-screen drawer below.
- * Both are one native GET form with the URL's own keys, so they work without
- * JavaScript. With it, the result count for the choice being edited comes
- * from the API (debounced) before it is applied, and applying navigates to
- * the clean URL. Forms never animate.
+ * The catalogue's filters in the hairline language (ui-kit.md → Segmented,
+ * RangeHairline, Checkbox): the left third of the page from `lg`, and below
+ * it a fixed "FİLTR" button opening a full-screen dialog with a sticky,
+ * blurred bar ("N MƏNZİL GÖSTƏR" | "SIFIRLA"). Both are one native GET form
+ * with the URL's own keys, so they work without JavaScript. With it, the
+ * result count for the choice being edited comes from the API (debounced)
+ * before it is applied, and applying navigates to the clean URL. Filters
+ * and results never animate. Sorting is in the results' header
+ * (`CatalogueSort`); the form carries the applied sort along.
  *
  * The count needs Redux and RTK Query, which would weigh more than the rest
  * of the page's own script (CLAUDE.md §5), so `CatalogueCount` is imported
  * only on the visitor's first interaction with the filters: focus, input or
- * opening the drawer. Until it answers, the apply button reads "Show".
+ * opening the dialog. Until it answers, the apply button reads "Show".
  */
 const CatalogueCount = dynamic(() => import("./catalogue-count"), { ssr: false });
 
@@ -154,6 +153,16 @@ function Filters({ facets, applied, total, locale }: Props) {
     });
   }
 
+  /** Clears every filter in the draft; the sort and the view stay. */
+  function clear() {
+    setDraft(
+      draftOf(
+        { ...emptyFilters, sort: applied.sort, page: 1, view: applied.view },
+        facets.pricesVisible,
+      ),
+    );
+  }
+
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     dialog.current?.close();
@@ -174,6 +183,10 @@ function Filters({ facets, applied, total, locale }: Props) {
   }
 
   const active = activeGroups(parseCatalogueParams(appliedDraft)).length;
+  const resetHref = {
+    pathname: "/menziller" as const,
+    query: toCatalogueQuery({ ...emptyFilters, sort: applied.sort, page: 1, view: applied.view }),
+  };
   const form = (variant: "sidebar" | "drawer") => (
     <FilterForm
       variant={variant}
@@ -186,6 +199,7 @@ function Filters({ facets, applied, total, locale }: Props) {
       onToggle={toggle}
       onSubmit={submit}
       onEngage={engage}
+      onClear={clear}
     />
   );
 
@@ -199,37 +213,51 @@ function Filters({ facets, applied, total, locale }: Props) {
           onCount={onCount}
         />
       )}
-      <div className="flex flex-wrap items-center gap-4 lg:hidden" data-print-hidden="">
-        <Button
-          variant="secondary"
-          onClick={() => {
-            dialog.current?.showModal();
-            setOpen(true);
-            engage();
-          }}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          aria-controls="catalogue-filters"
-          leadingIcon={<Icon icon={SlidersHorizontal} />}
-        >
-          {t("filters.open")}
-          {active > 0 && (
-            <span className="grid min-w-6 place-items-center rounded-full bg-action px-1.5 text-small text-action-text">
-              <span aria-hidden>{formatNumber(active, locale)}</span>
-              <span className="sr-only">{t("filters.active", { count: active })}</span>
-            </span>
-          )}
-        </Button>
-      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          dialog.current?.showModal();
+          setOpen(true);
+          engage();
+        }}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls="catalogue-filters"
+        data-print-hidden=""
+        data-filter-button=""
+        className={cx(
+          "fixed inset-x-0 bottom-(--floating-bottom) z-30 mx-auto flex min-h-[3.125rem] w-max min-w-[6.8125rem] items-center justify-center gap-2 px-u2",
+          "bg-ink text-label text-cream uppercase lg:hidden",
+          // Over the dark page and the cream cards alike: the ring sits inside.
+          "focus-visible:-outline-offset-4 focus-visible:outline-cream",
+        )}
+      >
+        {t("filters.heading")}
+        {active > 0 && (
+          <>
+            <span aria-hidden>({formatNumber(active, locale)})</span>
+            <span className="sr-only">{t("filters.active", { count: active })}</span>
+          </>
+        )}
+      </button>
 
       <aside
         aria-labelledby="catalogue-filters-title"
         className="hidden lg:block"
         data-print-hidden=""
       >
-        <h2 id="catalogue-filters-title" className="mb-6 text-legacy-title">
-          {t("filters.title")}
-        </h2>
+        <div className="flex items-center justify-between gap-u border-b border-(--t-line) pb-u">
+          <h2 id="catalogue-filters-title" className="text-label text-(--t-small) uppercase">
+            {t("filters.heading")}
+          </h2>
+          <Link
+            href={resetHref}
+            className="-me-[0.9375rem] flex min-h-target items-center px-[0.9375rem] text-label text-(--t-small) uppercase hover:text-(--t-text)"
+          >
+            {t("filters.resetShort")}
+          </Link>
+        </div>
         {form("sidebar")}
       </aside>
 
@@ -239,23 +267,27 @@ function Filters({ facets, applied, total, locale }: Props) {
         aria-labelledby="catalogue-filters-dialog-title"
         data-scroll-lock=""
         data-lenis-prevent=""
+        data-theme="dark"
         onClose={() => setOpen(false)}
         onKeyDown={trapFocus}
-        className="m-0 h-dvh max-h-none w-full max-w-none border-0 bg-surface p-0 text-text backdrop:bg-transparent lg:hidden"
+        className="m-0 h-dvh max-h-none w-full max-w-none border-0 bg-ink bg-(image:--gradient-curtain) p-0 text-(--t-text) [--t-small:var(--t-text)] backdrop:bg-transparent lg:hidden"
       >
         <div className="flex min-h-full flex-col">
-          <div className="sticky top-0 z-10 flex min-h-(--header-height) items-center justify-between gap-4 border-b border-border bg-surface px-page">
-            <h2 id="catalogue-filters-dialog-title" className="text-legacy-title">
-              {t("filters.title")}
+          <div className="flex items-center justify-between gap-u border-b border-(--t-line) px-layout py-u2">
+            <h2
+              id="catalogue-filters-dialog-title"
+              className="text-title text-(--t-primary) uppercase"
+            >
+              {t("filters.heading")}
             </h2>
             <button
               type="button"
               autoFocus
               onClick={() => dialog.current?.close()}
               aria-label={t("filters.close")}
-              className="-me-2.5 grid size-target shrink-0 place-items-center rounded-full"
+              className="grid size-target shrink-0 place-items-center border border-(--t-control) text-(--t-text)"
             >
-              <Icon icon={X} size={24} />
+              <X width={20} height={20} strokeWidth={1} aria-hidden focusable={false} />
             </button>
           </div>
           {open && form("drawer")}
@@ -277,6 +309,8 @@ type FormProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   /** The first focus or input: time to load the live count. */
   onEngage: () => void;
+  /** Clears the draft's filters (the dialog's "Reset"). */
+  onClear: () => void;
 };
 
 function listOf(value: string | string[] | undefined): string[] {
@@ -287,13 +321,11 @@ function textOf(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
-function Group({ legend, children }: { legend: string; children: ReactNode }) {
-  return (
-    <fieldset className="flex flex-col gap-2 border-0 p-0">
-      <legend className="mb-2 text-small font-medium text-text">{legend}</legend>
-      {children}
-    </fieldset>
-  );
+/** A slider step of about a hundredth of the span, rounded to 1, 10, 100… */
+function niceStep(bounds: { min: number; max: number } | null): number {
+  if (!bounds) return 1;
+  const raw = (bounds.max - bounds.min) / 100;
+  return raw <= 1 ? 1 : 10 ** Math.floor(Math.log10(raw));
 }
 
 function FilterForm({
@@ -307,65 +339,45 @@ function FilterForm({
   onToggle,
   onSubmit,
   onEngage,
+  onClear,
 }: FormProps) {
   const t = useTranslations("Catalogue.filters");
   const status = useTranslations("Status");
   const prefix = `${variant}-${useId().replace(/:/g, "")}`;
   const id = (name: string) => `${prefix}-${name}`;
   const drawer = variant === "drawer";
-  const sorts = catalogueSorts.filter((sort) => facets.pricesVisible || !priceSorts.includes(sort));
   const number = (value: number) => formatNumber(value, locale, { maximumFractionDigits: 0 });
-
-  const checkboxes = (
-    key: string,
-    options: Array<{ value: string; label: ReactNode }>,
-    columns: string,
-  ) => {
-    const selected = listOf(draft[key]);
-    return (
-      <div className={columns}>
-        {options.map((option) => (
-          <Checkbox
-            key={option.value}
-            id={id(`${key}-${option.value}`)}
-            name={key}
-            value={option.value}
-            label={option.label}
-            checked={selected.includes(option.value)}
-            onChange={(event) => onToggle(key, option.value, event.currentTarget.checked)}
-          />
-        ))}
-      </div>
-    );
-  };
-
+  const floors = facets.floors.length
+    ? { min: Math.min(...facets.floors), max: Math.max(...facets.floors) }
+    : null;
+  const sliderLabels = (legend: string) => ({
+    min: `${legend}: ${t("from")}`,
+    max: `${legend}: ${t("to")}`,
+    sliderMin: `${legend}: ${t("sliderFrom")}`,
+    sliderMax: `${legend}: ${t("sliderTo")}`,
+  });
   const range = (
+    legend: string,
     minKey: string,
     maxKey: string,
     bounds: { min: number; max: number } | null,
-    inputMode: "decimal" | "numeric",
+    options: { inputMode: "decimal" | "numeric"; format: (value: number) => string },
   ) => (
-    <div className="grid grid-cols-2 gap-3">
-      {[
-        { key: minKey, label: t("from"), placeholder: bounds?.min },
-        { key: maxKey, label: t("to"), placeholder: bounds?.max },
-      ].map((field) => (
-        <Input
-          key={field.key}
-          id={id(field.key)}
-          name={field.key}
-          label={field.label}
-          type="number"
-          inputMode={inputMode}
-          min={0}
-          step={inputMode === "decimal" ? "0.01" : "1"}
-          placeholder={field.placeholder !== undefined ? number(field.placeholder) : undefined}
-          value={textOf(draft[field.key])}
-          onChange={(event) => onSet(field.key, event.currentTarget.value)}
-        />
-      ))}
-    </div>
+    <RangeHairline
+      legend={legend}
+      idPrefix={id("range")}
+      names={[minKey, maxKey]}
+      value={[textOf(draft[minKey]), textOf(draft[maxKey])]}
+      bounds={bounds}
+      step={niceStep(bounds)}
+      fieldStep={options.inputMode === "decimal" ? "0.01" : "1"}
+      inputMode={options.inputMode}
+      labels={sliderLabels(legend)}
+      format={options.format}
+      onChange={(bound, value) => onSet(bound === 0 ? minKey : maxKey, value)}
+    />
   );
+  const sort = textOf(draft[keys.sort]);
 
   return (
     <form
@@ -375,117 +387,113 @@ function FilterForm({
       onFocus={onEngage}
       onInput={onEngage}
       onPointerDown={onEngage}
-      className={drawer ? "flex flex-1 flex-col" : "flex flex-col gap-8"}
+      className={drawer ? "flex flex-1 flex-col" : "flex flex-col gap-u3 pt-u2"}
     >
-      <div className={drawer ? "flex flex-col gap-8 py-block px-page" : "contents"}>
-        <Select
-          id={id(keys.sort)}
-          name={keys.sort}
-          label={t("sort")}
-          value={textOf(draft[keys.sort])}
-          onChange={(event) => onSet(keys.sort, event.currentTarget.value)}
-        >
-          <option value="">{t("sortDefault")}</option>
-          {sorts.map((sort) => (
-            <option key={sort} value={sort}>
-              {t(`sortOptions.${sortLabels[sort]}` as "sortOptions.areaAsc")}
-            </option>
-          ))}
-        </Select>
+      <div className={drawer ? "flex flex-col gap-u3 px-layout py-u2" : "contents"}>
+        {facets.blocks.length > 0 && (
+          <Segmented
+            legend={t("blocks")}
+            name={keys.blocks}
+            idPrefix={id(keys.blocks)}
+            value={listOf(draft[keys.blocks])}
+            options={facets.blocks.map((block) => ({
+              value: block.code,
+              // The code fits a cell; the full name is what is read out.
+              label: (
+                <>
+                  <span aria-hidden>{block.code}</span>
+                  <span className="sr-only">
+                    <Localized text={block.name} />
+                  </span>
+                </>
+              ),
+            }))}
+            onChange={(value, on) => onToggle(keys.blocks, value, on)}
+          />
+        )}
 
         {facets.rooms.length > 0 && (
-          <Group legend={t("rooms")}>
-            {checkboxes(
-              keys.rooms,
-              facets.rooms.map((rooms) => ({ value: String(rooms), label: number(rooms) })),
-              "flex flex-wrap gap-x-4",
-            )}
-          </Group>
+          <Segmented
+            legend={t("rooms")}
+            name={keys.rooms}
+            idPrefix={id(keys.rooms)}
+            value={listOf(draft[keys.rooms])}
+            options={facets.rooms.map((rooms) => ({
+              value: String(rooms),
+              label: number(rooms),
+            }))}
+            onChange={(value, on) => onToggle(keys.rooms, value, on)}
+          />
         )}
 
-        <Group legend={t("area")}>
-          {range(keys.areaMin, keys.areaMax, facets.area, "decimal")}
-        </Group>
+        {range(t("area"), keys.areaMin, keys.areaMax, facets.area, {
+          inputMode: "decimal",
+          // Whole numbers: browsers without Azerbaijani number data format
+          // decimals differently from the server, which breaks hydration.
+          format: number,
+        })}
 
-        {facets.floors.length > 0 && (
-          <Group legend={t("floor")}>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { key: keys.floorMin, label: t("floorFrom") },
-                { key: keys.floorMax, label: t("floorTo") },
-              ].map((field) => (
-                <Select
-                  key={field.key}
-                  id={id(field.key)}
-                  name={field.key}
-                  label={field.label}
-                  value={textOf(draft[field.key])}
-                  onChange={(event) => onSet(field.key, event.currentTarget.value)}
-                >
-                  <option value="">{t("any")}</option>
-                  {facets.floors.map((floor) => (
-                    <option key={floor} value={floor}>
-                      {formatNumber(floor, locale)}
-                    </option>
-                  ))}
-                </Select>
-              ))}
-            </div>
-          </Group>
-        )}
+        {facets.pricesVisible &&
+          range(t("price"), keys.priceMin, keys.priceMax, facets.price, {
+            inputMode: "numeric",
+            format: number,
+          })}
 
-        {facets.blocks.length > 0 && (
-          <Group legend={t("blocks")}>
-            {checkboxes(
-              keys.blocks,
-              facets.blocks.map((block) => ({
-                value: block.code,
-                label: <Localized text={block.name} />,
-              })),
-              "grid grid-cols-2 gap-x-4",
-            )}
-          </Group>
-        )}
+        {floors &&
+          range(t("floor"), keys.floorMin, keys.floorMax, floors, {
+            inputMode: "numeric",
+            format: number,
+          })}
 
-        <Group legend={t("statuses")}>
-          {checkboxes(
-            keys.statuses,
-            publicApartmentStatuses.map((value) => ({
-              value: statusWord(value),
-              label: status(value),
-            })),
-            "flex flex-col",
-          )}
-        </Group>
+        <fieldset className="m-0 flex min-w-0 flex-col border-0 p-0">
+          <legend className="mb-u p-0 text-label-xs text-(--t-small) uppercase">
+            {t("statuses")}
+          </legend>
+          {publicApartmentStatuses.map((value) => {
+            const word = statusWord(value);
+            return (
+              <Checkbox
+                key={value}
+                size="filter"
+                id={id(`${keys.statuses}-${word}`)}
+                name={keys.statuses}
+                value={word}
+                label={status(value)}
+                checked={listOf(draft[keys.statuses]).includes(word)}
+                onChange={(event) => onToggle(keys.statuses, word, event.currentTarget.checked)}
+              />
+            );
+          })}
+        </fieldset>
 
-        {facets.pricesVisible && (
-          <Group legend={t("price")}>
-            {range(keys.priceMin, keys.priceMax, facets.price, "numeric")}
-          </Group>
-        )}
-
+        {/* Kept from the results' header, so applying does not lose them. */}
+        {sort && <input type="hidden" name={keys.sort} value={sort} />}
         {view === "list" && <input type="hidden" name={keys.view} value="siyahi" />}
       </div>
 
       <div
         className={
           drawer
-            ? "sticky bottom-0 mt-auto flex flex-col gap-2 border-t border-border bg-surface pt-4 px-page pb-(--action-bar-inset)"
-            : "flex flex-col gap-2"
+            ? "sticky bottom-0 mt-auto grid grid-cols-[3fr_2fr] bg-ink/60 px-layout pt-u2 pb-(--action-bar-inset) backdrop-blur-[10px]"
+            : "flex flex-col"
         }
       >
-        <Button type="submit" size="lg" aria-describedby={id("count")}>
-          {count === undefined ? t("applyPending") : t("apply", { count })}
-        </Button>
-        <Link
-          href={{
-            pathname: "/menziller",
-            query: view === "list" ? { [keys.view]: "siyahi" } : {},
-          }}
-          className={buttonClass({ variant: "link", className: "self-center" })}
+        <button
+          type="submit"
+          aria-describedby={id("count")}
+          className={cx(barButton, "bg-cream text-ink")}
         >
-          {t("reset")}
-        </Link>
+          {count === undefined ? t("applyPending") : t("apply", { count })}
+        </button>
+        {drawer && (
+          <button
+            type="button"
+            onClick={onClear}
+            className={cx(barButton, "border border-(--t-control) text-(--t-text)")}
+          >
+            {t("resetShort")}
+          </button>
+        )}
         <p id={id("count")} role="status" className="sr-only">
           {count === undefined ? "" : t("matches", { count })}
         </p>

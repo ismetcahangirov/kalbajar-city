@@ -80,7 +80,11 @@
       "apply": "Show {count, plural, one {# apartment} other {# apartments}}",
       "applyPending": "Show",
       "matches": "{count, plural, one {# apartment matches} other {# apartments match}}",
-      "reset": "Clear filters"
+      "reset": "Clear filters",
+      "heading": "Filter",
+      "resetShort": "Reset",
+      "sliderFrom": "Minimum, slider",
+      "sliderTo": "Maximum, slider"
     },
     "empty": {
       "title": "No apartment matches this choice",
@@ -96,9 +100,12 @@
     },
     "card": {
       "floor": "Floor {floor}",
-      "rooms": "{rooms, plural, one {# room} other {# rooms}}"
+      "rooms": "{rooms, plural, one {# room} other {# rooms}}",
+      "number": "No. {number}",
+      "layout": "Layout {code}"
     },
-    "priceOnRequest": "Price on request"
+    "priceOnRequest": "Price on request",
+    "sortApply": "Sort"
   },
   "Complex": {
     "title": "The complex",
@@ -157,7 +164,12 @@
     "share": "Share",
     "copied": "Link copied.",
     "copyFailed": "The link could not be copied. Address: {url}",
-    "print": "Print"
+    "print": "Print",
+    "planTabs": "Plans",
+    "tabApartment": "Apartment",
+    "tabFloor": "Floor",
+    "inquire": "Make an inquiry",
+    "pricePerArea": "Price per m²"
   },
   "RoomKinds": {
     "living": "Living room",

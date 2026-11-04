@@ -184,6 +184,7 @@ export async function getPublicApartment(
         buildingName: buildings.name,
         roomAreas: layoutTypes.roomAreas,
         description: layoutTypes.description,
+        floorPlanMediaId: floors.planMediaId,
       })
       .from(apartments)
       .innerJoin(floors, eq(floors.id, apartments.floorId))
@@ -198,7 +199,7 @@ export async function getPublicApartment(
   if (!row) return null;
 
   const [images, gallery] = await Promise.all([
-    planImages(db, [row], locale),
+    planImages(db, [row, { planMediaId: row.floorPlanMediaId }], locale),
     layoutGallery(db, row.layoutId, locale),
   ]);
   return {
@@ -207,6 +208,7 @@ export async function getPublicApartment(
     roomAreas: row.roomAreas,
     description: row.description ? localize(row.description, locale) : null,
     gallery,
+    floorPlan: row.floorPlanMediaId ? (images.get(row.floorPlanMediaId) ?? null) : null,
   };
 }
 

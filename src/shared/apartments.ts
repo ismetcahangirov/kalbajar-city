@@ -131,6 +131,8 @@ export type PublicApartmentDetail = PublicApartment & {
   description: Localized | null;
   /** Images of the layout beyond its plan (interiors, views); often empty. */
   gallery: PublicImage[];
+  /** The plan of the apartment's floor, set per floor in the console; often null. */
+  floorPlan: PublicImage | null;
 };
 
 export type PublicLayoutType = {

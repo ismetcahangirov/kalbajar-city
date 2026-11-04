@@ -244,4 +244,19 @@ describe("getPublicApartment", () => {
     const other = await loaders.getPublicApartment(slugOf("m-22"), "az");
     expect(other?.gallery).toEqual([]);
   });
+
+  it("includes the plan of the apartment's floor when the floor has one", async () => {
+    const [, second] = ids.floors;
+    await db.update(floors).set({ planMediaId: ids.media }).where(eq(floors.id, second!));
+    try {
+      const upstairs = await loaders.getPublicApartment(slugOf("m-22"), "az");
+      expect(upstairs?.floorPlan).toEqual(
+        expect.objectContaining({ src: `https://cdn.test/kalbajar/catalogue-test/${tag}.jpg` }),
+      );
+      const downstairs = await loaders.getPublicApartment(slugOf("m-12"), "az");
+      expect(downstairs?.floorPlan).toBeNull();
+    } finally {
+      await db.update(floors).set({ planMediaId: null }).where(eq(floors.id, second!));
+    }
+  });
 });
