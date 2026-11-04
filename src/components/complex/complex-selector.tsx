@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { StatusBadge } from "@/components/apartments/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { formatArea, formatNumber } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -11,6 +12,7 @@ import {
   blockApartments,
   boxSize,
   canvas,
+  drawnView,
   facadeLayout,
   floorLayout,
   labelPoint,
@@ -18,12 +20,14 @@ import {
   siteLayout,
   statusCounts,
   toSvgPoints,
+  type Canvas,
   type ComplexSelectorData,
   type Polygon,
   type Selection,
   type SelectorApartment,
   type SelectorBlock,
   type SelectorFloor,
+  type SelectorPicture,
 } from "@/shared/complex";
 
 import { SelectionFocus } from "./selection-focus";
@@ -81,6 +85,22 @@ export function ComplexSelector({ data, selection, locale }: Props) {
   if (!data.blocks.length) {
     return <p className="text-body">{t("empty")}</p>;
   }
+
+  // The level's picture, once every hotspot on it is drawn in the console.
+  const view = !block
+    ? drawnView(
+        data.site,
+        data.blocks.map((item) => item.sitePolygon),
+      )
+    : !floor
+      ? drawnView(
+          block.facade,
+          block.floors.map((item) => item.facadePolygon),
+        )
+      : drawnView(
+          floor.plan,
+          floor.apartments.map((item) => item.planPolygon),
+        );
 
   const heading = !block
     ? t("headingBlocks")
@@ -145,14 +165,14 @@ export function ComplexSelector({ data, selection, locale }: Props) {
             {/* The plan on the page's ground inside a hairline frame. */}
             <div className="border border-(--t-line) p-u">
               {!block ? (
-                <BlocksPlan data={data} locale={locale} />
+                <BlocksPlan data={data} view={view} locale={locale} />
               ) : !floor ? (
-                <FloorsPlan block={block} locale={locale} />
+                <FloorsPlan block={block} view={view} locale={locale} />
               ) : (
-                <ApartmentsPlan block={block} floor={floor} locale={locale} />
+                <ApartmentsPlan block={block} floor={floor} view={view} locale={locale} />
               )}
             </div>
-            <figcaption className="text-small-t text-(--t-small)">{t("schematic")}</figcaption>
+            <Caption picture={view?.picture ?? null} />
           </figure>
         </section>
 
@@ -335,14 +355,49 @@ function Legend() {
 // ---------------------------------------------------------------------------
 // Plans
 
-function Plan({ label, children }: { label: string; children: ReactNode }) {
+/** A level drawn on its picture, or null for the schematic layout. */
+type View = { picture: SelectorPicture; canvas: Canvas } | null;
+
+/** What the plan shows: the schematic's note, or the picture's own caption. */
+function Caption({ picture }: { picture: SelectorPicture | null }) {
+  const t = useTranslations("Complex");
+  const media = useTranslations("Media");
+  if (!picture) {
+    return <figcaption className="text-small-t text-(--t-small)">{t("schematic")}</figcaption>;
+  }
+  return (
+    <figcaption className="flex flex-wrap items-center gap-u text-small-t text-(--t-small)">
+      {picture.illustrative && <Badge variant="illustrative">{media("illustrative")}</Badge>}
+      <span>{picture.alt ? `${picture.alt}. ${t("drawn")}` : t("drawn")}</span>
+    </figcaption>
+  );
+}
+
+/**
+ * The drawing: the schematic's blank canvas, or the picture under the
+ * hotspots drawn on it, at the picture's own aspect ratio.
+ */
+function Plan({ label, view, children }: { label: string; view: View; children: ReactNode }) {
+  const size = view?.canvas ?? canvas;
   return (
     <svg
-      viewBox={`0 0 ${canvas.width} ${canvas.height}`}
+      viewBox={`0 0 ${size.width} ${size.height}`}
       role="group"
       aria-label={label}
       className="kompleks-plan"
+      data-picture={view ? "" : undefined}
+      style={{ aspectRatio: `${size.width} / ${size.height}` }}
     >
+      {view && (
+        // The figure's label and the hotspots' names say what it shows.
+        <image
+          href={view.picture.src}
+          width={size.width}
+          height={size.height}
+          preserveAspectRatio="none"
+          aria-hidden
+        />
+      )}
       {children}
     </svg>
   );
@@ -352,6 +407,7 @@ function Hotspot({
   href,
   label,
   polygon,
+  size,
   status,
   testId,
   children,
@@ -359,11 +415,12 @@ function Hotspot({
   href: Parameters<typeof Link>[0]["href"];
   label: string;
   polygon: Polygon;
+  size: Canvas;
   status?: PublicApartmentStatus;
   testId: string;
   children: ReactNode;
 }) {
-  const points = toSvgPoints(polygon);
+  const points = toSvgPoints(polygon, size);
   return (
     <Link
       href={href}
@@ -382,26 +439,35 @@ function Hotspot({
 }
 
 /** Font sizes that fit a hotspot, in user units, capped for large shapes. */
-function fit(polygon: Polygon, big: number, small: number) {
-  const { width, height } = boxSize(polygon);
+function fit(polygon: Polygon, size: Canvas, big: number, small: number) {
+  const { width, height } = boxSize(polygon, size);
   return {
     big: Math.round(Math.min(big, height * 0.32, width * 0.3)),
     small: Math.round(Math.min(small, height * 0.16, width * 0.13)),
   };
 }
 
-function BlocksPlan({ data, locale }: { data: ComplexSelectorData; locale: Locale }) {
+function BlocksPlan({
+  data,
+  view,
+  locale,
+}: {
+  data: ComplexSelectorData;
+  view: View;
+  locale: Locale;
+}) {
   const t = useTranslations("Complex");
   const status = useTranslations("Status");
   const labels = useLabels(locale);
-  const layout = siteLayout(data.blocks);
+  const layout = view ? null : siteLayout(data.blocks);
+  const area = view?.canvas ?? canvas;
   return (
-    <Plan label={t("figureBlocks")}>
+    <Plan label={t("figureBlocks")} view={view}>
       {data.blocks.map((block) => {
-        const polygon = layout.get(block.code);
+        const polygon = layout ? layout.get(block.code) : block.sitePolygon;
         if (!polygon) return null;
-        const { x, y } = labelPoint(polygon);
-        const size = fit(polygon, 120, 30);
+        const { x, y } = labelPoint(polygon, area);
+        const size = fit(polygon, area, 120, 30);
         const available = statusCounts(blockApartments(block)).available;
         return (
           <Hotspot
@@ -409,6 +475,7 @@ function BlocksPlan({ data, locale }: { data: ComplexSelectorData; locale: Local
             href={selectorHref(block.code)}
             label={labels.block(block)}
             polygon={polygon}
+            size={area}
             testId={`blok-${block.code}`}
           >
             <text
@@ -448,26 +515,70 @@ function BlocksPlan({ data, locale }: { data: ComplexSelectorData; locale: Local
   );
 }
 
-function FloorsPlan({ block, locale }: { block: SelectorBlock; locale: Locale }) {
+function FloorsPlan({ block, view, locale }: { block: SelectorBlock; view: View; locale: Locale }) {
   const t = useTranslations("Complex");
   const labels = useLabels(locale);
-  const layout = facadeLayout(block.floors.map((floor) => floor.number));
+  const layout = view ? null : facadeLayout(block.floors.map((floor) => floor.number));
+  const area = view?.canvas ?? canvas;
   return (
-    <Plan label={t("figureFloors", { block: block.name.value })}>
+    <Plan label={t("figureFloors", { block: block.name.value })} view={view}>
       {block.floors.map((floor) => {
-        const polygon = layout.get(floor.number);
+        const polygon = layout ? layout.get(floor.number) : floor.facadePolygon;
         if (!polygon) return null;
+        const href = selectorHref(block.code, floor.number);
+        const label = labels.floorName(floor.number, floor.apartments);
+        const testId = `mertebe-${floor.number}`;
+        const available = t("available", { count: statusCounts(floor.apartments).available });
+        if (view) {
+          // A band drawn across a facade: the floor's name in its middle,
+          // swapped for what is available on hover and focus.
+          const { x, y } = labelPoint(polygon, area);
+          const { width, height } = boxSize(polygon, area);
+          const fontSize = Math.round(Math.min(44, height * 0.45, width * 0.09));
+          return (
+            <Hotspot
+              key={floor.number}
+              href={href}
+              label={label}
+              polygon={polygon}
+              size={area}
+              testId={testId}
+            >
+              <text
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={fontSize}
+                className="kompleks-summary fill-text"
+              >
+                {labels.floor(floor.number)}
+              </text>
+              <text
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={fontSize}
+                className="kompleks-detail fill-text"
+              >
+                {available}
+              </text>
+            </Hotspot>
+          );
+        }
         const [[left] = [0, 0], [right] = [0, 0]] = polygon;
-        const { y } = labelPoint(polygon);
-        const { height } = boxSize(polygon);
+        const { y } = labelPoint(polygon, area);
+        const { height } = boxSize(polygon, area);
         const size = Math.round(Math.min(44, height * 0.36));
         return (
           <Hotspot
             key={floor.number}
-            href={selectorHref(block.code, floor.number)}
-            label={labels.floorName(floor.number, floor.apartments)}
+            href={href}
+            label={label}
             polygon={polygon}
-            testId={`mertebe-${floor.number}`}
+            size={area}
+            testId={testId}
           >
             <text
               x={left * canvas.width + 28}
@@ -486,7 +597,7 @@ function FloorsPlan({ block, locale }: { block: SelectorBlock; locale: Locale })
               fontSize={size * 0.75}
               className="fill-text-muted"
             >
-              {t("available", { count: statusCounts(floor.apartments).available })}
+              {available}
             </text>
           </Hotspot>
         );
@@ -498,28 +609,32 @@ function FloorsPlan({ block, locale }: { block: SelectorBlock; locale: Locale })
 function ApartmentsPlan({
   block,
   floor,
+  view,
   locale,
 }: {
   block: SelectorBlock;
   floor: SelectorFloor;
+  view: View;
   locale: Locale;
 }) {
   const t = useTranslations("Complex");
   const labels = useLabels(locale);
   const card = useTranslations("Catalogue.card");
-  const cells = floorLayout(floor.apartments.length);
+  const cells = view ? null : floorLayout(floor.apartments.length);
+  const area = view?.canvas ?? canvas;
   return (
     <Plan
       label={t("figureApartments", {
         block: block.name.value,
         floor: formatNumber(floor.number, locale),
       })}
+      view={view}
     >
       {floor.apartments.map((apartment, index) => {
-        const polygon = cells[index];
+        const polygon = cells ? cells[index] : apartment.planPolygon;
         if (!polygon) return null;
-        const { x, y } = labelPoint(polygon);
-        const size = fit(polygon, 72, 34);
+        const { x, y } = labelPoint(polygon, area);
+        const size = fit(polygon, area, 72, 34);
         const line = size.small * 1.35;
         return (
           <Hotspot
@@ -527,6 +642,7 @@ function ApartmentsPlan({
             href={{ pathname: "/menziller/[slug]", params: { slug: apartment.slug } }}
             label={`${labels.apartmentName(block, apartment)}: ${labels.specs(apartment)}, ${labels.status(apartment.status)}`}
             polygon={polygon}
+            size={area}
             status={apartment.status}
             testId={`menzil-${apartment.slug}`}
           >

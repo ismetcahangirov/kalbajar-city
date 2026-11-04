@@ -3,11 +3,14 @@ import { describe, expect, it } from "vitest";
 import {
   boxSize,
   canvas,
+  drawnView,
   facadeLayout,
   floorLayout,
   hasSelectionParams,
   labelPoint,
+  pictureCanvas,
   resolveSelection,
+  selectorPolygonSchema,
   selectionQuery,
   siteLayout,
   statusCounts,
@@ -32,12 +35,18 @@ function block(code: string, building: string, floors: number[]): SelectorBlock 
         status: i === 1 ? "available" : i === 2 ? "reserved" : "sold",
         rooms: i,
         areaTotal: "60.50",
+        planPolygon: null,
       })),
+      facadePolygon: null,
+      plan: null,
     })),
+    sitePolygon: null,
+    facade: null,
   };
 }
 
 const data: ComplexSelectorData = {
+  site: null,
   blocks: [
     block("A", "bina-1", [1, 2, 3]),
     block("B", "bina-1", [1, 2]),
@@ -158,5 +167,82 @@ describe("complex selector geometry", () => {
     );
     expect(labelPoint(square)).toEqual({ x: canvas.width / 4, y: canvas.height / 4 });
     expect(boxSize(square)).toEqual({ width: canvas.width / 2, height: canvas.height / 2 });
+  });
+});
+
+describe("complex selector drawn hotspots", () => {
+  const picture = { src: "/x.webp", width: 1600, height: 900, alt: "", illustrative: false };
+  const triangle: Polygon = [
+    [0.1, 0.1],
+    [0.4, 0.1],
+    [0.1, 0.4],
+  ];
+
+  it("stores polygons rounded, inside the picture and with an area", () => {
+    expect(
+      selectorPolygonSchema.parse([
+        [0.123456, 0],
+        [1, 0],
+        [1, 1],
+      ]),
+    ).toEqual([
+      [0.1235, 0],
+      [1, 0],
+      [1, 1],
+    ]);
+    expect(
+      selectorPolygonSchema.safeParse([
+        [0, 0],
+        [1, 1],
+      ]).success,
+    ).toBe(false);
+    expect(
+      selectorPolygonSchema.safeParse([
+        [0, 0],
+        [1.2, 0],
+        [1, 1],
+      ]).success,
+    ).toBe(false);
+    // Three points on one line enclose nothing: a misclick, not a hotspot.
+    expect(
+      selectorPolygonSchema.safeParse([
+        [0, 0],
+        [0.5, 0.5],
+        [1, 1],
+      ]).success,
+    ).toBe(false);
+    expect(selectorPolygonSchema.safeParse(Array.from({ length: 65 }, () => [0, 0])).success).toBe(
+      false,
+    );
+  });
+
+  it("draws a level on its picture only when every hotspot is drawn", () => {
+    expect(drawnView(null, [triangle])).toBeNull();
+    expect(drawnView(picture, [])).toBeNull();
+    expect(drawnView(picture, [triangle, null])).toBeNull();
+    expect(drawnView(picture, [triangle])).toEqual({
+      picture,
+      canvas: { width: 1000, height: 563 },
+      polygons: [triangle],
+    });
+    expect(pictureCanvas({ width: 600, height: 800 })).toEqual({ width: 1000, height: 1333 });
+  });
+
+  it("labels a shape at its centroid, on any canvas", () => {
+    const size = { width: 1000, height: 500 };
+    expect(labelPoint(triangle, size)).toEqual({ x: 200, y: 100 });
+    // An L shape: the centroid stays in its body, not the empty corner.
+    const l: Polygon = [
+      [0, 0],
+      [0.2, 0],
+      [0.2, 0.8],
+      [1, 0.8],
+      [1, 1],
+      [0, 1],
+    ];
+    const point = labelPoint(l, { width: 1, height: 1 });
+    expect(point.x).toBeLessThan(0.5);
+    expect(point.y).toBeGreaterThan(0.5);
+    expect(toSvgPoints(triangle, size)).toBe("100,50 400,50 100,200");
   });
 });

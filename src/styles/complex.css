@@ -78,4 +78,24 @@
   .kompleks-hotspot text {
     pointer-events: none;
   }
+
+  /* On a render or a plan drawn in the console (#19): the picture shows
+     through the shapes, which tint it with the ground and fill in on hover
+     and focus; text keeps a halo of the ground so it reads on any picture.
+     The status still shows as a word, a stroke style and a pattern. */
+  .kompleks-plan[data-picture] .kompleks-shape {
+    fill-opacity: 0.35;
+  }
+
+  .kompleks-plan[data-picture] .kompleks-hotspot:is(:hover, :focus-visible) .kompleks-shape {
+    fill: var(--t-bg);
+    fill-opacity: 0.85;
+  }
+
+  .kompleks-plan[data-picture] text {
+    paint-order: stroke;
+    stroke: var(--t-bg);
+    stroke-width: 0.3em;
+    stroke-linejoin: round;
+  }
 }
