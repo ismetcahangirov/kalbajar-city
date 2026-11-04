@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
-import { ApartmentCard, ApartmentRow } from "@/components/apartments/apartment-card";
+import { ApartmentRow } from "@/components/apartments/apartment-card";
 import { CatalogueFilters } from "@/components/apartments/catalogue-filters";
+import { CatalogueSort } from "@/components/apartments/catalogue-sort";
+import { CurtainLines } from "@/components/apartments/curtain-lines";
 import { Pagination } from "@/components/apartments/pagination";
 import { ViewSwitch } from "@/components/apartments/view-switch";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
-import { buttonClass, Container, Heading, Text } from "@/components/ui";
+import { ArrowBlock } from "@/components/ui/arrow-block";
+import { FlatCard } from "@/components/ui/flat-card";
 import { formatNumber } from "@/i18n/format";
 import { Link, redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -86,34 +89,40 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
     : apartments("title");
 
   return (
-    <Container className="flex flex-col gap-block pt-block pb-section">
-      <header className="flex flex-col gap-4">
-        <Heading as="h1" size="display">
-          {title}
-        </Heading>
-        <Text size="body-lg" tone="muted" className="max-w-(--container-prose)">
-          {t("lead")}
-        </Text>
+    <div
+      data-theme="dark"
+      className="relative isolate flex flex-1 flex-col bg-umber bg-(image:--gradient-curtain) bg-no-repeat text-(--t-text)"
+    >
+      <CurtainLines />
+      {/* The header runs transparent over the title, as over a hero. */}
+      <header
+        data-header-overlay=""
+        className="flex flex-col items-center gap-u2 px-layout pt-[calc(var(--header-height)+var(--u)*6)] pb-u6 text-center desk:pt-[calc(var(--header-height)+var(--u)*6)] desk:pb-u4"
+      >
+        <h1 className="text-title text-(--t-primary) uppercase">{title}</h1>
+        <p className="max-w-(--container-prose) text-body text-(--t-small)">{t("lead")}</p>
       </header>
 
-      <div className="grid gap-block lg:grid-cols-12 lg:gap-gutter">
-        <div className="lg:col-span-4 xl:col-span-3">
+      {/* Below the curtain's top 70svh sand fails 4.5 : 1 for small text,
+          so the filters and results set it in the text colour. */}
+      <div className="grid gap-y-u2 pb-[calc(var(--floating-bottom)+var(--u)*8)] [--t-small:var(--t-text)] lg:grid-cols-3 lg:pb-u12">
+        <div className="px-layout">
           <CatalogueFilters facets={facets} applied={state} total={page.total} locale={locale} />
         </div>
 
         <section
           aria-labelledby="catalogue-results"
-          className="flex min-w-0 flex-col gap-8 lg:col-span-8 xl:col-span-9"
+          className="flex min-w-0 flex-col gap-u2 px-layout lg:col-span-2"
         >
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-x-u2 border-b border-(--t-line) pb-u">
             <h2 id="catalogue-results" className="sr-only">
               {t("resultsLabel")}
             </h2>
             {/* Announced when applying filters re-renders the page in place. */}
-            <p role="status" className="text-body">
+            <p role="status" className="text-label text-(--t-small) uppercase">
               {t("results", { count: page.total })}
               {page.pageCount > 1 && (
-                <span className="text-text-muted">
+                <span>
                   {" · "}
                   {t("pageOf", {
                     page: formatNumber(state.page, locale),
@@ -122,13 +131,16 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
                 </span>
               )}
             </p>
-            <ViewSwitch state={state} />
+            <div className="ms-auto flex flex-wrap items-center justify-end gap-x-u2">
+              <ViewSwitch state={state} />
+              <CatalogueSort applied={state} pricesVisible={pricesVisible} locale={locale} />
+            </div>
           </div>
 
           {page.items.length === 0 ? (
             <EmptyState state={state} locale={locale} pricesVisible={pricesVisible} />
           ) : state.view === "list" ? (
-            <ul className="border-t border-border">
+            <ul>
               {page.items.map((apartment) => (
                 <ApartmentRow
                   key={apartment.slug}
@@ -139,14 +151,10 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
               ))}
             </ul>
           ) : (
-            <ul className="grid gap-x-gutter gap-y-block sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="grid gap-u2 desk:grid-cols-2">
               {page.items.map((apartment) => (
                 <li key={apartment.slug}>
-                  <ApartmentCard
-                    apartment={apartment}
-                    locale={locale}
-                    pricesVisible={pricesVisible}
-                  />
+                  <FlatCard apartment={apartment} locale={locale} pricesVisible={pricesVisible} />
                 </li>
               ))}
             </ul>
@@ -159,7 +167,7 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
         locale={locale}
         nodes={[await breadcrumbs(locale, [{ name: apartments("title"), href: "/menziller" }])]}
       />
-    </Container>
+    </div>
   );
 }
 
@@ -199,21 +207,19 @@ async function EmptyState({
   };
 
   return (
-    <div className="flex flex-col items-start gap-4 rounded-md bg-surface-alt p-6 sm:p-8">
-      <Heading as="h3" size="heading">
-        {t("empty.title")}
-      </Heading>
+    <div className="flex flex-col items-start gap-u2 border border-(--t-line-alt) p-u2 desk:p-u3">
+      <h3 className="text-lead text-(--t-text)">{t("empty.title")}</h3>
       {nearest && (
         <>
-          <Text>
+          <p className="text-body">
             {t("empty.suggestion", { filter: groupLabel[nearest.group], count: nearest.total })}
-          </Text>
-          <Link
+          </p>
+          <ArrowBlock
+            as="link"
             href={{ pathname: "/menziller", query: toCatalogueQuery(nearest.relaxed) }}
-            className={buttonClass({ variant: "primary" })}
           >
             {t("empty.show")}
-          </Link>
+          </ArrowBlock>
         </>
       )}
       <Link
@@ -221,7 +227,7 @@ async function EmptyState({
           pathname: "/menziller",
           query: toCatalogueQuery({ ...emptyFilters, page: 1, view: state.view }),
         }}
-        className={buttonClass({ variant: nearest ? "link" : "primary" })}
+        className="flex min-h-target items-center text-label text-(--t-text) uppercase underline underline-offset-4"
       >
         {t("empty.reset")}
       </Link>

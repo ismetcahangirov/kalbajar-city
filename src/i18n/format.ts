@@ -84,6 +84,26 @@ export function formatPrice(amount: string, currency: string, locale: Locale): s
   return `${value}${NBSP}${currency}`;
 }
 
+/**
+ * The price of one square metre, rounded to the whole currency unit:
+ * `2 069 AZN/m²`. From the price's minor-unit string and the area in m²;
+ * `null` when the area is not positive.
+ */
+export function formatPricePerArea(
+  amount: string,
+  currency: string,
+  area: number,
+  locale: Locale,
+): string | null {
+  if (!(area > 0)) return null;
+  const digits =
+    numberFormat("en", { style: "currency", currency }).resolvedOptions().maximumFractionDigits ??
+    2;
+  const unit = 10 ** digits;
+  const perArea = Math.round(Number(amount) / unit / area);
+  return `${formatNumber(perArea, locale)}${NBSP}${currency}/${squareMetre[locale]}`;
+}
+
 /** A whole percentage from 0–100: `40%` (en), `40 %` (ru), per the locale's pattern. */
 export function formatPercent(value: number, locale: Locale): string {
   return numberFormat(locale, { style: "percent", maximumFractionDigits: 0 }).format(value / 100);

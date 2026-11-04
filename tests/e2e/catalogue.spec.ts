@@ -39,15 +39,19 @@ test("changing a filter updates the URL, and a reload shows the same results", a
   await waitForHydration(page);
   const before = await cardTitles(page);
 
+  // The sort sits in the results' header and applies at once.
+  await page.getByLabel("Sıralama").selectOption({ label: "Sahə: böyükdən kiçiyə" });
+  await expect(page).toHaveURL(/\/menziller\?sira=-sahe$/);
+  await waitForHydration(page);
+
   let filters: Locator;
   if (isMobile) {
-    await page.getByRole("button", { name: /^Filtrlər/ }).click();
-    filters = page.getByRole("dialog", { name: "Filtrlər və sıralama" });
+    await page.getByRole("button", { name: /^Filtr/ }).click();
+    filters = page.getByRole("dialog", { name: "Filtr" });
   } else {
-    filters = page.getByRole("complementary", { name: "Filtrlər və sıralama" });
+    filters = page.getByRole("complementary", { name: "Filtr" });
   }
   await filters.getByRole("group", { name: "Otaq sayı" }).getByLabel("3", { exact: true }).check();
-  await filters.getByLabel("Sıralama").selectOption({ label: "Sahə: böyükdən kiçiyə" });
 
   // The count for the edited choice arrives before it is applied.
   const apply = filters.getByRole("button", { name: /mənzili göstər$/ });
@@ -61,12 +65,7 @@ test("changing a filter updates the URL, and a reload shows the same results", a
   await expect(status).toContainText(`${count} mənzil`);
   const filtered = await cardTitles(page);
   expect(filtered).not.toEqual(before);
-  await expect(
-    page
-      .getByRole("region", { name: "Nəticələr" })
-      .getByText(/^3 otaq · /)
-      .first(),
-  ).toBeVisible();
+  expect(filtered.every((title) => title.startsWith("3 otaq"))).toBe(true);
 
   await page.reload();
   await expect(status).toContainText(`${count} mənzil`);
@@ -108,9 +107,9 @@ test.describe("at 320 px with the keyboard alone", () => {
     await waitForHydration(page);
     await expectNoHorizontalScroll(page);
 
-    await tabTo(page, page.getByRole("button", { name: /^Filtrlər/ }));
+    await tabTo(page, page.getByRole("button", { name: /^Filtr/ }));
     await page.keyboard.press("Enter");
-    const dialog = page.getByRole("dialog", { name: "Filtrlər və sıralama" });
+    const dialog = page.getByRole("dialog", { name: "Filtr" });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Filtrləri bağla" })).toBeFocused();
 

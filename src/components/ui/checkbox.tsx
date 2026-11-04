@@ -3,15 +3,25 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
 import { cx } from "@/lib/cx";
 
-type CheckboxProps = Omit<ComponentPropsWithoutRef<"input">, "type" | "id"> & {
+type CheckboxProps = Omit<ComponentPropsWithoutRef<"input">, "type" | "id" | "size"> & {
   id: string;
   /** May contain a link, such as the consent text. */
   label: ReactNode;
   error?: string;
+  /**
+   * `form`: the 24 px box of the current forms (semantic tokens), until the
+   * inquiry form is rebuilt with `FieldBox` (#64). `filter`: the hairline
+   * 15 × 15 box of the catalogue's filters, on the theme tokens
+   * (ui-kit.md → Checkbox). Both sit in a 44 px hit area and change instantly.
+   */
+  size?: "form" | "filter";
 };
 
-/** 24 px box inside a 44 px hit area, label to the right. */
-export function Checkbox({ id, label, error, className, ...props }: CheckboxProps) {
+export function Checkbox({ size = "form", ...props }: CheckboxProps) {
+  return size === "filter" ? <FilterCheckbox {...props} /> : <FormCheckbox {...props} />;
+}
+
+function FormCheckbox({ id, label, error, className, ...props }: Omit<CheckboxProps, "size">) {
   return (
     <div className={cx("flex flex-col gap-1", className)}>
       <div className="flex items-start gap-3">
@@ -46,6 +56,38 @@ export function Checkbox({ id, label, error, className, ...props }: CheckboxProp
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+/** The filter box: the whole row is the 44 px target, the box is 15 px. */
+function FilterCheckbox({ id, label, className, ...props }: Omit<CheckboxProps, "size">) {
+  return (
+    <div className={cx("relative flex min-h-target items-center gap-3", className)}>
+      <input
+        id={id}
+        type="checkbox"
+        className="peer absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+        {...props}
+      />
+      <span
+        aria-hidden
+        className={cx(
+          "pointer-events-none grid size-[0.9375rem] shrink-0 place-items-center border border-(--t-control) text-transparent",
+          "peer-hover:border-(--t-text)",
+          "peer-checked:border-(--t-text) peer-checked:text-(--t-text)",
+          "peer-focus-visible:outline-(length:--focus-ring-width) peer-focus-visible:outline-offset-(--focus-ring-width) peer-focus-visible:outline-(--t-text) peer-focus-visible:outline-solid",
+          "peer-disabled:opacity-(--opacity-disabled)",
+        )}
+      >
+        <Check width={11} height={11} strokeWidth={2} aria-hidden focusable={false} />
+      </span>
+      <label
+        htmlFor={id}
+        className="pointer-events-none text-body text-(--t-text) peer-disabled:opacity-(--opacity-disabled)"
+      >
+        {label}
+      </label>
     </div>
   );
 }

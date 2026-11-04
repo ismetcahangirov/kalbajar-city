@@ -85,6 +85,21 @@ even where the reference ignores them.
   `--spacing-<name>`: never name a spacing token `block` or `inline`
 - The console has no "Default" label on empty image pickers yet; add it when
   the content editors (#25 part B) add pickers for these slots
+- (#67) Exporting a component from the `@/components/ui` barrel put it in the
+  shared JS (+1.5 KB): the shell's client components import the barrel. New
+  components are imported by path
+- (#67) Browsers lack Azerbaijani number data, so a client component that
+  formats a decimal with `formatNumber(…, "az")` renders `62.09` where the
+  server rendered `62,09` and hydration fails. Format decimals on the server,
+  or whole numbers in client components
+- (#67) Small sand text on the curtain fails below 70svh: themed blocks that
+  run lower set `[--t-small:var(--t-text)]` (catalogue body, filter dialog,
+  apartment page)
+- (#67) The locale suggestion banner shares `--floating-bottom` with fixed
+  buttons; it carries `data-locale-suggestion`, and the catalogue's "FİLTR"
+  button lifts above it while it shows. #64's fixed round button needs the same
+- (#67) `[data-theme] :focus-visible` takes the outline colour from `--t-text`
+  (`src/styles/ui.css`); the global ring is `--color-focus`, ink on dark themes
 
 ---
 

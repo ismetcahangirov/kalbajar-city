@@ -4,6 +4,17 @@
  */
 
 @layer base {
+  /* The catalogue's fixed filter button shares the floating slot with the
+     locale suggestion: while the suggestion shows, the button sits above it
+     (its tallest, two lines at 320 px). */
+  html:has([data-locale-suggestion]) [data-filter-button] {
+    translate: 0 calc(-1 * var(--locale-suggestion-space));
+  }
+
+  :root {
+    --locale-suggestion-space: 5.5rem;
+  }
+
   /* An open full-screen dialog (filters, the floor plan) covers the page;
      the page behind it does not scroll. */
   html:has(dialog[data-scroll-lock][open]) {

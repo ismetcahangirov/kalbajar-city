@@ -4,12 +4,14 @@ import { Printer, Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { Button, Icon } from "@/components/ui";
+import { RoundButton } from "@/components/ui/round-button";
 
 /**
  * Share the page (the system share sheet where there is one, otherwise the
  * link goes to the clipboard) and print it (the print stylesheet keeps the
- * plan, the facts and the area table).
+ * plan, the facts and the area table): two round buttons on the theme. The
+ * outcome of sharing is announced to screen readers; the visible result is
+ * the sheet or the clipboard.
  */
 export function ShareActions({ title }: { title: string }) {
   const t = useTranslations("ApartmentPage");
@@ -34,21 +36,12 @@ export function ShareActions({ title }: { title: string }) {
     }
   }
 
+  const icon = { width: 16, height: 16, strokeWidth: 1, "aria-hidden": true, focusable: false };
   return (
-    <div className="flex flex-col gap-2" data-print-hidden="">
-      <div className="flex flex-wrap gap-3">
-        <Button variant="secondary" onClick={share} leadingIcon={<Icon icon={Share2} />}>
-          {t("share")}
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={() => window.print()}
-          leadingIcon={<Icon icon={Printer} />}
-        >
-          {t("print")}
-        </Button>
-      </div>
-      <p role="status" className="text-small break-all text-text-muted">
+    <div className="flex items-center" data-print-hidden="">
+      <RoundButton label={t("share")} icon={<Share2 {...icon} />} onClick={share} />
+      <RoundButton label={t("print")} icon={<Printer {...icon} />} onClick={() => window.print()} />
+      <p role="status" className="sr-only">
         {message}
       </p>
     </div>

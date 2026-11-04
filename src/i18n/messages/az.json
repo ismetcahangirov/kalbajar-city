@@ -52,8 +52,6 @@
       "list": "Siyahı"
     },
     "filters": {
-      "title": "Filtrlər və sıralama",
-      "open": "Filtrlər",
       "active": "{count, plural, one {# filtr seçilib} other {# filtr seçilib}}",
       "close": "Filtrləri bağla",
       "rooms": "Otaq sayı",
@@ -80,7 +78,10 @@
       "apply": "{count, plural, one {# mənzili göstər} other {# mənzili göstər}}",
       "applyPending": "Göstər",
       "matches": "{count, plural, one {# mənzil uyğundur} other {# mənzil uyğundur}}",
-      "reset": "Filtrləri təmizlə"
+      "heading": "Filtr",
+      "resetShort": "Sıfırla",
+      "sliderFrom": "Ən az, sürgü",
+      "sliderTo": "Ən çox, sürgü"
     },
     "empty": {
       "title": "Bu seçimə uyğun mənzil yoxdur",
@@ -96,9 +97,12 @@
     },
     "card": {
       "floor": "Mərtəbə {floor}",
-      "rooms": "{rooms, plural, one {# otaq} other {# otaq}}"
+      "rooms": "{rooms, plural, one {# otaq} other {# otaq}}",
+      "number": "№ {number}",
+      "layout": "Plan {code}"
     },
-    "priceOnRequest": "Qiymət sorğu ilə"
+    "priceOnRequest": "Qiymət sorğu ilə",
+    "sortApply": "Sırala"
   },
   "Complex": {
     "title": "Kompleks",
@@ -157,7 +161,12 @@
     "share": "Paylaş",
     "copied": "Keçid kopyalandı.",
     "copyFailed": "Keçidi kopyalamaq alınmadı. Ünvan: {url}",
-    "print": "Çap et"
+    "print": "Çap et",
+    "planTabs": "Planlar",
+    "tabApartment": "Mənzil",
+    "tabFloor": "Mərtəbə",
+    "inquire": "Müraciət et",
+    "pricePerArea": "1 m² qiyməti"
   },
   "RoomKinds": {
     "living": "Qonaq otağı",

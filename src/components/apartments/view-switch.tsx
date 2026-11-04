@@ -1,23 +1,22 @@
-import { LayoutGrid, List } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Icon } from "@/components/ui";
 import { Link } from "@/i18n/navigation";
 import { cx } from "@/lib/cx";
 import { toCatalogueQuery, type CatalogueState, type CatalogueView } from "@/shared/catalogue";
 
-const views = [
-  { view: "grid", icon: LayoutGrid },
-  { view: "list", icon: List },
-] as const satisfies ReadonlyArray<{ view: CatalogueView; icon: typeof List }>;
+const views = ["grid", "list"] as const satisfies ReadonlyArray<CatalogueView>;
 
-/** Cards or list, kept in the URL (`gorunus=siyahi`) like every other choice. */
+/**
+ * Cards or list, kept in the URL (`gorunus=siyahi`) like every other choice.
+ * The reference has no such switch; ours stays because shared links and the
+ * keyboard tests use the list, restyled as caps tabs on the theme.
+ */
 export function ViewSwitch({ state }: { state: CatalogueState }) {
   const t = useTranslations("Catalogue.view");
   return (
     <nav aria-label={t("label")} data-print-hidden="">
-      <ul className="flex rounded-full border border-border-strong p-0.5">
-        {views.map(({ view, icon }) => {
+      <ul className="flex">
+        {views.map((view) => {
           const current = state.view === view;
           return (
             <li key={view}>
@@ -25,11 +24,12 @@ export function ViewSwitch({ state }: { state: CatalogueState }) {
                 href={{ pathname: "/menziller", query: toCatalogueQuery({ ...state, view }) }}
                 aria-current={current ? "true" : undefined}
                 className={cx(
-                  "inline-flex min-h-target items-center gap-2 rounded-full px-4 text-small font-medium",
-                  current ? "bg-action text-action-text" : "text-text hover:bg-surface-alt",
+                  "inline-flex min-h-target items-center gap-2 border-b px-u text-label uppercase",
+                  current
+                    ? "border-(--t-text) text-(--t-text)"
+                    : "border-transparent text-(--t-small) hover:text-(--t-text)",
                 )}
               >
-                <Icon icon={icon} />
                 {t(view)}
               </Link>
             </li>

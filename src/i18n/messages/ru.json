@@ -52,8 +52,6 @@
       "list": "Список"
     },
     "filters": {
-      "title": "Фильтры и сортировка",
-      "open": "Фильтры",
       "active": "{count, plural, one {выбран # фильтр} few {выбрано # фильтра} many {выбрано # фильтров} other {выбрано # фильтра}}",
       "close": "Закрыть фильтры",
       "rooms": "Комнаты",
@@ -80,7 +78,10 @@
       "apply": "{count, plural, one {Показать # квартиру} few {Показать # квартиры} many {Показать # квартир} other {Показать # квартиры}}",
       "applyPending": "Показать",
       "matches": "{count, plural, one {Подходит # квартира} few {Подходят # квартиры} many {Подходят # квартир} other {Подходят # квартиры}}",
-      "reset": "Сбросить фильтры"
+      "heading": "Фильтр",
+      "resetShort": "Сбросить",
+      "sliderFrom": "Минимум, ползунок",
+      "sliderTo": "Максимум, ползунок"
     },
     "empty": {
       "title": "Нет квартир, подходящих под этот выбор",
@@ -96,9 +97,12 @@
     },
     "card": {
       "floor": "Этаж {floor}",
-      "rooms": "{rooms, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}"
+      "rooms": "{rooms, plural, one {# комната} few {# комнаты} many {# комнат} other {# комнаты}}",
+      "number": "№ {number}",
+      "layout": "Планировка {code}"
     },
-    "priceOnRequest": "Цена по запросу"
+    "priceOnRequest": "Цена по запросу",
+    "sortApply": "Сортировать"
   },
   "Complex": {
     "title": "Комплекс",
@@ -157,7 +161,12 @@
     "share": "Поделиться",
     "copied": "Ссылка скопирована.",
     "copyFailed": "Не удалось скопировать ссылку. Адрес: {url}",
-    "print": "Распечатать"
+    "print": "Распечатать",
+    "planTabs": "Планировки",
+    "tabApartment": "Квартира",
+    "tabFloor": "Этаж",
+    "inquire": "Оставить заявку",
+    "pricePerArea": "Цена за м²"
   },
   "RoomKinds": {
     "living": "Гостиная",

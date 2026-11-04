@@ -44,11 +44,14 @@ export function PlanViewer({
   image,
   name,
   locale,
+  priority = true,
 }: {
   image: PublicImage;
   /** The apartment's name, for the dialog's title. */
   name: string;
   locale: Locale;
+  /** The first plan on the page loads eagerly; one in a hidden tab does not. */
+  priority?: boolean;
 }) {
   const t = useTranslations("ApartmentPage");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -194,7 +197,7 @@ export function PlanViewer({
         className="group relative block w-full overflow-hidden rounded-md bg-surface-raised"
         style={{ aspectRatio: `${image.width} / ${image.height}` }}
       >
-        <Picture image={image} sizes="(min-width: 64rem) 58vw, 100vw" priority />
+        <Picture image={image} sizes="(min-width: 64rem) 60vw, 100vw" priority={priority} />
         <span
           aria-hidden
           data-print-hidden=""

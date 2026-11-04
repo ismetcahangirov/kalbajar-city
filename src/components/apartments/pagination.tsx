@@ -9,11 +9,14 @@ import { cx } from "@/lib/cx";
 import { pageWindow, toCatalogueQuery, type CatalogueState } from "@/shared/catalogue";
 
 const item = cx(
-  "grid min-h-target min-w-target place-items-center rounded-full px-3 text-body",
-  "hover:bg-surface-alt",
+  "grid min-h-target min-w-target place-items-center border-b border-transparent px-3",
+  "text-label text-(--t-small) hover:text-(--t-text)",
 );
 
-/** Links to the catalogue's pages, keeping the filters, sort and view. */
+/**
+ * Links to the catalogue's pages, keeping the filters, sort and view: caps
+ * numbers on the theme, the current page underlined in the text colour.
+ */
 export function Pagination({
   state,
   pageCount,
@@ -47,7 +50,7 @@ export function Pagination({
         </li>
         {pageWindow(current, pageCount).map((page, i) =>
           page === "gap" ? (
-            <li key={`gap-${i}`} aria-hidden className="px-1 text-text-muted">
+            <li key={`gap-${i}`} aria-hidden className="px-1 text-label text-(--t-small)">
               …
             </li>
           ) : (
@@ -56,10 +59,7 @@ export function Pagination({
                 href={href(page)}
                 aria-label={t("page", { page: formatNumber(page, locale) })}
                 aria-current={page === current ? "page" : undefined}
-                className={cx(
-                  item,
-                  page === current && "bg-action text-action-text hover:bg-action",
-                )}
+                className={cx(item, page === current && "border-(--t-text) text-(--t-text)")}
               >
                 {formatNumber(page, locale)}
               </Link>
