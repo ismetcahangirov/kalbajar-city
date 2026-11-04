@@ -68,7 +68,14 @@ test("an editor adds a question and reorders it by button and by keyboard on a p
   await handle.focus();
   const dropped = savedOrder(page);
   await page.keyboard.press("Space");
+  // dnd-kit's keyboard sensor listens for arrows from a `setTimeout` queued at
+  // the pick-up; an arrow sent before it runs is lost and the row stays put.
+  await expect(handle).toHaveAttribute("aria-pressed", "true");
+  await page.evaluate(() => new Promise((resolve) => setTimeout(resolve)));
   await page.keyboard.press("ArrowDown");
+  await expect(
+    page.getByRole("status").filter({ hasText: `${question}: indi ${start + 1}-ci yerdədir` }),
+  ).toHaveCount(1);
   await page.keyboard.press("Space");
   expect((await dropped).status()).toBe(200);
   await expect.poll(async () => (await titles()).indexOf(question)).toBe(start);

@@ -178,6 +178,62 @@
   "Media": {
     "illustrative": "İllüstrativ"
   },
+  "Defaults": {
+    "home": {
+      "hero": {
+        "poster": "Kalbajar City-nin yaşayış binası, dağların fonunda, axşam işığında (vizualizasiya)",
+        "panel": "Kalbajar City binasının fasadı və həyətdəki ağaclar (vizualizasiya)"
+      },
+      "about": {
+        "image": "Eyvanlı və daş üzlüklü fasad (vizualizasiya)",
+        "background": "Kalbajar City-də binalar boyunca küçə (vizualizasiya)"
+      },
+      "stats": {
+        "background": "Palıd səthin üzərində kətan parça, yumşaq gün işığında"
+      },
+      "layouts": {
+        "background": "Suvaqlı divar və palıd döşəmə üzərində axşam günəşi"
+      },
+      "cardZoom": {
+        "1": "Gün batımında Kalbajar City binası (vizualizasiya)",
+        "2": "Yumşaq divanlı və hündür pərdəli qonaq otağı (vizualizasiya)",
+        "3": "Fasadda böyük pəncərə və taxta detallar, yaxın plan (vizualizasiya)",
+        "4": "Ağacların arasından görünən bina, axşam işığında (vizualizasiya)"
+      },
+      "amenities": {
+        "window": "Yumşaq işıqda dağlar və vadi"
+      },
+      "location": {
+        "intro": "Kəlbəcər: qarlı zirvələr altında vadi və yaşayış məntəqəsi",
+        "moverLeft": "Dağ daşının teksturası, yaxın plan",
+        "moverRight": "Terrazzo və isti taxta, yaxın plan",
+        "card": {
+          "1": "Qayalar arasında axan dağ çayı",
+          "2": "Yaşıl dağ yamacları və vadi",
+          "3": "Kəlbəcər dağlarının zirvələri",
+          "4": "Rəngli qayalar arasında bulaq hovuzu",
+          "5": "Sütunvari qayalar və mağara",
+          "6": "Sütunvari bazalt qayalar"
+        }
+      },
+      "construction": {
+        "background": "Tikinti meydançası: monolit karkas və taxta qəliblər"
+      },
+      "cta": {
+        "portrait": "İşıqlı otaqda kreslo və bitki"
+      }
+    },
+    "page": {
+      "menziller": "Dağ mənzərəli yataq otağı (vizualizasiya)",
+      "haqqimizda": "Kəlbəcərdə dağ yamacları",
+      "kompleks": "Kalbajar City binasının ön fasadı (vizualizasiya)",
+      "yerlesme": "Kəlbəcər vadisi və qarlı dağlar",
+      "qalereya": "Yazı masası olan işıqlı dəhliz (vizualizasiya)",
+      "tikinti": "Tikintidə olan bina və hasar boyunca keçid",
+      "xeberler": "Tikinti: beton mərtəbələr və taxta materiallar",
+      "elaqe": "Yarpaq kölgələri düşən taxta masa"
+    }
+  },
   "LocaleSwitcher": {
     "label": "Dil",
     "az": "Azərbaycanca",

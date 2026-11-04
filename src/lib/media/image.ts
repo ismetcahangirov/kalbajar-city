@@ -21,7 +21,8 @@ export type ProcessedImage = {
 /** Larger than any photo or render the site needs (12 000 × 10 000), small enough to decode safely. */
 const maxPixels = 120_000_000;
 
-const encoders = {
+/** The library's encoder settings; the bundled defaults use them too (`pnpm defaults:encode`). */
+export const encoders = {
   avif: (image: Sharp) => image.avif({ quality: 50, effort: 4 }),
   webp: (image: Sharp) => image.webp({ quality: 74, effort: 4 }),
 } satisfies Record<VariantFormat, (image: Sharp) => Sharp>;
