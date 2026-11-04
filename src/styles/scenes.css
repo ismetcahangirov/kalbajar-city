@@ -1,0 +1,253 @@
+/*
+ * The scene engine and its primitives (src/components/motion, #63;
+ * docs/motion-system.md → Scene engine). Values come from tokens.css.
+ *
+ * Nothing here hides content before script runs: every start state is keyed
+ * on a `data-state` the primitives set after hydration, and only on elements
+ * below the viewport. Scenes pin only where the reference pins (a fine
+ * pointer at 668 px and up, or `mobile="sticky"`), never under reduced
+ * motion, and never without JavaScript (`scripting: enabled`): everywhere
+ * else a scene is a plain stacked page in its final state.
+ */
+
+@layer components {
+  /* A start state applied after hydration does not animate (env.ts → instantly). */
+  [data-instant],
+  [data-instant] * {
+    transition: none !important;
+  }
+
+  /* --- Scene, SceneLayer --------------------------------------------- */
+
+  [data-scroll-scene] {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    isolation: isolate;
+  }
+
+  /* Stacked (static): each layer is one row; a full-screen layer keeps a
+     viewport of height so its image has a frame. */
+  [data-layer] {
+    position: relative;
+    min-width: 0;
+  }
+
+  [data-layer="screen"] {
+    height: 100svh;
+  }
+
+  /* Pinned: the layers and the content share one grid cell; layers stick to
+     the top for the length of the scene. `underPrevious` overlaps the scene
+     before by a viewport and is clipped there, so the scene before slides
+     away and reveals this one; `underNext` lets the next scene slide over
+     this one while it stays pinned. */
+  @media (scripting: enabled) and (pointer: fine) and (width >= 41.75rem) and (prefers-reduced-motion: no-preference) {
+    [data-scroll-scene] {
+      min-height: calc(var(--scene-length, 1) * 100svh);
+    }
+
+    [data-scroll-scene] > * {
+      grid-area: 1 / 1;
+    }
+
+    [data-scroll-scene] > [data-layer] {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      align-self: start;
+    }
+
+    [data-scroll-scene][data-under-previous] {
+      margin-top: -100svh;
+      clip-path: inset(100svh 0 0);
+    }
+
+    [data-scroll-scene][data-under-next] {
+      margin-bottom: -100svh;
+    }
+  }
+
+  /* The same, on touch and narrow screens, for scenes whose mobile variant
+     in the reference stays pinned. */
+  @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+    [data-scroll-scene][data-mobile="sticky"] {
+      min-height: calc(var(--scene-length, 1) * 100svh);
+    }
+
+    [data-scroll-scene][data-mobile="sticky"] > * {
+      grid-area: 1 / 1;
+    }
+
+    [data-scroll-scene][data-mobile="sticky"] > [data-layer] {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      align-self: start;
+    }
+
+    [data-scroll-scene][data-mobile="sticky"][data-under-previous] {
+      margin-top: -100svh;
+      clip-path: inset(100svh 0 0);
+    }
+
+    [data-scroll-scene][data-mobile="sticky"][data-under-next] {
+      margin-bottom: -100svh;
+    }
+  }
+
+  /* --- Reveal (text, image-in, clip-down, clip-up) -------------------- */
+
+  [data-reveal][data-state] {
+    transition-property: opacity, filter, clip-path;
+    transition-duration: var(--duration-reveal);
+    transition-timing-function: var(--ease-out);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal="image-in"][data-state="out"] {
+    opacity: 0;
+    filter: blur(var(--motion-blur));
+  }
+
+  [data-reveal="clip-down"][data-state],
+  [data-reveal="clip-up"][data-state] {
+    transition-timing-function: var(--ease-wipe);
+  }
+
+  [data-reveal="clip-down"][data-state="out"],
+  [data-reveal="clip-up"][data-state="out"] {
+    transition-duration: var(--duration-slow);
+  }
+
+  [data-reveal="clip-down"][data-state="out"] {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  [data-reveal="clip-up"][data-state="out"] {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  /* `text`: lines are not clipped (the blur would be cut); each rises from
+     its own height below, blurred, one after another. */
+  [data-reveal="text"] [data-line] {
+    overflow: visible;
+    padding-block: 0;
+    margin-block: 0;
+  }
+
+  [data-reveal="text"][data-state] [data-line-inner] {
+    transition-property: opacity, filter, translate;
+    transition-duration: var(--duration-reveal);
+    transition-timing-function: var(--ease-out);
+    transition-delay: calc(var(--reveal-delay, 0ms) + var(--line-index, 0) * var(--stagger-line));
+  }
+
+  [data-reveal="text"][data-state="out"] [data-line-inner] {
+    opacity: 0;
+    filter: blur(var(--motion-blur));
+    translate: 0 100%;
+  }
+
+  /* --- SplitWord ------------------------------------------------------- */
+
+  [data-split-word] {
+    display: flex;
+    justify-content: space-between;
+    clip-path: inset(-0.2em -0.1em);
+    white-space: nowrap;
+  }
+
+  [data-split-word] > [data-letter] {
+    display: block;
+  }
+
+  [data-split-word] > [data-letter]:first-child {
+    margin-inline-start: -0.05em;
+  }
+
+  [data-split-word] > [data-letter]:last-child {
+    margin-inline-end: -0.05em;
+  }
+
+  /* --- GridLines (A13) ------------------------------------------------- */
+
+  [data-grid-lines][data-state] > [data-grid-line] {
+    transition: scale var(--duration-slow) var(--ease-wipe);
+    transform-origin: top;
+  }
+
+  [data-grid-lines][data-state] > [data-grid-line]:nth-child(even) {
+    transform-origin: bottom;
+  }
+
+  [data-grid-lines][data-state="out"] > [data-grid-line] {
+    scale: 1 0;
+  }
+
+  /* --- StatSwap (A30, A31) --------------------------------------------- */
+
+  /* Swapping (desktop, after hydration): the sets share one row and each
+     slot's span leaves and enters through the slot's clip. Stacked rows are
+     the static form. */
+  [data-stat-swap] {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--u) * 2);
+  }
+
+  [data-stat-swap][data-swap] {
+    display: grid;
+  }
+
+  [data-stat-swap][data-swap] > [data-stat-set] {
+    grid-area: 1 / 1;
+  }
+
+  [data-stat-swap][data-swap] > [data-stat-set]:not(:first-child) [data-stat-line] {
+    visibility: hidden;
+  }
+
+  [data-stat-swap][data-swap] [data-swap-slot] {
+    overflow: clip;
+  }
+
+  [data-stat-swap][data-swap] [data-swap-item] {
+    display: block;
+    transition: translate var(--duration-slow) var(--ease-wipe) var(--duration-fast);
+  }
+
+  [data-stat-swap][data-swap] [data-row-state="in"] [data-swap-item] {
+    transition-delay: var(--duration-normal);
+  }
+
+  [data-stat-swap][data-swap] [data-row-state="before"] [data-swap-item] {
+    translate: 0 -140%;
+  }
+
+  [data-stat-swap][data-swap] [data-row-state="after"] [data-swap-item] {
+    translate: 0 140%;
+  }
+
+  [data-stat-swap][data-swap] [data-stat-line] {
+    transition: scale var(--duration-normal) var(--ease-wipe);
+  }
+
+  [data-stat-swap][data-lines="out"] [data-stat-line] {
+    scale: 0 1;
+  }
+
+  /* --- Cursor follower (A35, the teaser's button) ---------------------- */
+
+  /* The follower keeps the caller's position at rest (touch, no script,
+     reduced motion); with a fine pointer it shows only while the pointer is
+     over its area, moved by `transform`. */
+  [data-follow] [data-follower] {
+    pointer-events: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+  }
+
+  [data-follow]:not([data-state="in"]) [data-follower] {
+    opacity: 0;
+  }
+}
