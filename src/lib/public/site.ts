@@ -5,6 +5,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { contacts as fallbackContacts } from "@/config/contacts";
 import { privacy } from "@/config/privacy";
+import { defaultImage } from "@/content/defaults";
 import { getDb } from "@/db";
 import type { Executor } from "@/db/client";
 import { homeSections, layoutTypes, media, settings } from "@/db/schema";
@@ -39,7 +40,7 @@ export type AboutPage = {
     eyebrow: Localized | null;
     title: Localized;
     body: Localized;
-    image: PublicImage | null;
+    image: PublicImage;
   } | null;
   amenities: Array<{ icon: Amenity; title: Localized; body: Localized | null }>;
   facts: ComplexFacts | null;
@@ -145,7 +146,7 @@ export async function getAboutPage(locale: Locale): Promise<AboutPage> {
           eyebrow: maybe(about.eyebrow),
           title: text(about.title),
           body: text(about.body),
-          image: image ?? null,
+          image: image ?? defaultImage("home.about.image", locale),
         }
       : null,
     amenities: amenities.map((item) => ({

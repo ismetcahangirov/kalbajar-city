@@ -3,6 +3,7 @@ import "server-only";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
+import { defaultImage, type DefaultSlot } from "@/content/defaults";
 import { getDb } from "@/db";
 import type { Executor } from "@/db/client";
 import {
@@ -40,7 +41,8 @@ export type HomeSection =
       kind: "hero";
       title: Localized;
       subtitle: Localized | null;
-      poster: PublicImage | null;
+      /** The console's poster, else the film's poster frame, else the bundled default. */
+      poster: PublicImage;
       video: PublicVideo | null;
       /** Spec chips at the hero's foot; null until layouts exist. */
       chips: { apartments: number; roomsMin: number; roomsMax: number; areaMin: number } | null;
@@ -51,7 +53,7 @@ export type HomeSection =
       eyebrow: Localized | null;
       title: Localized;
       body: Localized;
-      image: PublicImage | null;
+      image: PublicImage;
     }
   | { kind: "layouts"; title: Localized; body: Localized | null; groups: LayoutGroup[] }
   | {
@@ -74,7 +76,7 @@ export type HomeSection =
   | {
       kind: "construction";
       title: Localized;
-      update: { title: Localized; month: string; progress: number; image: PublicImage | null };
+      update: { title: Localized; month: string; progress: number; image: PublicImage };
     }
   | { kind: "process"; title: Localized; steps: Array<{ title: Localized; body: Localized }> }
   | { kind: "faq"; title: Localized; items: Array<{ question: Localized; answer: Localized }> }
@@ -100,10 +102,19 @@ export async function loadPublishedFaq(db: Executor) {
     .orderBy(asc(faq.sortOrder), asc(faq.createdAt), asc(faq.id));
 }
 
+/** The card-zoom scenes shown while the console has chosen none (spec §8). */
+const defaultScenes = [
+  "home.cardZoom.1",
+  "home.cardZoom.2",
+  "home.cardZoom.3",
+  "home.cardZoom.4",
+] as const satisfies readonly DefaultSlot[];
+
 /**
  * Everything the home page shows, localised, in the console's order. A
- * section the console hides, or one with nothing to show yet (no scenes, no
- * published construction update), is left out.
+ * section the console hides, or one with nothing to show yet (no published
+ * construction update), is left out. An image slot the console leaves empty
+ * shows its bundled default (`src/content/defaults`).
  */
 export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   "use cache";
@@ -186,7 +197,10 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           title: text(c.title),
           subtitle: maybe(c.subtitle),
           // Without a poster of its own, the hero shows the film's poster frame.
-          poster: image(c.posterMediaId) ?? video(c.videoMediaId)?.poster ?? null,
+          poster:
+            image(c.posterMediaId) ??
+            video(c.videoMediaId)?.poster ??
+            defaultImage("home.hero.poster", locale),
           video: video(c.videoMediaId),
           chips: layouts.length
             ? {
@@ -215,7 +229,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           eyebrow: maybe(c.eyebrow),
           title: text(c.title),
           body: text(c.body),
-          image: image(c.mediaId),
+          image: image(c.mediaId) ?? defaultImage("home.about.image", locale),
         };
       }
       case "layouts":
@@ -236,15 +250,20 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           })),
         };
       case "card_zoom": {
-        const scenes = section.content.items.flatMap((item) => {
+        const chosen = section.content.items.flatMap((item) => {
           const picture = image(item.mediaId);
           return picture
             ? [{ key: item.mediaId, image: picture, caption: maybe(item.caption) }]
             : [];
         });
-        return scenes.length
-          ? { kind: "card_zoom", title: text(section.content.title), scenes }
-          : null;
+        const scenes = chosen.length
+          ? chosen
+          : defaultScenes.map((slot) => ({
+              key: slot,
+              image: defaultImage(slot, locale),
+              caption: null,
+            }));
+        return { kind: "card_zoom", title: text(section.content.title), scenes };
       }
       case "location": {
         const c = section.content;
@@ -270,7 +289,9 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
                 progress: latestUpdate.progressPercent,
                 // A video's poster stands in when the update leads with a video.
                 image:
-                  image(updateMedia[0]?.mediaId) ?? video(updateMedia[0]?.mediaId)?.poster ?? null,
+                  image(updateMedia[0]?.mediaId) ??
+                  video(updateMedia[0]?.mediaId)?.poster ??
+                  defaultImage("home.construction.background", locale),
               },
             }
           : null;
