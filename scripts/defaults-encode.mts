@@ -3,8 +3,8 @@
 //   pnpm defaults:encode               every slot
 //   pnpm defaults:encode home.hero.poster page.elaqe   only these
 //
-// Reads the originals from DEFAULTS_ORIGINALS (default C:/dev/kc-65-assets/originals,
-// never committed), crops each to its slot's aspect ratio around its focus
+// Reads the originals from DEFAULTS_ORIGINALS (default assets/defaults/originals,
+// committed so anyone can re-encode), crops each to its slot's aspect ratio around its focus
 // point, and writes public/defaults/<slot>/<width>.<avif|webp> at the widths
 // the media library would make (`planVariantWidths`), with the library's own
 // encoder settings. Sizes, the blur placeholder and the dominant colour go to
@@ -25,7 +25,7 @@ import {
 import { encoders } from "../src/lib/media/image";
 import { planVariantWidths } from "../src/shared/media";
 
-const originals = process.env.DEFAULTS_ORIGINALS ?? "C:/dev/kc-65-assets/originals";
+const originals = process.env.DEFAULTS_ORIGINALS ?? "assets/defaults/originals";
 const publicDir = "public/defaults";
 const manifestFile = "src/content/defaults/encoded.json";
 

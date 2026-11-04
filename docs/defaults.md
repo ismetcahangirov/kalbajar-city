@@ -20,9 +20,9 @@ the real map.
   would make (`planVariantWidths`, capped by `maxWidth`) with the library's
   encoder settings, and `src/content/defaults/encoded.json` (size, focus
   position, blur placeholder, dominant colour)
-- The originals are not committed. They live in `DEFAULTS_ORIGINALS`
-  (default `C:/dev/kc-65-assets/originals`), under `instagram/` with
-  `sources.csv` and `generated/` with `prompts.md`
+- The originals are committed in `assets/defaults/originals/` (override with
+  `DEFAULTS_ORIGINALS`): `instagram/` with `sources.csv`, and `generated/` with
+  `prompts.md`. Generated originals are stored as JPEG at quality 95
 - Alt text is `Defaults.<slot>` in the az, en and ru catalogues. The
   `decor.*` slots are decorative and have none
 - `tests/unit/defaults.test.ts` checks that every file exists, the widths and

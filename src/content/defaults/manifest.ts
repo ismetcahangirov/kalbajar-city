@@ -122,7 +122,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "home.stats.background": {
-    original: "generated/g4-linen-timber.png",
+    original: "generated/g4-linen-timber.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     source: "generated",
@@ -130,7 +130,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "home.layouts.background": {
-    original: "generated/g5-light-on-wall.png",
+    original: "generated/g5-light-on-wall.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     source: "generated",
@@ -171,7 +171,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "home.amenities.window": {
-    original: "generated/g6-mountain-valley.png",
+    original: "generated/g6-mountain-valley.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     source: "generated",
@@ -187,7 +187,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "home.location.moverLeft": {
-    original: "generated/g7-mountain-stone.png",
+    original: "generated/g7-mountain-stone.jpg",
     aspect: 5 / 6,
     focus: { x: 0.5, y: 0.5 },
     source: "generated",
@@ -195,7 +195,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "home.location.moverRight": {
-    original: "generated/g8-terrazzo-timber.png",
+    original: "generated/g8-terrazzo-timber.jpg",
     aspect: 5 / 6,
     focus: { x: 0.5, y: 0.5 },
     source: "generated",
@@ -334,7 +334,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "decor.leafShadow.1": {
-    original: "generated/g1-leaf-shadow.png",
+    original: "generated/g1-leaf-shadow.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     maxWidth: 960,
@@ -344,7 +344,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "decor.leafShadow.2": {
-    original: "generated/g2-leaf-shadow.png",
+    original: "generated/g2-leaf-shadow.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     maxWidth: 960,
@@ -354,7 +354,7 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     date: collected,
   },
   "decor.plaster": {
-    original: "generated/g3-plaster.png",
+    original: "generated/g3-plaster.jpg",
     aspect: 3 / 2,
     focus: { x: 0.5, y: 0.5 },
     maxWidth: 960,

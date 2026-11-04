@@ -1,6 +1,6 @@
 # pyzhevsky.ru: global chrome, inner pages, interaction states
 
-Measured 2026-11-04 with Playwright at 1440x900, key points at 390x844. Sources: live computed styles, global.css, shared.js, per-page bundles in ref/pages/*.css|js. Screenshots: ref/shots/pages/ (94). "(inferred)" = not read from code/styles.
+Measured 2026-11-04 with Playwright at 1440x900, key points at 390x844. Sources: live computed styles, global.css, shared.js, per-page bundles in ref/pages/*.css|js. Screenshots: `docs/redesign/reference-shots/pages/` (94). "(inferred)" = not read from code/styles.
 Gaps: request form not submitted (error/success from CSS only); /map is WebGL, only loader seen; preloader-NNNNms screenshot names are requested times (real: 1247,1329,1431,1599,2531,2820,3718,4334,8522 ms) — use §1.1 timeline.
 
 ## 0. System
