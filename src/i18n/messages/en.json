@@ -8,8 +8,6 @@
     "title": "Kalbajar City",
     "tagline": "The first private residential complex in Kalbajar",
     "hero": {
-      "apartments": "View apartments",
-      "viewing": "Book a viewing",
       "chips": "At a glance",
       "chipApartments": "{count, plural, one {# apartment} other {# apartments}}",
       "chipRooms": "{min}–{max} rooms",
@@ -21,7 +19,8 @@
     "layouts": {
       "rooms": "{rooms}-room apartments",
       "plans": "{count, plural, one {# layout} other {# layouts}}",
-      "all": "All apartments"
+      "all": "All apartments",
+      "details": "{title}: details"
     },
     "construction": {
       "progress": "{percent} complete",
@@ -30,7 +29,16 @@
     },
     "location": {
       "minutes": "{minutes} min",
-      "more": "More about the location"
+      "more": "More about the location",
+      "cards": "Travel time",
+      "unit": "min"
+    },
+    "words": {
+      "cardZoom": "VIEWS",
+      "amenities": "COMFORT",
+      "location": "LOCATION",
+      "construction": "BUILDING",
+      "process": "STEPS"
     }
   },
   "Apartments": {

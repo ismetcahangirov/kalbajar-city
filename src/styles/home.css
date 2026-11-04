@@ -1,93 +1,150 @@
 /*
- * Home page transitions that are not primitives (motion-system.md → UI
- * transitions). Only transform-family properties and opacity move; reduced
- * motion cuts every duration to nothing (globals.css).
+ * The home page's scenes (#66, src/components/home/scenes;
+ * docs/motion-system.md). The scene engine's own rules are in scenes.css;
+ * these are the home-only pieces. Only transform-family properties,
+ * opacity, clip-path and the catalogue's blur move.
  */
 
+/* Where a scene pins (src/styles/scenes.css): a fine pointer at 668 px and
+   up, motion allowed and script running. Layout that only makes sense while
+   pinned (a card scrolling over a pinned photo) uses `pinned:`. */
+@custom-variant pinned (@media (scripting: enabled) and (pointer: fine) and (width >= 41.75rem) and (prefers-reduced-motion: no-preference));
+
+/* A mouse at 668 px and up: hover interactions; touch gets accordions. */
+@custom-variant pointer-desk (@media (pointer: fine) and (width >= 41.75rem));
+
+/* Cap-height trimming (ui-kit.md → Cap-height trimming). */
+@utility trim-cap {
+  text-box: trim-both cap alphabetic;
+
+  @supports not (text-box: trim-both cap alphabetic) {
+    margin-block: calc((1em - 1lh) / 2 - var(--font-cap-trim));
+  }
+}
+
 @layer components {
-  /* Hero media: visible from first paint, settling from a slight zoom. */
-  [data-hero-media] > picture > img,
-  [data-hero-media] > video {
-    animation: hero-settle var(--duration-settle) var(--ease-out) both;
-  }
-
-  @keyframes hero-settle {
-    from {
-      scale: 1.06;
-    }
-  }
-
-  /* The film fades in over its poster once it can play through. */
+  /* The hero film fades in over its poster once it can play through. */
   [data-hero-video] {
     opacity: 0;
-    transition: opacity var(--duration-crossfade) var(--ease-in-out);
+    transition: opacity var(--duration-slow) var(--ease-out);
   }
 
   [data-hero-video][data-ready] {
     opacity: 1;
   }
 
-  /* Accordion: the panel opens instantly, the plus turns into a cross. */
-  [data-accordion-icon] {
-    transition: rotate var(--duration-fast) var(--ease-standard);
+  /* HoverList (A33): with a mouse, the hovered or focused row (the first
+     while none is) gets the accent border and ⊖, and its caption comes in
+     out of a blur while the others blur out. On touch it is a one-open
+     accordion (hover-list-toggle.tsx); the open row shows its caption. */
+  [data-hover-row] [data-icon-open],
+  [data-hover-row] [data-icon-closed] {
+    transition: opacity var(--duration-normal) var(--ease-out);
   }
 
-  details[open] > summary [data-accordion-icon] {
-    rotate: 45deg;
+  @media not ((pointer: fine) and (width >= 41.75rem)) {
+    [data-hover-row]:not([data-open]) [data-icon-open],
+    [data-hover-row][data-open] [data-icon-closed] {
+      opacity: 0;
+    }
+
+    [data-hover-row]:not([data-open]) [data-hover-caption] {
+      display: none;
+    }
   }
 
-  details > summary {
+  @media (pointer: fine) and (width >= 41.75rem) {
+    [data-hover-row] [data-hover-link]::before {
+      content: "";
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: var(--grid-line-width);
+      background: var(--t-text);
+      opacity: 0;
+      transition: opacity var(--duration-normal) var(--ease-out);
+    }
+
+    [data-hover-row] [data-hover-caption] {
+      opacity: 0;
+      filter: blur(var(--motion-blur));
+      transition:
+        opacity var(--duration-normal) var(--ease-exit),
+        filter var(--duration-normal) var(--ease-exit);
+    }
+
+    /* With a mouse the open state is the hover, not the accordion's. */
+    [data-hover-row] [data-icon-open] {
+      opacity: 0;
+    }
+
+    [data-hover-row] [data-icon-closed] {
+      opacity: 1;
+    }
+
+    [data-hover-row]:is(:hover, :focus-within),
+    [data-hover-list]:not(:has([data-hover-row]:is(:hover, :focus-within)))
+      [data-hover-row]:first-child {
+      & [data-hover-link]::before {
+        opacity: 1;
+      }
+
+      & [data-icon-open] {
+        opacity: 1;
+      }
+
+      & [data-icon-closed] {
+        opacity: 0;
+      }
+
+      & [data-hover-caption] {
+        opacity: 1;
+        filter: none;
+        transition-timing-function: var(--ease-out);
+      }
+    }
+  }
+
+  /* The FAQ: the answer opens instantly, ⊕ turns into ⊖. */
+  details[data-faq] > summary {
     list-style: none;
   }
 
-  details > summary::-webkit-details-marker {
+  details[data-faq] > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  details[data-faq]:not([open]) [data-icon-open],
+  details[data-faq][open] [data-icon-closed] {
     display: none;
   }
 }
 
 /* The place the home inquiry form takes before its script loads
    (src/components/leads/deferred-lead-form.tsx), so nothing moves when it
-   appears: the tallest height of `LeadForm` (its status line and the form)
-   in az, en and ru at each width range, measured every 5 px from 320 to
-   1920 px on the production build on 2026-11-03 (Russian runs longest).
-   Each breakpoint is the first sampled width at which the shorter height
+   appears: the tallest height of the hairline `LeadForm` (its status line
+   and the form) in az, en and ru at each width range, measured every 5 px
+   from 320 to 1920 px on 2026-11-04 in the #66 CTA scene (the form takes
+   the full width on phones and the right half from `desk`). Each
+   breakpoint is the first sampled width at which the shorter height
    holds. Re-measure when the form's fields or copy, or the CTA's layout,
    change. */
 @utility min-h-lead-form-home {
-  min-height: 52.3046875rem;
+  min-height: 42.4375rem;
 
-  @media (width >= 21.25rem) {
-    min-height: 50.60546875rem;
+  @media (width >= 42.5rem) {
+    min-height: 41.5rem;
   }
-  @media (width >= 23.75rem) {
-    min-height: 48.90625rem;
+  @media (width >= 49.0625rem) {
+    min-height: 40.5625rem;
   }
-  @media (width >= 26.5625rem) {
-    min-height: 47.20703125rem;
+  @media (width >= 56.875rem) {
+    min-height: 39.625rem;
   }
-  @media (width >= 28.4375rem) {
-    min-height: 45.80078125rem;
+  @media (width >= 71.5625rem) {
+    min-height: 35.1875rem;
   }
-  @media (width >= 35.9375rem) {
-    min-height: 44.1015625rem;
-  }
-  @media (width >= 37.8125rem) {
-    min-height: 39.1015625rem;
-  }
-  @media (width >= 54.0625rem) {
-    min-height: 37.6953125rem;
-  }
-  @media (width >= 57.8125rem) {
-    min-height: 35.99609375rem;
-  }
-  /* Two columns from lg: the form gets narrower and taller again. */
-  @media (width >= 64rem) {
-    min-height: 45.80078125rem;
-  }
-  @media (width >= 65.9375rem) {
-    min-height: 44.1015625rem;
-  }
-  @media (width >= 69.0625rem) {
-    min-height: 39.1015625rem;
+  @media (width >= 90rem) {
+    min-height: 34.8125rem;
   }
 }

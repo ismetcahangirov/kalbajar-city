@@ -43,6 +43,8 @@ export type HomeSection =
       subtitle: Localized | null;
       /** The console's poster, else the film's poster frame, else the bundled default. */
       poster: PublicImage;
+      /** The render in the hero's right third; the bundled default until the console has a picker. */
+      panel: PublicImage;
       video: PublicVideo | null;
       /** Spec chips at the hero's foot; null until layouts exist. */
       chips: { apartments: number; roomsMin: number; roomsMax: number; areaMin: number } | null;
@@ -201,6 +203,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
             image(c.posterMediaId) ??
             video(c.videoMediaId)?.poster ??
             defaultImage("home.hero.poster", locale),
+          panel: defaultImage("home.hero.panel", locale),
           video: video(c.videoMediaId),
           chips: layouts.length
             ? {

@@ -304,6 +304,34 @@ and screenshots `reference-shots/home/*`. Needs #63 and #64.
   LCP < 2.5 s and CLS < 0.05 (Lighthouse median of 3 ≥ 93), per-route JS
   < 40 KB gzip (`pnpm budget:js`), 320–1920 px without horizontal scroll, az/en/ru
 
+### #66 notes
+
+- Text on photos: the default images' dominant tones are too light for AA
+  contrast with cream text (medians 2.1–4.0:1 measured on the stats, layouts
+  and about images), so every readable line over a photo sits on a solid
+  surface (card, band or chip). Only the `aria-hidden` giant words sit on
+  the photo itself
+- `Reveal kind="clip-down|clip-up" group` never fired in Chrome: the
+  IntersectionObserver measures the target's own clip-path, so a wipe's
+  start state never reaches the group threshold. `reveal.tsx` now enters
+  wipes at the edge instead of the group threshold
+- `src/components/home/sections.tsx` keeps only `About` and `Amenities`
+  (and `section-head.tsx`, `localized.tsx` stay) because `/haqqimizda` and
+  other inner pages still import them; #68 decides their fate
+- `home.css` adds `pinned:` (script, fine pointer, `desk`, motion allowed:
+  the same test as a pinning `Scene`) and `pointer-desk:` variants, and a
+  `trim-cap` utility (`text-box` with a margin fallback)
+- Stats pair two stats per `StatSwap` set (left and right label/value, the
+  set number in the centre), so six stats make three sets
+- The wordmark is rendered with `lang="en"` so CSS uppercasing keeps
+  "CITY" rather than the Azerbaijani "CİTY"; the header's brand (#64) still
+  shows "CİTY" in az
+- Home no longer uses the legacy motion primitives (FadeUp, LineReveal,
+  ImageReveal, Parallax, PinnedCardZoom, CountUp), the legacy ui components
+  (Section, Container, Heading, Text, Button, Card, Stat, Eyebrow, Icon) or
+  the `--color-scrim`, `--duration-crossfade` and `--duration-settle`
+  tokens; they stay for #68 until the joint cleanup
+
 ## #68 Inner pages
 
 Branch `feat/redesign-pages`. Spec §7.3; reference `pyzhevsky-pages.md` §2–§3
