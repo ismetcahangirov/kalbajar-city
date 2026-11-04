@@ -28,3 +28,18 @@
     }
   }
 }
+
+@layer components {
+  /* The screen slider's thumbnail strip (src/components/pages/screen-slider.tsx)
+     shows only where its scene pins (src/styles/scenes.css): stacked, the
+     screens follow one another and the strip has nothing to point along. */
+  [data-screen-strip] {
+    display: none;
+  }
+
+  @media (scripting: enabled) and (pointer: fine) and (width >= 41.75rem) and (prefers-reduced-motion: no-preference) {
+    [data-screen-strip] {
+      display: flex;
+    }
+  }
+}

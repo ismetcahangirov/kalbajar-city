@@ -131,7 +131,18 @@
     "legend": "Vəziyyət",
     "listTitle": "Siyahı",
     "listLead": "Sxemdəki məlumatın eynisi, siyahı şəklində.",
-    "empty": "Hələlik göstəriləcək mənzil yoxdur."
+    "empty": "Hələlik göstəriləcək mənzil yoxdur.",
+    "numbersTitle": "Kompleks rəqəmlərlə",
+    "numbers": {
+      "blocks": "blok",
+      "floors": "mərtəbəyədək",
+      "apartments": "mənzil",
+      "available": "satışda"
+    },
+    "tabs": {
+      "numbers": "Rəqəmlər",
+      "selector": "Seçim"
+    }
   },
   "ApartmentPage": {
     "metaTitle": "{name}: {rooms, plural, one {# otaq} other {# otaq}}, {area}",
@@ -376,7 +387,9 @@
       "youtube": "YouTube",
       "tiktok": "TikTok"
     },
-    "map": "Xəritədə"
+    "map": "Xəritədə",
+    "office": "Satış ofisi",
+    "book": "Baxışa yazılın"
   },
   "Construction": {
     "title": "Tikintinin gedişatı",
@@ -391,7 +404,12 @@
     "video": "Tikinti videosu, {month}",
     "emptyTitle": "İlk hesabat tezliklə",
     "emptyBody": "Tikinti meydançasından aylıq hesabatlar burada dərc olunacaq. Hələlik tikintini öz gözünüzlə görmək üçün baxışa yazıla bilərsiniz.",
-    "emptyAction": "Baxışa yazılın"
+    "emptyAction": "Baxışa yazılın",
+    "updatesTitle": "Aylar üzrə",
+    "tabs": {
+      "progress": "İrəliləyiş",
+      "updates": "Aylar"
+    }
   },
   "Gallery": {
     "title": "Qalereya",
@@ -400,7 +418,14 @@
     "filter": "Kateqoriyalar",
     "all": "Hamısı",
     "emptyTitle": "Şəkillər tezliklə",
-    "emptyBody": "Qalereya hazırlanır. İlk şəkillər burada dərc olunacaq."
+    "emptyBody": "Qalereya hazırlanır. İlk şəkillər burada dərc olunacaq.",
+    "screensTitle": "Seçilmiş şəkillər",
+    "allTitle": "Bütün şəkillər",
+    "screen": "Şəkil {index}",
+    "tabs": {
+      "screens": "Seçilmiş",
+      "all": "Hamısı"
+    }
   },
   "Lightbox": {
     "dialog": "Şəkil baxışı",
@@ -453,7 +478,13 @@
     "directions": "Necə gəlmək olar",
     "directionsDefault": "Baxışa yazıldığınız zaman satış komandası sizə ən rahat yolu və hazırkı səfər qaydalarını izah edəcək, sizə uyğun vaxtı razılaşdıracaq.",
     "viewing": "Baxışa yazılın",
-    "map": "Xəritə"
+    "map": "Xəritə",
+    "tabs": {
+      "statement": "Məkan",
+      "distances": "Məsafələr",
+      "directions": "Yol",
+      "map": "Xəritə"
+    }
   },
   "About": {
     "description": "Kəlbəcərdəki Kalbajar City: kompleks, əsas faktlar, üstünlüklər və tikinti şirkəti.",
@@ -476,7 +507,22 @@
       "instagram": "Instagram"
     },
     "apartments": "Mənzillərə baxın",
-    "viewing": "Baxışa yazılın"
+    "viewing": "Baxışa yazılın",
+    "numbersTitle": "Rəqəmlərlə",
+    "numbers": {
+      "apartments": "mənzil",
+      "buildings": "yaşayış binası",
+      "blocks": "blok",
+      "parking": "yerlik yeraltı qaraj",
+      "area": "ümumi sahə",
+      "land": "torpaq sahəsi"
+    },
+    "tabs": {
+      "intro": "Layihə",
+      "facts": "Faktlar",
+      "amenities": "Üstünlüklər",
+      "developer": "Tikinti şirkəti"
+    }
   },
   "Privacy": {
     "description": "Kalbajar City saytı formalar vasitəsilə göndərdiyiniz məlumatlarla necə davranır: nəyi toplayırıq, nə üçün, kim alır və nə qədər saxlayırıq.",
@@ -570,5 +616,17 @@
     "hours": "İş saatları",
     "developer": "Tikinti şirkəti",
     "developerWebsite": "Tikinti şirkətinin saytı"
+  },
+  "Pages": {
+    "down": "Növbəti bölməyə keç",
+    "words": {
+      "about": "Haqqımızda",
+      "complex": "Kompleks",
+      "location": "Yerləşmə",
+      "gallery": "Qalereya",
+      "construction": "Tikinti",
+      "news": "Xəbərlər",
+      "contact": "Əlaqə"
+    }
   }
 }

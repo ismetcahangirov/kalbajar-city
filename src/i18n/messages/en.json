@@ -131,7 +131,18 @@
     "legend": "Status",
     "listTitle": "List",
     "listLead": "The same information as the plan, as a list.",
-    "empty": "There are no apartments to show yet."
+    "empty": "There are no apartments to show yet.",
+    "numbersTitle": "The complex in numbers",
+    "numbers": {
+      "blocks": "blocks",
+      "floors": "floors at most",
+      "apartments": "apartments",
+      "available": "for sale"
+    },
+    "tabs": {
+      "numbers": "Numbers",
+      "selector": "Selector"
+    }
   },
   "ApartmentPage": {
     "metaTitle": "{name}: {rooms, plural, one {# room} other {# rooms}}, {area}",
@@ -376,7 +387,9 @@
       "youtube": "YouTube",
       "tiktok": "TikTok"
     },
-    "map": "On the map"
+    "map": "On the map",
+    "office": "Sales office",
+    "book": "Book a viewing"
   },
   "Construction": {
     "title": "Construction progress",
@@ -391,7 +404,12 @@
     "video": "Construction video, {month}",
     "emptyTitle": "The first report is coming",
     "emptyBody": "Monthly reports from the construction site will be published here. Meanwhile, book a viewing to see the site for yourself.",
-    "emptyAction": "Book a viewing"
+    "emptyAction": "Book a viewing",
+    "updatesTitle": "Month by month",
+    "tabs": {
+      "progress": "Progress",
+      "updates": "Months"
+    }
   },
   "Gallery": {
     "title": "Gallery",
@@ -400,7 +418,14 @@
     "filter": "Categories",
     "all": "All",
     "emptyTitle": "Photos are coming",
-    "emptyBody": "The gallery is being prepared. The first photos will be published here."
+    "emptyBody": "The gallery is being prepared. The first photos will be published here.",
+    "screensTitle": "Selected images",
+    "allTitle": "All images",
+    "screen": "Image {index}",
+    "tabs": {
+      "screens": "Selected",
+      "all": "All"
+    }
   },
   "Lightbox": {
     "dialog": "Image viewer",
@@ -453,7 +478,13 @@
     "directions": "How to get here",
     "directionsDefault": "When you book a viewing, the sales team will tell you the best route and the current travel arrangements, and agree a time that suits you.",
     "viewing": "Book a viewing",
-    "map": "Map"
+    "map": "Map",
+    "tabs": {
+      "statement": "The place",
+      "distances": "Distances",
+      "directions": "Directions",
+      "map": "Map"
+    }
   },
   "About": {
     "description": "Kalbajar City in Kalbajar: the complex, its key facts, its amenities and its developer.",
@@ -476,7 +507,22 @@
       "instagram": "Instagram"
     },
     "apartments": "See the apartments",
-    "viewing": "Book a viewing"
+    "viewing": "Book a viewing",
+    "numbersTitle": "In numbers",
+    "numbers": {
+      "apartments": "apartments",
+      "buildings": "residential buildings",
+      "blocks": "blocks",
+      "parking": "underground parking spaces",
+      "area": "total area",
+      "land": "land plot"
+    },
+    "tabs": {
+      "intro": "The project",
+      "facts": "Facts",
+      "amenities": "Amenities",
+      "developer": "Developer"
+    }
   },
   "Privacy": {
     "description": "How the Kalbajar City website handles the details you send through its forms: what we collect, why, who receives it and how long we keep it.",
@@ -570,5 +616,17 @@
     "hours": "Office hours",
     "developer": "Developer",
     "developerWebsite": "Developer's website"
+  },
+  "Pages": {
+    "down": "Go to the next section",
+    "words": {
+      "about": "About",
+      "complex": "Complex",
+      "location": "Location",
+      "gallery": "Gallery",
+      "construction": "Building",
+      "news": "News",
+      "contact": "Contact"
+    }
   }
 }
