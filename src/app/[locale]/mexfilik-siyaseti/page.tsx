@@ -3,9 +3,8 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import type { ReactNode } from "react";
 
-import { PageHead } from "@/components/site/page-head";
+import { ArticleHead } from "@/components/pages/article-head";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
-import { Container, Heading, Text } from "@/components/ui";
 import { privacy } from "@/config/privacy";
 import { formatPhone } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
@@ -63,23 +62,26 @@ export default async function PrivacyPage() {
 
   return (
     <>
-      <PageHead
-        title={nav("privacy")}
-        lead={t("lead")}
-        meta={
-          <time dateTime={privacy.updated}>
-            {t("updated", { date: format.dateTime(updated, "long") })}
-          </time>
-        }
-      />
-      <div className="pb-section">
-        {/* The prose measure, aligned with the page head rather than centred. */}
-        <Container className="flex flex-col gap-block *:max-w-(--container-prose)">
+      {/* The article layout (reference `/news` article): title, date, rule, a 720 px column. */}
+      <div
+        data-theme="light"
+        className="flex flex-col bg-(--t-bg) pb-u6 text-(--t-text) desk:pb-u9"
+      >
+        <ArticleHead
+          title={nav("privacy")}
+          meta={
+            <time dateTime={privacy.updated}>
+              {t("updated", { date: format.dateTime(updated, "long") })}
+            </time>
+          }
+        />
+        <div className="mx-auto flex w-full max-w-[45rem] flex-col gap-u4 px-layout pt-u4 desk:px-0">
+          <p className="text-lead">{t("lead")}</p>
           <Block title={t("controller.title")}>
-            <Text>{t("controller.body", { developer: about.developer.name })}</Text>
+            <p>{t("controller.body", { developer: about.developer.name })}</p>
           </Block>
           <Block title={t("data.title")}>
-            <Text>{t("data.body")}</Text>
+            <p>{t("data.body")}</p>
             <List
               items={[
                 t("data.items.contact"),
@@ -88,34 +90,34 @@ export default async function PrivacyPage() {
                 t("data.items.language"),
               ]}
             />
-            <Text>{t("data.none")}</Text>
+            <p>{t("data.none")}</p>
           </Block>
           <Block title={t("purpose.title")}>
-            <Text>{t("purpose.body")}</Text>
+            <p>{t("purpose.body")}</p>
           </Block>
           <Block title={t("storage.title")}>
-            <Text>{t("storage.body")}</Text>
+            <p>{t("storage.body")}</p>
           </Block>
           <Block title={t("recipients.title")}>
-            <Text>{t("recipients.body")}</Text>
+            <p>{t("recipients.body")}</p>
           </Block>
           <Block title={t("retention.title")}>
-            <Text>{t("retention.body", { months: retentionMonths })}</Text>
+            <p>{t("retention.body", { months: retentionMonths })}</p>
           </Block>
           <Block title={t("analytics.title")}>
-            <Text>
+            <p>
               {services.length
                 ? t("analytics.bodyActive", { services: servicesText })
                 : t("analytics.body")}
-            </Text>
+            </p>
           </Block>
           <Block title={t("cookies.title")}>
-            <Text>{services.length ? t("cookies.bodyActive") : t("cookies.body")}</Text>
+            <p>{services.length ? t("cookies.bodyActive") : t("cookies.body")}</p>
             <List items={[t("cookies.items.locale"), t("cookies.items.attribution")]} />
-            <Text>{t("cookies.console")}</Text>
+            <p>{t("cookies.console")}</p>
           </Block>
           <Block title={t("rights.title")}>
-            <Text>{t("rights.body")}</Text>
+            <p>{t("rights.body")}</p>
             <List
               items={[
                 t("rights.items.access"),
@@ -127,7 +129,7 @@ export default async function PrivacyPage() {
             />
           </Block>
           <Block title={t("contact.title")}>
-            <Text>
+            <p>
               {t.rich("contact.body", {
                 phone: phone ? formatPhone(phone) : "",
                 link: (chunks) => (
@@ -136,10 +138,10 @@ export default async function PrivacyPage() {
                   </Link>
                 ),
               })}
-            </Text>
-            {contacts.email && <Text>{t("contact.email", { email: contacts.email })}</Text>}
+            </p>
+            {contacts.email && <p>{t("contact.email", { email: contacts.email })}</p>}
           </Block>
-        </Container>
+        </div>
       </div>
       <StructuredData
         locale={locale}
@@ -151,10 +153,8 @@ export default async function PrivacyPage() {
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-4">
-      <Heading as="h2" size="heading">
-        {title}
-      </Heading>
+    <section className="flex flex-col gap-u text-body [&_a]:underline-offset-4">
+      <h2 className="text-lead">{title}</h2>
       {children}
     </section>
   );
@@ -162,7 +162,7 @@ function Block({ title, children }: { title: string; children: ReactNode }) {
 
 function List({ items }: { items: string[] }) {
   return (
-    <ul className="flex list-disc flex-col gap-2 ps-6 text-body marker:text-text-muted">
+    <ul className="flex list-disc flex-col gap-u ps-u2 text-body marker:text-(--t-small)">
       {items.map((item) => (
         <li key={item}>{item}</li>
       ))}

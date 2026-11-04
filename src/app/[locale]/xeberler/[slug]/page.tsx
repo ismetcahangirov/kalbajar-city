@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
@@ -7,10 +6,11 @@ import { connection } from "next/server";
 import { RichText } from "@/components/content/rich-text";
 import { ShareButton } from "@/components/content/share-button";
 import { Localized } from "@/components/home/localized";
-import { FadeUp, LineReveal } from "@/components/motion";
+import { Reveal } from "@/components/motion/reveal";
 import { NewsCard } from "@/components/news/news-card";
+import { ArticleHead } from "@/components/pages/article-head";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
-import { Button, Container, Heading, Icon, Picture, Section, Text } from "@/components/ui";
+import { Picture } from "@/components/ui/picture";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { getDeveloper } from "@/lib/public/site";
@@ -60,69 +60,72 @@ export default async function ArticlePage({ params }: PageProps<"/[locale]/xeber
 
   return (
     <>
-      <Section>
-        <article aria-labelledby="meqale" className="flex flex-col gap-block">
-          <Container size="prose" className="flex flex-col gap-6">
-            <div>
-              <Button
-                href={getPathname({ href: "/xeberler", locale })}
-                variant="link"
-                leadingIcon={<Icon icon={ArrowLeft} />}
-              >
-                {t("all")}
-              </Button>
-            </div>
-            <Heading as="h1" size="display" id="meqale" lang={titleLang}>
-              {article.title.value}
-            </Heading>
-            <Text size="small" tone="muted">
-              {t("published")}:{" "}
+      {/* The reference's article on light: title, date and rule, the cover
+          centred at 720 px, and the body in a 720 px column. */}
+      <article
+        aria-labelledby="meqale"
+        data-theme="light"
+        className="flex flex-col bg-(--t-bg) pb-u6 text-(--t-text) desk:pb-u9"
+      >
+        <ArticleHead
+          id="meqale"
+          title={article.title.value}
+          lang={titleLang}
+          back={{ href: "/xeberler", label: t("all") }}
+          meta={
+            <>
+              <span className="sr-only">{t("published")}: </span>
               <time dateTime={article.publishedAt}>
                 {format.dateTime(new Date(article.publishedAt), "long")}
               </time>
-            </Text>
-            {article.lead && (
-              <Text size="body-lg" tone="muted">
-                <Localized text={article.lead} />
-              </Text>
-            )}
-          </Container>
+            </>
+          }
+        />
 
+        <div className="flex flex-col gap-u4 px-layout pt-u3 desk:pt-u3">
           {article.cover && (
-            <Container>
-              {/* Above the fold, so it is the LCP candidate: no entry, loaded first. */}
-              <div className="relative aspect-hero-mobile overflow-hidden rounded-md bg-surface-alt sm:aspect-hero">
-                <Picture image={article.cover} sizes="(min-width: 90rem) 90rem, 100vw" priority />
-              </div>
-            </Container>
+            // Above the fold, so it is the LCP candidate: no entry, loaded first.
+            <div className="relative mx-auto aspect-[720/345] w-full max-w-[45rem] overflow-hidden bg-(--t-line)">
+              <Picture image={article.cover} sizes="(min-width: 48rem) 45rem, 100vw" priority />
+            </div>
           )}
-
-          <Container size="prose" className="flex flex-col gap-block">
+          <div className="mx-auto flex w-full max-w-[45rem] flex-col gap-u4">
+            {article.lead && (
+              <p className="text-lead">
+                <Localized text={article.lead} />
+              </p>
+            )}
             <RichText text={article.body} />
             <ShareButton title={article.title.value} />
-          </Container>
-        </article>
-      </Section>
+          </div>
+        </div>
+      </article>
 
       {article.related.length > 0 && (
-        <Section tone="limestone" aria-labelledby="diger-xeberler">
-          <Container className="flex flex-col gap-block">
-            <LineReveal as="h2" id="diger-xeberler" size="display">
-              {t("related")}
-            </LineReveal>
-            <FadeUp
-              as="ul"
-              group
-              className="grid gap-x-gutter gap-y-block sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {article.related.map((other) => (
-                <li key={other.slug}>
-                  <NewsCard article={other} titleAs="h3" />
-                </li>
-              ))}
-            </FadeUp>
-          </Container>
-        </Section>
+        <section
+          data-theme="dark-alt"
+          aria-labelledby="diger-xeberler"
+          className="flex flex-col gap-u4 bg-(--t-bg) px-layout py-u6 text-(--t-text) desk:py-u9"
+        >
+          <Reveal
+            kind="text"
+            as="h2"
+            id="diger-xeberler"
+            className="text-title break-words hyphens-auto text-(--t-primary) uppercase"
+          >
+            {t("related")}
+          </Reveal>
+          <ul className="grid gap-y-u4 desk:grid-cols-3">
+            {article.related.map((other) => (
+              <li
+                key={other.slug}
+                className="border-(--t-line) desk:border-s desk:px-u desk:first:border-s-0 desk:first:ps-0"
+              >
+                <NewsCard article={other} titleAs="h3" />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <StructuredData
