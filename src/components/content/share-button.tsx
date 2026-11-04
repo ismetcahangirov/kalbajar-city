@@ -4,7 +4,8 @@ import { Share2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { Button, Icon } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 
 /**
  * Shares the page through the system share sheet where there is one (Web

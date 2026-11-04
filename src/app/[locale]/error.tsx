@@ -4,7 +4,8 @@ import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
-import { Button, buttonClass, Container, Heading, Icon, Text } from "@/components/ui";
+import { Button, buttonClass } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { Link } from "@/i18n/navigation";
 
 /**
@@ -21,24 +22,20 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
 
   return (
     // The same frame as the 404 (`PlaceholderFrame`, which is server-only).
-    <div className="flex flex-1 flex-col justify-center py-section">
-      <Container className="flex flex-col items-center gap-6 text-center">
-        <Heading as="h1" size="display" align="center">
-          {t("title")}
-        </Heading>
-        <Text tone="muted">{t("body")}</Text>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button onClick={() => retry()} leadingIcon={<Icon icon={RotateCcw} />}>
-            {t("retry")}
-          </Button>
-          <Link href="/menziller" className={buttonClass({ variant: "secondary" })}>
-            {t("catalogue")}
-          </Link>
-          <Link href="/" className={buttonClass({ variant: "link" })}>
-            {t("home")}
-          </Link>
-        </div>
-      </Container>
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-layout py-u6 text-center desk:py-u9">
+      <h1 className="text-lead-lg text-balance">{t("title")}</h1>
+      <p className="text-body text-pretty text-(--t-small)">{t("body")}</p>
+      <div className="flex flex-wrap justify-center gap-3">
+        <Button onClick={() => retry()} leadingIcon={<Icon icon={RotateCcw} />}>
+          {t("retry")}
+        </Button>
+        <Link href="/menziller" className={buttonClass({ variant: "secondary" })}>
+          {t("catalogue")}
+        </Link>
+        <Link href="/" className={buttonClass({ variant: "link" })}>
+          {t("home")}
+        </Link>
+      </div>
     </div>
   );
 }

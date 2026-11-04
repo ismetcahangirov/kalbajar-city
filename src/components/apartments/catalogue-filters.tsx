@@ -15,7 +15,7 @@ import {
 } from "react";
 
 import { Localized } from "@/components/home/localized";
-import { Checkbox } from "@/components/ui";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RangeHairline } from "@/components/ui/range-hairline";
 import { Segmented } from "@/components/ui/segmented";
 import type { Localized as LocalizedValue } from "@/i18n/content";

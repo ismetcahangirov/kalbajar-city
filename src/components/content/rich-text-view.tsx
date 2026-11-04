@@ -41,7 +41,7 @@ function blocks(list: RichBlock[], renderImage: RenderImage, prefix: string): Re
         return <p key={key}>{inlines(block.content)}</p>;
       case "heading":
         return block.level === 2 ? (
-          <h2 key={key} className="pt-4 text-heading text-balance">
+          <h2 key={key} className="pt-4 text-lead text-balance">
             {inlines(block.content)}
           </h2>
         ) : (
@@ -70,7 +70,7 @@ function blocks(list: RichBlock[], renderImage: RenderImage, prefix: string): Re
         return (
           <blockquote
             key={key}
-            className="flex flex-col gap-4 border-s-2 border-border-strong ps-6 text-body-lg text-text-muted"
+            className="flex flex-col gap-4 border-s-2 border-border-strong ps-6 text-lead text-text-muted"
           >
             {blocks(block.content, renderImage, `${key}.`)}
           </blockquote>

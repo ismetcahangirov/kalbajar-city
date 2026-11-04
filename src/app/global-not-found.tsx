@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 export default function GlobalNotFound() {
   return (
     <html lang="az" className={`${alethia.variable} ${alethiaItalic.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col items-center justify-center gap-6 px-gutter text-center">
-        <h1 className="text-display">{az.NotFound.title}</h1>
-        <p className="text-body text-text-muted">{az.NotFound.body}</p>
+      <body className="flex min-h-full flex-col items-center justify-center gap-6 px-layout text-center">
+        <h1 className="text-lead-lg text-balance">{az.NotFound.title}</h1>
+        <p className="text-body text-(--t-small)">{az.NotFound.body}</p>
         <Link href="/" className="text-body font-medium underline underline-offset-4">
           {az.NotFound.home}
         </Link>

@@ -11,11 +11,11 @@ import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
 import { Localized } from "@/components/home/localized";
 import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
-import { FadeUp, ImageReveal } from "@/components/motion";
+import { Reveal } from "@/components/motion/reveal";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
-import { Container, Heading, Picture, Section, Text, type Tone } from "@/components/ui";
 import { ArrowBlock } from "@/components/ui/arrow-block";
 import { FlatCard } from "@/components/ui/flat-card";
+import { Picture } from "@/components/ui/picture";
 import { RoundButton } from "@/components/ui/round-button";
 import { Tabs } from "@/components/ui/tabs";
 import { mainPhone } from "@/config/contacts";
@@ -105,8 +105,11 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
     apartment.gallery.length > 0 ? "gallery" : null,
     forSale ? "inquiry" : null,
   ].filter((section) => section !== null);
-  const tone = (section: string): Tone =>
-    sections.indexOf(section) % 2 === 0 ? "limestone" : "paper";
+  // On the light theme, alternating the cream ground with its hover shade.
+  const surface = (section: string) =>
+    sections.indexOf(section) % 2 === 0 ? "bg-cream-hover" : "bg-(--t-bg)";
+  const sectionClass = (section: string) =>
+    cx(surface(section), "px-layout py-u6 text-(--t-text) desk:py-u9");
 
   const plan = apartment.plan ? (
     <PlanViewer image={apartment.plan} name={name} locale={locale} />
@@ -276,88 +279,89 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
       </div>
 
       {sections.includes("breakdown") && (
-        <Section tone={tone("breakdown")} aria-labelledby="otaqlar">
-          <Container className="grid gap-block lg:grid-cols-12 lg:gap-gutter">
-            <div className="flex flex-col gap-block lg:col-span-7">
-              <FadeUp>
-                <Heading as="h2" size="heading" id="otaqlar">
-                  {t("breakdown")}
-                </Heading>
-              </FadeUp>
-              {apartment.roomAreas.length > 0 && (
-                <AreaTable
-                  id="otaqlar"
-                  rooms={apartment.roomAreas}
-                  total={apartment.areaTotal}
-                  locale={locale}
-                />
-              )}
-            </div>
-            {apartment.description && (
-              <Text size="body-lg" className="max-w-(--container-prose) lg:col-span-5">
-                <Localized text={apartment.description} />
-              </Text>
+        <section
+          data-theme="light"
+          aria-labelledby="otaqlar"
+          className={cx(sectionClass("breakdown"), "grid gap-u3 lg:grid-cols-12 lg:gap-u2")}
+        >
+          <div className="flex flex-col gap-u3 lg:col-span-7">
+            <Reveal kind="text" as="h2" id="otaqlar" className="text-lead text-balance">
+              {t("breakdown")}
+            </Reveal>
+            {apartment.roomAreas.length > 0 && (
+              <AreaTable
+                id="otaqlar"
+                rooms={apartment.roomAreas}
+                total={apartment.areaTotal}
+                locale={locale}
+              />
             )}
-          </Container>
-        </Section>
+          </div>
+          {apartment.description && (
+            <p className="max-w-(--container-prose) text-lead text-pretty lg:col-span-5">
+              <Localized text={apartment.description} />
+            </p>
+          )}
+        </section>
       )}
 
       {sections.includes("gallery") && (
-        <Section tone={tone("gallery")} aria-labelledby="qalereya">
-          <Container className="flex flex-col gap-block">
-            <FadeUp>
-              <Heading as="h2" size="heading" id="qalereya">
-                {t("gallery")}
-              </Heading>
-            </FadeUp>
-            <ul className="grid gap-gutter sm:grid-cols-2">
-              {apartment.gallery.map((image, i) => {
-                const frame = "relative aspect-grid overflow-hidden rounded-md";
-                const media = <Picture image={image} sizes="(min-width: 40rem) 50vw, 100vw" />;
-                return (
-                  <li key={image.src} className={cx(i === 0 && "sm:col-span-2")}>
-                    {/* Only the first image enters with the reveal (motion budget). */}
-                    {i === 0 ? (
-                      <ImageReveal className={frame}>{media}</ImageReveal>
-                    ) : (
-                      <div className={frame}>{media}</div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Container>
-        </Section>
+        <section
+          data-theme="light"
+          aria-labelledby="qalereya"
+          className={cx(sectionClass("gallery"), "flex flex-col gap-u3")}
+        >
+          <Reveal kind="text" as="h2" id="qalereya" className="text-lead text-balance">
+            {t("gallery")}
+          </Reveal>
+          <ul className="grid gap-u2 sm:grid-cols-2">
+            {apartment.gallery.map((image, i) => {
+              const frame = "relative aspect-grid overflow-hidden";
+              const media = <Picture image={image} sizes="(min-width: 40rem) 50vw, 100vw" />;
+              return (
+                <li key={image.src} className={cx(i === 0 && "sm:col-span-2")}>
+                  {/* Only the first image enters with the reveal (motion budget). */}
+                  {i === 0 ? (
+                    <Reveal kind="image-in" className={frame}>
+                      {media}
+                    </Reveal>
+                  ) : (
+                    <div className={frame}>{media}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       {forSale && (
-        <Section
-          tone={tone("inquiry")}
+        <section
+          data-theme="light"
           id="sorgu"
           aria-labelledby="sorgu-basliq"
           data-print-hidden=""
+          className={cx(sectionClass("inquiry"), "grid gap-u3 lg:grid-cols-12 lg:gap-u2")}
         >
-          <Container className="grid gap-block lg:grid-cols-12 lg:gap-gutter">
-            <div className="flex flex-col gap-2 lg:col-span-6">
-              <Heading as="h2" size="heading" id="sorgu-basliq">
-                {form("heading.inquiry")}
-              </Heading>
-              <Text tone="muted">{form("intro.inquiry")}</Text>
-            </div>
-            <DeferredLeadForm
-              reserve="apartment"
-              type="inquiry"
-              // About as wide as the column its reserved height was measured in.
-              className="lg:col-span-5 lg:col-start-8"
-              // "Mənzil 102 (A blok) haqqında": door numbers repeat across blocks.
-              apartment={{
-                slug: apartment.slug,
-                label: `${apartment.number} (${apartment.block.name.value})`,
-              }}
-              labelledBy="sorgu-basliq"
-            />
-          </Container>
-        </Section>
+          <div className="flex flex-col gap-2 lg:col-span-6">
+            <h2 id="sorgu-basliq" className="text-lead text-balance">
+              {form("heading.inquiry")}
+            </h2>
+            <p className="text-body text-pretty text-(--t-small)">{form("intro.inquiry")}</p>
+          </div>
+          <DeferredLeadForm
+            reserve="apartment"
+            type="inquiry"
+            // About as wide as the column its reserved height was measured in.
+            className="lg:col-span-5 lg:col-start-8"
+            // "Mənzil 102 (A blok) haqqında": door numbers repeat across blocks.
+            apartment={{
+              slug: apartment.slug,
+              label: `${apartment.number} (${apartment.block.name.value})`,
+            }}
+            labelledBy="sorgu-basliq"
+          />
+        </section>
       )}
 
       <StructuredData

@@ -87,13 +87,6 @@ design (the reference's curve).
 | `--motion-blur`      | `20px`   | Start blur of `text` and `image-in`                               |
 | `--motion-blur-soft` | `10px`   | `BlurSlideshow` blur                                              |
 
-Legacy tokens used by the current primitives (`FadeUp`, `LineReveal`,
-`ImageReveal`, `Parallax`, `PinnedCardZoom`, `CountUp`, the old hero and
-menu) stay until #63 replaces them: `--duration-base`, `-crossfade`,
-`-entry` (900 ms), `-wipe`, `-count`, `-settle`, `--ease-in-out`,
-`--ease-standard`, `--motion-rise`, `--motion-stagger`,
-`--motion-stagger-image`, `--motion-parallax-scale`.
-
 ## Scene engine
 
 Built in #63 on the existing frame loop (`src/lib/motion/frame.ts`), Lenis and
@@ -126,8 +119,8 @@ range is a pair: `"100-0 → 0-0"`. Distances below are in viewport heights
 
 ### Primitives (#63)
 
-In `src/components/motion/`; import each from its own file (not the legacy
-`index.ts` barrel), so a page loads only what it uses. The playground
+In `src/components/motion/`; import each from its own file (there is no
+barrel), so a page loads only what it uses. The playground
 `/primitivler/hereket` shows every one wired as a page should copy it.
 
 | Primitive                                                              | What it does                                                                                                                                                                                                                                                                                                                                       |
@@ -147,8 +140,10 @@ In `src/components/motion/`; import each from its own file (not the legacy
 
 Components built on them (`RollLink`, `Burger`, `TripleCarousel`,
 `BlurSlideshow`, `HoverList`, `StatSpread` …) come with the chrome and page
-PRs (#64, #66–#68). The legacy primitives' playground is
-`/primitivler/hereket/kohne`, deleted with the last of them.
+PRs (#64, #66–#68). The pre-redesign primitives (`FadeUp`, `LineReveal`,
+`ImageReveal`, `Parallax`, `PinnedCardZoom`, `CountUp`), their playground and
+their tokens were deleted in the #61 cleanup; `Reveal` replaces their last
+uses.
 
 ### Time-based transitions
 

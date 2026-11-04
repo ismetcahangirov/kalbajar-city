@@ -4,7 +4,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 
 import type { NavKey } from "@/components/shell/navigation";
-import { Container, Heading, Text } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import type { PageHref } from "@/lib/seo/metadata";
 import { pageMetadata } from "@/lib/seo/page-metadata";
@@ -12,8 +11,8 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 /** Centres the content of a page that its own issue has not built yet. */
 export function PlaceholderFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-1 flex-col justify-center py-section">
-      <Container className="flex flex-col items-center gap-6 text-center">{children}</Container>
+    <div className="flex flex-1 flex-col items-center justify-center gap-6 px-layout py-u6 text-center desk:py-u9">
+      {children}
     </div>
   );
 }
@@ -24,10 +23,8 @@ export function PlaceholderPage({ page }: { page: NavKey }) {
   const t = useTranslations("Placeholder");
   return (
     <PlaceholderFrame>
-      <Heading as="h1" size="display" align="center">
-        {nav(page)}
-      </Heading>
-      <Text tone="muted">{t("body")}</Text>
+      <h1 className="text-lead-lg text-balance">{nav(page)}</h1>
+      <p className="text-body text-pretty text-(--t-small)">{t("body")}</p>
     </PlaceholderFrame>
   );
 }

@@ -22,8 +22,7 @@ import { CarouselDemo, TeaserDemo } from "./followers";
 // PRs (#64, #66, #68) should copy it. The ranges are the catalogue's
 // (docs/motion-system.md), measured against these scenes. Like /primitivler
 // it answers 404 in production unless ENABLE_PRIMITIVES=1, so its sample copy
-// does not go through the message catalogues. The legacy primitives are on
-// /primitivler/hereket/kohne until their last use is rebuilt.
+// does not go through the message catalogues.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /** The catalogue's clips (motion-system.md → Scenes). */

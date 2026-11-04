@@ -80,12 +80,7 @@ type Pair = { fg: string; bg: string; min: number };
 const TEXT = 4.5;
 const LARGE = 3;
 
-describe("the semantic tokens (current components)", () => {
-  const night = new Map([
-    ...palette,
-    ...declarations(block(/\[data-tone="night"\][^{]*\{([\s\S]*?)\n\}/)),
-  ]);
-
+describe("the semantic tokens (current components and the console)", () => {
   const surfaces = ["--color-surface", "--color-surface-alt", "--color-surface-raised"];
   const text = ["--color-text", "--color-text-muted", "--color-text-accent"];
   // Non-text UI that must be perceivable: input borders, icons, the focus ring.
@@ -93,27 +88,23 @@ describe("the semantic tokens (current components)", () => {
   // Status and error colours are defined for light surfaces only.
   const status = ["--color-status-available", "--color-status-reserved", "--color-status-sold"];
 
-  function pairs(tone: "light" | "night"): Pair[] {
-    const fgText = tone === "light" ? [...text, ...status, "--color-error"] : text;
+  function pairs(): Pair[] {
     return [
-      ...fgText.flatMap((fg) => surfaces.map((bg) => ({ fg, bg, min: TEXT }))),
+      ...[...text, ...status, "--color-error"].flatMap((fg) =>
+        surfaces.map((bg) => ({ fg, bg, min: TEXT })),
+      ),
       ...nonText.flatMap((fg) => surfaces.map((bg) => ({ fg, bg, min: LARGE }))),
       { fg: "--color-action-text", bg: "--color-action", min: TEXT },
     ];
   }
 
-  describe.each([
-    ["light", palette],
-    ["night", night],
-  ] as const)("on %s surfaces", (tone, tokens) => {
-    it.each(pairs(tone).map((p) => [p.fg, p.bg, p.min] as const))(
-      "%s on %s is at least %s : 1",
-      (fg, bg, min) => {
-        const ratio = contrast(resolve(tokens, fg), resolve(tokens, bg));
-        expect(ratio, `${fg} on ${bg} = ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(min);
-      },
-    );
-  });
+  it.each(pairs().map((p) => [p.fg, p.bg, p.min] as const))(
+    "%s on %s is at least %s : 1",
+    (fg, bg, min) => {
+      const ratio = contrast(resolve(palette, fg), resolve(palette, bg));
+      expect(ratio, `${fg} on ${bg} = ${ratio.toFixed(2)}`).toBeGreaterThanOrEqual(min);
+    },
+  );
 
   it("keeps the three statuses three different colours", () => {
     // The word always shows (colour never stands alone); the colours differ too.

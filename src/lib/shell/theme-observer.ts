@@ -5,8 +5,7 @@
  *
  * The contract for pages (#66, #68): a section that is not on the default
  * light ground carries `data-theme="dark|darker|dark-alt|sand|light"`
- * (a `Scene` sets it from its `theme`); the legacy `data-tone="night"`
- * counts as `dark`. Sections are found in `main` and the footer when the
+ * (a `Scene` sets it from its `theme`). Sections are found in `main` and the footer when the
  * observer starts (on each route change); where themed sections nest or
  * overlap, the last in document order wins, which is the one painted on
  * top. Nothing is measured per frame: one IntersectionObserver whose root
@@ -18,11 +17,10 @@ const themes = new Set<string>(["light", "dark", "darker", "dark-alt", "sand"]);
 
 function themeOf(element: Element): ShellTheme {
   const theme = element.getAttribute("data-theme");
-  if (theme && themes.has(theme)) return theme as ShellTheme;
-  return element.getAttribute("data-tone") === "night" ? "dark" : "light";
+  return theme && themes.has(theme) ? (theme as ShellTheme) : "light";
 }
 
-const sections = "main [data-theme], main [data-tone], footer[data-theme], footer [data-theme]";
+const sections = "main [data-theme], footer[data-theme], footer [data-theme]";
 
 /**
  * Calls `onTheme` with the theme under the line `line()` px from the top of
