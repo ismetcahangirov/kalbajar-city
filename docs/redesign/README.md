@@ -366,3 +366,32 @@ parallel with #66.
   default image; only the slots in `docs/defaults.md` do
 - Keep metadata, JSON-LD, sitemap entries and `pathnames` as they are
 - Remove the old page components and primitives nothing uses any more
+
+### #68 notes
+
+- `PageHero` (`src/components/pages/page-hero.tsx`) carries
+  `data-header-overlay`, so `main` drops its header padding and the hero brings
+  its own offset. Pages without a hero image but with an overlay header use
+  `ArticleHead` (`/xeberler/[slug]`, `/mexfilik-siyaseti`). The hero's `h1` is
+  visually hidden; the giant word is `Pages.words.*`, one per locale
+- With `cacheComponents` a visited route stays in the DOM hidden, so
+  `html:has([data-header-overlay])` (#64, shell.css) also matches while a
+  hidden page has a hero. Pages without an overlay looked right in testing,
+  but the selector should be scoped to the visible route if that changes
+- `ChapterTabs`: the active underline sat at `bottom-u` and struck through the
+  labels; it is now half a unit from the bottom
+- `ScreenSlider` (`/qalereya`) takes the first five gallery items, only when
+  no category is filtered; its thumbnail strip shows only where the scene
+  pins (`content.css`). There is no scroll-driven active thumbnail yet
+- The lightbox imports `Reveal` and the UI pieces by path; it no longer uses
+  `ImageReveal` or the `@/components/motion` and `@/components/ui` barrels.
+  Inner pages no longer use `FadeUp`, `LineReveal`, `ImageReveal`,
+  `Parallax`, `PinnedCardZoom` or `CountUp`. `PageHead` (both),
+  `home/sections.tsx` (`About`, `Amenities`) and `home/section-head.tsx` are
+  removed, since nothing renders them any more. The legacy primitives stay:
+  `/menziller/[slug]` still uses `FadeUp` and `ImageReveal`, and the
+  `/primitivler/hereket/kohne` fixture shows them all
+- Not built: the `/kompleks` collage and the scattered `/yerlesme` photos
+  (no image slots in `docs/defaults.md`), team cards on `/haqqimizda` (the
+  content has one developer), an illustrated street map (the map is a drawn
+  ground with the pin until the owner supplies `location.map`)

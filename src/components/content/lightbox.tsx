@@ -9,8 +9,10 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-import { ImageReveal } from "@/components/motion";
-import { Badge, Icon, Picture } from "@/components/ui";
+import { Reveal } from "@/components/motion/reveal";
+import { Badge } from "@/components/ui/badge";
+import { Icon } from "@/components/ui/icon";
+import { Picture } from "@/components/ui/picture";
 import type { Localized } from "@/i18n/content";
 import { prefersReducedMotion } from "@/lib/motion/env";
 import { cx } from "@/lib/cx";
@@ -24,6 +26,8 @@ type LightboxProps = {
   layout: "masonry" | "grid";
   /** `sizes` of one thumbnail. */
   sizes: string;
+  /** Columns of the `grid` layout from `lg`: 3, or 2 in a half-width column. */
+  columns?: 2 | 3;
   className?: string;
 };
 
@@ -45,7 +49,7 @@ const control =
  *
  * Without JavaScript the thumbnails are an ordinary image grid.
  */
-export function Lightbox({ items, layout, sizes, className }: LightboxProps) {
+export function Lightbox({ items, layout, sizes, columns = 3, className }: LightboxProps) {
   const t = useTranslations("Lightbox");
   const media = useTranslations("Media");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -142,29 +146,28 @@ export function Lightbox({ items, layout, sizes, className }: LightboxProps) {
       <ul
         className={cx(
           layout === "masonry"
-            ? "columns-1 gap-gutter sm:columns-2 lg:columns-3"
-            : "grid gap-gutter sm:grid-cols-2 lg:grid-cols-3",
+            ? "columns-1 gap-u2 sm:columns-2 lg:columns-3"
+            : cx("grid gap-u sm:grid-cols-2", columns === 3 && "lg:grid-cols-3"),
           className,
         )}
       >
         {items.map((item, i) => (
           <li
             key={item.id}
-            className={cx("relative", layout === "masonry" && "mb-gutter break-inside-avoid")}
+            className={cx("relative", layout === "masonry" && "mb-u2 break-inside-avoid")}
           >
-            <ImageReveal
-              className={cx(
-                "relative rounded-md bg-surface-alt",
-                layout === "grid" && "aspect-grid",
-              )}
-              style={
-                layout === "masonry"
-                  ? { aspectRatio: `${item.image.width} / ${item.image.height}` }
-                  : undefined
-              }
-            >
-              <Picture image={item.image} sizes={sizes} />
-            </ImageReveal>
+            <Reveal kind="image-in">
+              <div
+                className={cx("relative bg-(--t-line)", layout === "grid" && "aspect-grid")}
+                style={
+                  layout === "masonry"
+                    ? { aspectRatio: `${item.image.width} / ${item.image.height}` }
+                    : undefined
+                }
+              >
+                <Picture image={item.image} sizes={sizes} />
+              </div>
+            </Reveal>
             <button
               type="button"
               ref={(element) => {

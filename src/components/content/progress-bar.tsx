@@ -2,7 +2,9 @@ import { cx } from "@/lib/cx";
 
 /**
  * A labelled progress bar: the visible label carries the number, so the bar
- * is never the only cue. The fill is a `scaleX` of a full-width layer.
+ * is never the only cue. A 1 px track in the theme's control colour with a
+ * 1 px fill in its text colour, as the reference's range track; the fill is
+ * a `scaleX` of a full-width layer.
  */
 export function ProgressBar({
   value,
@@ -18,8 +20,8 @@ export function ProgressBar({
   className?: string;
 }) {
   return (
-    <div className={cx("flex flex-col gap-3", className)}>
-      <p id={id} className="text-legacy-title">
+    <div className={cx("flex flex-col gap-u", className)}>
+      <p id={id} className="text-lead">
         {label}
       </p>
       <div
@@ -29,10 +31,10 @@ export function ProgressBar({
         aria-valuemax={100}
         aria-valuenow={value}
         aria-valuetext={label}
-        className="h-1 overflow-hidden rounded-full bg-border"
+        className="relative h-[0.1875rem] overflow-hidden before:absolute before:inset-x-0 before:top-px before:h-px before:bg-(--t-control)"
       >
         <div
-          className="h-full origin-left bg-text-accent rtl:origin-right"
+          className="relative h-full origin-left bg-(--t-text) rtl:origin-right"
           style={{ transform: `scaleX(${value / 100})` }}
         />
       </div>

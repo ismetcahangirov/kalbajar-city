@@ -68,7 +68,7 @@ export function ChapterTabs({ tabs, label }: ChapterTabsProps) {
       className={cx(
         "relative flex min-h-target items-center text-label whitespace-nowrap uppercase",
         tab.id === active
-          ? "text-(--t-text) after:absolute after:inset-x-0 after:bottom-u after:h-px after:bg-current"
+          ? "text-(--t-text) after:absolute after:inset-x-0 after:bottom-[calc(var(--u)/2)] after:h-px after:bg-current"
           : "text-(--t-small) hover:text-(--t-text)",
         className,
       )}

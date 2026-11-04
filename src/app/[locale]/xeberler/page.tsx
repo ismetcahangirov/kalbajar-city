@@ -4,12 +4,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 
 import { EmptyState } from "@/components/content/empty-state";
-import { PageHead } from "@/components/content/page-head";
 import { Pagination } from "@/components/content/pagination";
-import { FadeUp } from "@/components/motion";
+import { Reveal } from "@/components/motion/reveal";
 import { NewsCard } from "@/components/news/news-card";
+import { PageHero } from "@/components/pages/page-hero";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
-import { Container, Section } from "@/components/ui";
 import type { Locale } from "@/i18n/routing";
 import { getNewsPage } from "@/lib/public/news";
 import { pageParam } from "@/lib/public/query";
@@ -37,11 +36,16 @@ export async function generateMetadata({
   });
 }
 
-/** `/xeberler` (#21): published articles, newest first, twelve to a page (`?sehife=`). */
+/**
+ * `/xeberler` (#21) after the reference's `/news`: a taupe page, the split
+ * title over a hairline, and the published articles, newest first, in three
+ * columns divided by 1 px rules, twelve to a page (`?sehife=`).
+ */
 export default async function NewsPage({ searchParams }: PageProps<"/[locale]/xeberler">) {
   await connection();
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("News");
+  const words = await getTranslations("Pages.words");
   const page = pageParam((await searchParams).sehife);
   const list = await getNewsPage(locale, page);
   // Past the last page there is nothing to show, and nothing to index.
@@ -49,39 +53,53 @@ export default async function NewsPage({ searchParams }: PageProps<"/[locale]/xe
 
   return (
     <>
-      <Section>
-        <Container className="flex flex-col gap-block">
-          <PageHead title={t("title")} lead={t("lead")} />
-          {list.items.length === 0 ? (
-            <EmptyState title={t("emptyTitle")} body={t("emptyBody")} />
-          ) : (
-            <>
-              <FadeUp
-                as="ul"
-                group
-                className="grid gap-x-gutter gap-y-block sm:grid-cols-2 lg:grid-cols-3"
-              >
-                {list.items.map((article) => (
-                  <li key={article.slug}>
-                    <NewsCard article={article} />
-                  </li>
-                ))}
-              </FadeUp>
-              <Pagination
-                page={page}
-                pageCount={list.pageCount}
-                href={(n) =>
-                  n === 1 ? "/xeberler" : { pathname: "/xeberler", query: { sehife: String(n) } }
-                }
-              />
-            </>
-          )}
-        </Container>
-        <StructuredData
-          locale={locale}
-          nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/xeberler" }])]}
-        />
-      </Section>
+      <PageHero
+        title={t("title")}
+        word={words("news")}
+        subtitle={t("lead")}
+        next="xeber-siyahisi"
+        theme="dark-alt"
+        layout="plain"
+      />
+      <section
+        id="xeber-siyahisi"
+        data-theme="dark-alt"
+        aria-label={t("title")}
+        className="flex flex-col gap-u4 bg-(--t-bg) px-layout py-u3 pb-u6 text-(--t-text) desk:pb-u9"
+      >
+        {list.items.length === 0 ? (
+          <EmptyState title={t("emptyTitle")} body={t("emptyBody")} />
+        ) : (
+          <>
+            <Reveal
+              kind="image-in"
+              group
+              as="ul"
+              className="grid gap-y-u4 desk:grid-cols-2 lg:grid-cols-3"
+            >
+              {list.items.map((article) => (
+                <li
+                  key={article.slug}
+                  className="border-(--t-line) desk:border-s desk:px-u desk:[&:nth-child(2n+1)]:border-s-0 desk:[&:nth-child(2n+1)]:ps-0 lg:[&:nth-child(2n+1)]:border-s lg:[&:nth-child(2n+1)]:ps-u lg:[&:nth-child(3n+1)]:border-s-0 lg:[&:nth-child(3n+1)]:ps-0"
+                >
+                  <NewsCard article={article} />
+                </li>
+              ))}
+            </Reveal>
+            <Pagination
+              page={page}
+              pageCount={list.pageCount}
+              href={(n) =>
+                n === 1 ? "/xeberler" : { pathname: "/xeberler", query: { sehife: String(n) } }
+              }
+            />
+          </>
+        )}
+      </section>
+      <StructuredData
+        locale={locale}
+        nodes={[await breadcrumbs(locale, [{ name: t("title"), href: "/xeberler" }])]}
+      />
       <NextChapter current="/xeberler" />
     </>
   );

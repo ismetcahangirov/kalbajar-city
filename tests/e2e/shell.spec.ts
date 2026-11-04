@@ -56,8 +56,8 @@ test.describe("header", () => {
   });
 
   test("takes the theme of the section under it", async ({ page }) => {
-    // The page is light; the next-chapter teaser above the footer is dark.
-    await page.goto("/haqqimizda");
+    // The page opens on a light hero; the next-chapter teaser above the footer is dark.
+    await page.goto("/kompleks");
     await waitForHydration(page);
     const header = page.locator("[data-site-header]");
     await expect(header).toHaveAttribute("data-theme", "light");

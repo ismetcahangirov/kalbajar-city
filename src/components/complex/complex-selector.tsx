@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
 import { StatusBadge } from "@/components/apartments/status-badge";
-import { Heading, Text } from "@/components/ui";
 import { formatArea, formatNumber } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -80,7 +79,7 @@ export function ComplexSelector({ data, selection, locale }: Props) {
   const { block, floor } = selection;
 
   if (!data.blocks.length) {
-    return <Text tone="muted">{t("empty")}</Text>;
+    return <p className="text-body">{t("empty")}</p>;
   }
 
   const heading = !block
@@ -93,14 +92,14 @@ export function ComplexSelector({ data, selection, locale }: Props) {
         });
 
   return (
-    <div className="flex flex-col gap-block">
+    <div className="flex flex-col gap-u4">
       <SelectionFocus
         target={headingId}
         selection={`${block?.code ?? ""}/${floor?.number ?? ""}`}
       />
       <PatternDefs />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-u2">
         <ChoiceNav label={t("blocksNav")}>
           {data.blocks.map((item) => (
             <Choice
@@ -129,23 +128,22 @@ export function ComplexSelector({ data, selection, locale }: Props) {
         )}
       </div>
 
-      <div className="grid gap-block lg:grid-cols-12 lg:gap-gutter">
-        <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-6 lg:col-span-8">
-          <div className="flex flex-col gap-4">
+      <div className="grid gap-u4 lg:grid-cols-3">
+        <section aria-labelledby={headingId} className="flex min-w-0 flex-col gap-u2 lg:col-span-2">
+          <div className="flex flex-col gap-u">
             <Trail selection={selection} locale={locale} />
-            <Heading
-              as="h2"
-              size="heading"
+            <h2
               id={headingId}
               tabIndex={-1}
-              className="scroll-mt-(--header-height)"
+              className="scroll-mt-(--header-height) text-title break-words hyphens-auto text-(--t-primary) uppercase"
             >
               {heading}
-            </Heading>
+            </h2>
             {floor && <Legend />}
           </div>
-          <figure className="flex flex-col gap-3">
-            <div className="rounded-md bg-surface-alt p-2 sm:p-4">
+          <figure className="flex flex-col gap-u">
+            {/* The plan on the page's ground inside a hairline frame. */}
+            <div className="border border-(--t-line) p-u">
               {!block ? (
                 <BlocksPlan data={data} locale={locale} />
               ) : !floor ? (
@@ -154,21 +152,16 @@ export function ComplexSelector({ data, selection, locale }: Props) {
                 <ApartmentsPlan block={block} floor={floor} locale={locale} />
               )}
             </div>
-            <figcaption className="text-small text-text-muted">{t("schematic")}</figcaption>
+            <figcaption className="text-small-t text-(--t-small)">{t("schematic")}</figcaption>
           </figure>
         </section>
 
-        <section
-          aria-labelledby="kompleks-list"
-          className="flex min-w-0 flex-col gap-4 lg:col-span-4"
-        >
-          <div className="flex flex-col gap-1">
-            <Heading as="h2" size="title" id="kompleks-list">
+        <section aria-labelledby="kompleks-list" className="flex min-w-0 flex-col gap-u2 lg:ps-u">
+          <div className="flex flex-col gap-u">
+            <h2 id="kompleks-list" className="text-label text-(--t-small) uppercase">
               {t("listTitle")}
-            </Heading>
-            <Text size="small" tone="muted">
-              {t("listLead")}
-            </Text>
+            </h2>
+            <p className="text-small-t text-(--t-small)">{t("listLead")}</p>
           </div>
           {!block ? (
             <BlocksList data={data} locale={locale} />
@@ -188,11 +181,12 @@ export function ComplexSelector({ data, selection, locale }: Props) {
 
 function ChoiceNav({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <nav aria-label={label} className="flex flex-col gap-2">
-      <p aria-hidden className="text-eyebrow text-text-muted uppercase">
+    <nav aria-label={label} className="flex flex-col gap-u">
+      <p aria-hidden className="text-label text-(--t-small) uppercase">
         {label}
       </p>
-      <ul className="flex flex-wrap gap-2">{children}</ul>
+      {/* Segmented cells joined by their borders (ui-kit.md → Segmented); instant states. */}
+      <ul className="flex flex-wrap ps-px">{children}</ul>
     </nav>
   );
 }
@@ -209,17 +203,17 @@ function Choice({
   children: ReactNode;
 }) {
   return (
-    <li>
+    <li className="-ms-px -mt-px">
       <Link
         href={href}
         scroll={false}
         aria-label={label}
         aria-current={current ? "true" : undefined}
         className={cx(
-          "inline-flex min-h-target min-w-target items-center justify-center rounded-full border px-4 text-body font-medium",
+          "relative inline-flex min-h-target min-w-target items-center justify-center border px-u text-body",
           current
-            ? "border-action bg-action text-action-text"
-            : "border-border-strong text-text hover:bg-surface-alt",
+            ? "z-1 border-(--t-text) bg-(--t-text) text-(--t-bg)"
+            : "border-(--t-control) text-(--t-text) hover:z-1 hover:border-(--t-text)",
         )}
       >
         {children}
@@ -242,21 +236,19 @@ function Trail({ selection, locale }: { selection: Selection; locale: Locale }) 
   }
   return (
     <nav aria-label={t("trail")}>
-      <ol className="flex flex-wrap items-center gap-x-2 text-small text-text-muted">
+      <ol className="flex flex-wrap items-center gap-x-u text-label text-(--t-small) uppercase">
         {steps.map((step, index) => {
           const last = index === steps.length - 1;
           return (
             <li key={step.label} className="flex items-center gap-2">
               {last ? (
-                <span aria-current="location" className="text-text">
-                  {step.label}
-                </span>
+                <span aria-current="location">{step.label}</span>
               ) : (
                 <>
                   <Link
                     href={step.href}
                     scroll={false}
-                    className="inline-flex min-h-target items-center underline underline-offset-4"
+                    className="inline-flex min-h-target items-center underline decoration-1 underline-offset-4"
                   >
                     {step.label}
                   </Link>
@@ -321,11 +313,11 @@ function Legend() {
   const t = useTranslations("Complex");
   const status = useTranslations("Status");
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-eyebrow text-text-muted uppercase">{t("legend")}</p>
-      <ul className="flex flex-wrap gap-x-6 gap-y-2">
+    <div className="flex flex-col gap-u">
+      <p className="text-label text-(--t-small) uppercase">{t("legend")}</p>
+      <ul className="flex flex-wrap gap-x-u2 gap-y-u">
         {publicApartmentStatuses.map((value) => (
-          <li key={value} className="flex items-center gap-2 text-small">
+          <li key={value} className="flex items-center gap-u text-small-t">
             <svg aria-hidden viewBox="0 0 40 28" className="h-7 w-10">
               <g className="kompleks-hotspot" data-status={value}>
                 <polygon points="3,3 37,3 37,25 3,25" className="kompleks-shape" />
@@ -601,7 +593,7 @@ const rowLink = cx(
 
 function Row({ children }: { children: ReactNode }) {
   return (
-    <li className="relative flex min-h-target flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-border py-3">
+    <li className="relative flex min-h-target flex-wrap items-center justify-between gap-x-u2 gap-y-1 border-b border-(--t-line) py-u">
       {children}
     </li>
   );
@@ -610,17 +602,13 @@ function Row({ children }: { children: ReactNode }) {
 function BlocksList({ data, locale }: { data: ComplexSelectorData; locale: Locale }) {
   const labels = useLabels(locale);
   return (
-    <ul className="border-t border-border">
+    <ul className="border-t border-(--t-line)">
       {data.blocks.map((block) => (
         <Row key={block.code}>
-          <Link
-            href={selectorHref(block.code)}
-            scroll={false}
-            className={cx("text-legacy-title", rowLink)}
-          >
+          <Link href={selectorHref(block.code)} scroll={false} className={cx("text-body", rowLink)}>
             {block.name.value}
           </Link>
-          <span className="text-small text-text-muted">
+          <span className="text-small-t text-(--t-small)">
             {block.building.name.value} · {labels.counts(blockApartments(block))}
           </span>
         </Row>
@@ -632,17 +620,17 @@ function BlocksList({ data, locale }: { data: ComplexSelectorData; locale: Local
 function FloorsList({ block, locale }: { block: SelectorBlock; locale: Locale }) {
   const labels = useLabels(locale);
   return (
-    <ul className="border-t border-border">
+    <ul className="border-t border-(--t-line)">
       {[...block.floors].reverse().map((floor) => (
         <Row key={floor.number}>
           <Link
             href={selectorHref(block.code, floor.number)}
             scroll={false}
-            className={cx("text-legacy-title", rowLink)}
+            className={cx("text-body", rowLink)}
           >
             {labels.floor(floor.number)}
           </Link>
-          <span className="text-small text-text-muted">{labels.counts(floor.apartments)}</span>
+          <span className="text-small-t text-(--t-small)">{labels.counts(floor.apartments)}</span>
         </Row>
       ))}
     </ul>
@@ -660,17 +648,17 @@ function ApartmentsList({
 }) {
   const labels = useLabels(locale);
   return (
-    <ul className="border-t border-border">
+    <ul className="border-t border-(--t-line)">
       {floor.apartments.map((apartment) => (
         <Row key={apartment.slug}>
           <span className="flex flex-col">
             <Link
               href={{ pathname: "/menziller/[slug]", params: { slug: apartment.slug } }}
-              className={cx("text-legacy-title", rowLink)}
+              className={cx("text-body", rowLink)}
             >
               {labels.apartmentName(block, apartment)}
             </Link>
-            <span className="text-small text-text-muted">{labels.specs(apartment)}</span>
+            <span className="text-small-t text-(--t-small)">{labels.specs(apartment)}</span>
           </span>
           <StatusBadge status={apartment.status} />
         </Row>
