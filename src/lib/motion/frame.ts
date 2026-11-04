@@ -23,6 +23,7 @@ const measureListeners = new Set<MeasureListener>();
 const frameCallbacks = new Set<FrameCallback>();
 
 let lenis: Lenis | null = null;
+const lenisListeners = new Set<(instance: Lenis | null) => void>();
 let frame = 0;
 let scrollDirty = false;
 let measureDirty = false;
@@ -129,6 +130,7 @@ export function onFrame(callback: FrameCallback): () => void {
 /** Lets the loop drive a Lenis instance created with `autoRaf: false`. */
 export function attachLenis(instance: Lenis): () => void {
   lenis = instance;
+  for (const listener of lenisListeners) listener(instance);
   const onLenisScroll = () => {
     scrollY = instance.scroll;
     markScroll();
@@ -140,9 +142,56 @@ export function attachLenis(instance: Lenis): () => void {
     if (lenis === instance) {
       lenis = null;
       scrollY = null;
+      for (const listener of lenisListeners) listener(null);
     }
     stopIfIdle();
   };
+}
+
+/**
+ * Calls `listener` with the running Lenis instance now and whenever it
+ * changes (null when smooth scrolling stops). Lenis loads after hydration
+ * and only for fine pointers, so the hero snap waits for it here.
+ */
+export function onLenis(listener: (instance: Lenis | null) => void): () => void {
+  lenisListeners.add(listener);
+  listener(lenis);
+  return () => lenisListeners.delete(listener);
+}
+
+export type VirtualScroll = { deltaX: number; deltaY: number; event: WheelEvent | TouchEvent };
+
+const virtualScrollGuards = new Set<(data: VirtualScroll) => boolean>();
+
+/**
+ * Lets a primitive take over a wheel or touch gesture before Lenis scrolls
+ * with it: a guard that returns false consumes the event (the hero snap).
+ */
+export function onVirtualScroll(guard: (data: VirtualScroll) => boolean): () => void {
+  virtualScrollGuards.add(guard);
+  return () => virtualScrollGuards.delete(guard);
+}
+
+/** Lenis's `virtualScroll` option: true lets Lenis scroll with the event. */
+export function allowVirtualScroll(data: VirtualScroll): boolean {
+  for (const guard of virtualScrollGuards) if (!guard(data)) return false;
+  return true;
+}
+
+/**
+ * The element's layout top relative to the document, from the offset chain:
+ * unlike `getBoundingClientRect`, it ignores transforms, so a scrubbed
+ * element measuring itself is not moved by what it wrote. Measure the scene
+ * (not a sticky layer, whose offset follows the scroll) for anything pinned.
+ */
+export function layoutTop(element: HTMLElement): number {
+  let top = 0;
+  let node: HTMLElement | null = element;
+  while (node) {
+    top += node.offsetTop;
+    node = node.offsetParent instanceof HTMLElement ? node.offsetParent : null;
+  }
+  return top;
 }
 
 /** The element's top relative to the document, for caching between frames. */

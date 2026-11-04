@@ -5,7 +5,16 @@ import { describe, expect, it } from "vitest";
 
 import { cubicBezier } from "@/lib/motion/bezier";
 import { pinnedScenes, type Inset } from "@/lib/motion/pinned";
-import { blur, duration, ease, parallax, rise, scrubEase, stagger } from "@/lib/motion/tokens";
+import {
+  blur,
+  delay,
+  duration,
+  ease,
+  parallax,
+  rise,
+  scrubEase,
+  stagger,
+} from "@/lib/motion/tokens";
 
 const css = readFileSync(
   fileURLToPath(new URL("../../src/styles/tokens.css", import.meta.url)),
@@ -32,6 +41,7 @@ describe("motion tokens", () => {
     for (const name of ["line", "glyph", "char", "roll", "group"] as const) {
       expect(token(`stagger-${name}`), name).toBe(`${stagger[name]}ms`);
     }
+    expect(token("delay-reveal")).toBe(`${delay.reveal}ms`);
     expect(token("motion-blur")).toBe(`${blur.reveal}px`);
     expect(token("motion-blur-soft")).toBe(`${blur.soft}px`);
     expect(token("motion-rise")).toBe(`${rise}px`);

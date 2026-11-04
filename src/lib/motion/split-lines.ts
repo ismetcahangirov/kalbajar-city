@@ -37,7 +37,19 @@ function wrap(text: string, wrappers: Element[]): Node {
   return node;
 }
 
-export function splitLines(heading: HTMLElement): SplitLines | null {
+export type SplitOptions = {
+  /**
+   * How the element keeps one accessible string: `aria-label` (headings,
+   * the default) or a visually hidden copy of the text, for elements such as
+   * paragraphs on which `aria-label` is not allowed.
+   */
+  label?: "aria-label" | "copy";
+};
+
+export function splitLines(
+  heading: HTMLElement,
+  { label: labelMode = "aria-label" }: SplitOptions = {},
+): SplitLines | null {
   const original = [...heading.childNodes];
   const words: Word[] = [];
   collectWords(original, [], words);
@@ -68,9 +80,10 @@ export function splitLines(heading: HTMLElement): SplitLines | null {
 
   // 3. Each line in a clip; words sharing wrappers stay in one wrapper.
   const label = heading.getAttribute("aria-label");
-  const inners = lines.map((line) => {
+  const inners = lines.map((line, index) => {
     const outer = document.createElement("span");
     outer.dataset.line = "";
+    outer.style.setProperty("--line-index", String(index));
     outer.setAttribute("aria-hidden", "true");
     const inner = document.createElement("span");
     inner.dataset.lineInner = "";
@@ -94,15 +107,21 @@ export function splitLines(heading: HTMLElement): SplitLines | null {
     return { outer, inner };
   });
   heading.replaceChildren(...inners.map(({ outer }) => outer));
-  if (label === null) {
-    heading.setAttribute("aria-label", words.map((w) => w.text).join(" "));
+  const text = words.map((w) => w.text).join(" ");
+  if (labelMode === "copy") {
+    const copy = document.createElement("span");
+    copy.className = "sr-only";
+    copy.textContent = text;
+    heading.prepend(copy);
+  } else if (label === null) {
+    heading.setAttribute("aria-label", text);
   }
 
   return {
     inners: inners.map(({ inner }) => inner),
     restore: () => {
       heading.replaceChildren(...original);
-      if (label === null) heading.removeAttribute("aria-label");
+      if (labelMode === "aria-label" && label === null) heading.removeAttribute("aria-label");
     },
   };
 }
