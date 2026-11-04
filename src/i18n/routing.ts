@@ -25,6 +25,7 @@ export const pathnames = {
   "/mexfilik-siyaseti": "/mexfilik-siyaseti",
   "/primitivler": "/primitivler",
   "/primitivler/hereket": "/primitivler/hereket",
+  "/primitivler/hereket/kohne": "/primitivler/hereket/kohne",
 } as const;
 
 export const routing = defineRouting({

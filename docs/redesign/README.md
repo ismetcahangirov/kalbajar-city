@@ -100,6 +100,16 @@ even where the reference ignores them.
   button lifts above it while it shows. #64's fixed round button needs the same
 - (#67) `[data-theme] :focus-visible` takes the outline colour from `--t-text`
   (`src/styles/ui.css`); the global ring is `--color-focus`, ink on dark themes
+- Scroll engine (#63): anything inside a pinned `SceneLayer` measures its
+  range against the scene (`trigger: "scene"`), because a sticky layer's
+  offset follows the scroll. A `Scrub`'s `style` is its server (final) state
+  and comes back when motion stops. Import primitives from their own files,
+  not `@/components/motion` (the legacy barrel), so a page loads only what it
+  uses. The legacy `PinnedCardZoom` owns `[data-scene]` and
+  `[data-scene-layer]`; the new scene uses `data-scroll-scene` and
+  `data-layer` until the legacy one is deleted
+- Text over photos in scenes: pick a dark default (dominant colours are in
+  `src/content/defaults/encoded.json`); overlays on photos are not allowed
 
 ---
 

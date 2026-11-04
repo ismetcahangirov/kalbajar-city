@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 
 import { hasFinePointer, onReducedMotion, prefersReducedMotion } from "@/lib/motion/env";
-import { attachLenis } from "@/lib/motion/frame";
+import { allowVirtualScroll, attachLenis } from "@/lib/motion/frame";
 import { smoothScroll } from "@/lib/motion/tokens";
 
 /**
@@ -30,6 +30,8 @@ export function SmoothScroll() {
         stopInertiaOnNavigate: true,
         // Wheel inside an open modal (the mobile menu) is not the page's.
         prevent: (node) => node.closest("dialog[open]") !== null,
+        // The hero snap takes over wheel turns in the first viewport.
+        virtualScroll: allowVirtualScroll,
       });
       const detach = attachLenis(lenis);
 

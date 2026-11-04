@@ -70,6 +70,35 @@ export const stagger = {
 /** `filter: blur()` start values in pixels: text and image reveals, the slideshow. */
 export const blur = { reveal: 20, soft: 10 } as const;
 
+/** Delays in milliseconds (`--delay-*` in tokens.css). */
+export const delay = {
+  /** Before a reveal on entry starts (the reference's 30 ms). */
+  reveal: 30,
+} as const;
+
+/**
+ * `Reveal` on entry (spec §6.2): the observer's bottom margin in px, the
+ * share of a group member that must be visible, and how many members of one
+ * batch stagger before the rest enter with the last.
+ */
+export const reveal = { margin: 100, groupThreshold: 0.5, maxStagger: 6 } as const;
+
+/**
+ * `SplitWord` offsets in vw (motion-system.md → Per-letter word animations):
+ * `spread` A14, `explode` A15, `staircase` A16.
+ */
+export const wordMotion = {
+  spread: { outer: 20, inner: 10 },
+  explode: { outer: 37.5, inner: 7.5, step: 5 },
+  staircase: { step: 2 },
+} as const;
+
+/**
+ * The hero snap (A43): forward after this share of a viewport, over this
+ * many milliseconds (the reference's lerp accelerating over 2 s).
+ */
+export const heroSnap = { threshold: 0.2, duration: 2000 } as const;
+
 /** Legacy: an entry starts when the element's top crosses this share of the viewport. */
 export const triggerLine = 0.85;
 

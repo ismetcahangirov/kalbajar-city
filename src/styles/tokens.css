@@ -239,6 +239,8 @@
   --stagger-char: 10ms;
   --stagger-roll: 16ms;
   --stagger-group: 180ms;
+  /* Before a reveal on entry starts. */
+  --delay-reveal: 30ms;
   /* `filter: blur()` start values: text and image reveals, the slideshow. */
   --motion-blur: 20px;
   --motion-blur-soft: 10px;

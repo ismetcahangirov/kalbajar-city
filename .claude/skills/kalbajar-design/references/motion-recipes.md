@@ -12,56 +12,64 @@ their own. Time-based transitions are CSS transitions or the Web Animations
 API, scroll-linked effects run on one `requestAnimationFrame` loop, pins are
 CSS `position: sticky`.
 
-Status marks: **exists** (in `main`), **#63** (the scroll engine and
-primitives PR builds it), **#64** / **#66–#68** (built with the chrome or the
+Status marks: **exists** (in `main`; #63 built the scroll engine and
+primitives), **#64** / **#66–#68** (built with the chrome or the
 page that needs it), **retires** (replaced by #63; removed when the last page
 using it is rebuilt).
 
 ## Engine
 
-| Module           | Status  | What it does                                                                                                                                                                                               |
-| ---------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `env.ts`         | exists  | `prefersReducedMotion`, `hasFinePointer`, `onReducedMotion`, `isBelowViewport`. #63 adds `isDesktopMotion` (`pointer: fine` and ≥ 668 px, the reference's switch)                                          |
-| `frame.ts`       | exists  | The one frame loop: `onMeasure` (layout may have changed) runs before `onScrollFrame` (scroll may have changed). Drives Lenis when it runs. Scenes, scrubs and thresholds all subscribe here               |
-| `tokens.ts`      | exists  | Durations, easings, `scrubEase` (`linear`, `quadOut`, `quadIn`, `quadInOut`), staggers, blur values                                                                                                        |
-| `range.ts`       | #63     | `parseRange("-150-0 → -250-0")` and `progress(geometry, range, scrollY)`: the reference's range notation as pure, unit-tested functions                                                                    |
-| `scrub.ts`       | #63     | `useScrub(ref, range, ease, apply)`: measures the element's document offset and height in `onMeasure`, computes progress in `onScrollFrame` from cached numbers only, calls `apply(eased)` when it changed |
-| `threshold.ts`   | #63     | `useThreshold(ref, point, enter, leave)`: crossing state from cached geometry; sets `data-state="in"` or `"out"` so CSS transitions play the enter or leave variant                                        |
-| `reveal.ts`      | #63     | One shared `IntersectionObserver` (`rootMargin: 0px 0px -100px 0px`); groups reveal at threshold .5 with `--stagger-group` and a 30 ms delay; replaces `entry.ts`                                          |
-| `split-lines.ts` | exists  | Splits a block into measured lines and restores its nodes; the `text` reveal reuses it (each line gets its own clip)                                                                                       |
-| `split-word.ts`  | #63     | Grapheme split with `Intl.Segmenter`; letter offsets for `spread`, `explode` and `staircase` from the letter count                                                                                         |
-| `snap.ts`        | #63     | The hero snap (A43): wheel only, first viewport, forward after 1/5 vh, through Lenis `scrollTo` with an accelerating lerp over 2 s                                                                         |
-| `bezier.ts`      | exists  | Evaluates an easing token in script (counters, scripted timelines)                                                                                                                                         |
-| `entry.ts`       | retires | The 85 %-line entry of the old primitives                                                                                                                                                                  |
-| `pinned.ts`      | retires | `pinnedScenes()`, the `PinnedCardZoom` choreography                                                                                                                                                        |
+| Module             | Status  | What it does                                                                                                                                                                                                                                                              |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env.ts`           | exists  | `prefersReducedMotion`, `hasFinePointer`, `onReducedMotion`, `isBelowViewport`, `isDesktopMotion` (`pointer: fine` and ≥ 668 px), `whileMotion(mode, start)` (runs and stops with the media conditions), `instantly`                                                      |
+| `frame.ts`         | exists  | The one frame loop: `onMeasure` (layout may have changed) runs before `onScrollFrame` (scroll may have changed). Drives Lenis when it runs. Scenes, scrubs and thresholds all subscribe here                                                                              |
+| `tokens.ts`        | exists  | Durations, easings, `scrubEase` (`linear`, `quadOut`, `quadIn`, `quadInOut`), staggers, blur values                                                                                                                                                                       |
+| `range.ts`         | exists  | `parsePoint`, `parseRange("-150-0 → -250-0")`, `scrollAt`, `rangeProgress(range, geometry, scrollY)`, `pointsPassed`: the reference's range notation, pure and unit-tested                                                                                                |
+| `interpolate.ts`   | exists  | `interpolate(from, to)(t)` for numbers, lengths, `calc()`, `inset()` and `polygon()`, term by term; `clamp`, `clamp01`, `mix`                                                                                                                                             |
+| `use-scrub.ts`     | exists  | (in `src/components/motion/`) `useScrub(ref, { range, easing, trigger, clamp, mode }, apply, reset)`: measures the trigger's layout offset and height in `onMeasure`, computes progress in `onScrollFrame` from cached numbers only, calls `apply(eased)` when it changed |
+| `use-threshold.ts` | exists  | (in `src/components/motion/`) `useThreshold(ref, { at, trigger }, onChange, reset)`: crossing state from cached geometry; `Threshold` sets `data-state="in"` or `"out"` so CSS transitions play the enter or leave variant                                                |
+| `reveal.ts`        | exists  | One shared `IntersectionObserver` (`rootMargin: 0px 0px -100px 0px`); groups reveal at threshold .5 with `--stagger-group` and a 30 ms delay; replaces `entry.ts`                                                                                                         |
+| `split-lines.ts`   | exists  | Splits a block into measured lines and restores its nodes; the `text` reveal reuses it (each line gets its own clip)                                                                                                                                                      |
+| `split-word.ts`    | exists  | Grapheme split with `Intl.Segmenter`; letter offsets for `spread`, `explode` and `staircase` from the letter count                                                                                                                                                        |
+| `snap.ts`          | exists  | The hero snap's decisions (A43): `heroSnapTarget`, `heroSnapSettle`; `useHeroSnap` (`hero-snap.tsx`) runs them on wheel input through Lenis's `virtualScroll` guard and `scrollTo` over 2 s                                                                               |
+| `bezier.ts`        | exists  | Evaluates an easing token in script (counters, scripted timelines)                                                                                                                                                                                                        |
+| `entry.ts`         | retires | The 85 %-line entry of the old primitives                                                                                                                                                                                                                                 |
+| `pinned.ts`        | retires | `pinnedScenes()`, the `PinnedCardZoom` choreography                                                                                                                                                                                                                       |
 
 ## Primitives
 
-| Component                                                                           | Status  | Use                                                                                       |
-| ----------------------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------- |
-| `Scene`, `SceneLayer`                                                               | #63     | Every chapter page and the home page; `underPrevious`, `underNext`, `data-theme`          |
-| `Reveal`                                                                            | #63     | `variant`: `text`, `image-in`, `clip-down`, `clip-up`; `group`                            |
-| `SplitWord`                                                                         | #63     | Giant words and split titles; `animation`: `spread`, `explode`, `staircase`, with a range |
-| `GridLines`                                                                         | #63     | `variant`: `center`, `thirds`, `quarters`, `wider`; `alt`, `mobileAll`; draws in          |
-| `Swap`                                                                              | #63     | Stat numbers and labels (A31)                                                             |
-| `RollLink`, `UnderlineLink`, `ArrowBlock`, `RoundButton`, `Burger`                  | #64     | Links and buttons with their hovers (A36–A38)                                             |
-| Preloader, page transition, header, menu, footer and teaser, tab bar, inquiry modal | #64     | Chrome (motion-system → Chrome)                                                           |
-| `HoverList`, `StatSpread`, `TripleCarousel`, `BlurSlideshow`, `LocationCard`        | #66     | Home scenes                                                                               |
-| `FlatCard`, `Segmented`, `RangeHairline`, plan `Tabs`                               | #67     | Catalogue and apartment page                                                              |
-| `FadeUp`, `LineReveal`, `ImageReveal`, `Parallax`, `PinnedCardZoom`, `CountUp`      | retires | The current pages, until #66–#68 rebuild them                                             |
+| Component                                                                           | Status  | Use                                                                                            |
+| ----------------------------------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| `Scene`, `SceneLayer`                                                               | exists  | Every chapter page and the home page; `underPrevious`, `underNext`, `data-theme`               |
+| `Reveal`                                                                            | exists  | `kind`: `text`, `image-in`, `clip-down`, `clip-up`; `group`; `at` for a reversible threshold   |
+| `SplitWord`                                                                         | exists  | Giant words and split titles; `mode`: `static`, `spread`, `explode`, `staircase`, with a range |
+| `GridLines`                                                                         | exists  | `variant`: `half`, `thirds`, `quarters`, `wider`; `alt`, `mobileAll`; `draw`                   |
+| `StatSwap`                                                                          | exists  | Stat numbers and labels with the line draw (A30, A31)                                          |
+| `Scrub`, `Threshold`, `useCursorFollower`                                           | exists  | Declarative scrub; threshold states; pointer follower (A35, the teaser button)                 |
+| `RollLink`, `UnderlineLink`, `ArrowBlock`, `RoundButton`, `Burger`                  | #64     | Links and buttons with their hovers (A36–A38)                                                  |
+| Preloader, page transition, header, menu, footer and teaser, tab bar, inquiry modal | #64     | Chrome (motion-system → Chrome)                                                                |
+| `HoverList`, `StatSpread`, `TripleCarousel`, `BlurSlideshow`, `LocationCard`        | #66     | Home scenes                                                                                    |
+| `FlatCard`, `Segmented`, `RangeHairline`, plan `Tabs`                               | #67     | Catalogue and apartment page                                                                   |
+| `FadeUp`, `LineReveal`, `ImageReveal`, `Parallax`, `PinnedCardZoom`, `CountUp`      | retires | The current pages, until #66–#68 rebuild them                                                  |
 
 ```tsx
-// Sketch of the #63 API; the code is the reference once it lands.
-<Scene theme="dark" underNext>
-  <SceneLayer>{background}</SceneLayer>
-  <SplitWord as="h2" animation="explode" range="-150-0 → -250-0">
-    {t("words.territory")}
-  </SplitWord>
+// The #63 API; src/app/[locale]/primitivler/hereket/page.tsx has every one.
+<Scene theme="light" length={3} underNext>
+  <SceneLayer className="z-1">
+    <Scrub trigger="scene" range="0-0 → -100-0" easing="quadIn"
+      from={{ clipPath: doorsClosed }} to={{ clipPath: doorsOpen }}>
+      {photo}
+      <SplitWord word={t("words.territory")} mode="explode" trigger="scene"
+        range="0-0 → -100-0" />
+    </Scrub>
+  </SceneLayer>
+  <h2 className="sr-only">{t("words.territory")}</h2>
 </Scene>
 
-<Reveal variant="text" as="p" className="text-lead">{t("lead")}</Reveal>
-<Reveal group variant="clip-down" as="ul">{columns}</Reveal>
-<GridLines variant="thirds" />
+<Reveal kind="text" as="p" className="text-lead">{t("lead")}</Reveal>
+<Reveal kind="text" at="90svh" as="p">{t("lead")}</Reveal>
+<Reveal kind="clip-down" group as="ul">{columns}</Reveal>
+<GridLines variant="thirds" draw />
 ```
 
 ## Building an effect
