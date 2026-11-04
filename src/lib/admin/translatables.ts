@@ -1,6 +1,11 @@
 import { missingTranslations, type Translatable } from "@/i18n/content";
 import { locales, type Locale } from "@/i18n/routing";
-import type { RichTextDoc, RichTextNode } from "@/shared/rich-text";
+import {
+  hasRichContent,
+  type RichTextDoc,
+  type RichTextNode,
+  type TranslatableRichText,
+} from "@/shared/rich-text";
 
 const translationKeys = new Set<string>(locales);
 
@@ -36,4 +41,11 @@ export function translatablesIn(value: unknown): Translatable[] {
 /** The locales a translatable value lacks; `az` is required by the schema itself. */
 export function missingLocales(value: Partial<Translatable> | null | undefined): Locale[] {
   return missingTranslations({ value: { az: "", ...value } }).map(({ locale }) => locale);
+}
+
+/** The locales a rich-text value lacks: a translation counts once it shows anything. */
+export function missingRichLocales(
+  value: Partial<TranslatableRichText> | null | undefined,
+): Locale[] {
+  return locales.filter((locale) => locale !== "az" && !hasRichContent(value?.[locale]));
 }

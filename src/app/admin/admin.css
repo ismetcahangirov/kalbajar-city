@@ -148,6 +148,56 @@
   }
 }
 
+/* The rich-text editor's document (#25): the structure an editor needs to
+   see (headings, lists, quotes, links, images), in the console's own type. */
+@layer components {
+  .kc-prose {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .kc-prose h2 {
+    font-size: var(--text-legacy-title);
+    font-weight: 500;
+  }
+
+  .kc-prose h3 {
+    font-weight: 600;
+  }
+
+  .kc-prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+
+  .kc-prose ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+
+  .kc-prose blockquote {
+    border-left: 3px solid var(--color-border-strong);
+    padding-left: 1rem;
+    color: var(--color-text-muted);
+  }
+
+  .kc-prose a {
+    color: var(--color-action);
+    text-decoration: underline;
+  }
+
+  .kc-prose img {
+    max-width: 100%;
+    max-height: 20rem;
+    border-radius: var(--radius-md);
+  }
+
+  .kc-prose img.ProseMirror-selectednode {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+  }
+}
+
 /* The shared focus ring on every interactive element. Unlayered on purpose:
    it wins over the `outline-none` and `outline-hidden` utilities the shadcn
    components carry, so no component can remove it. */
