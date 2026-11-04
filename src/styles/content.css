@@ -13,8 +13,8 @@
   [data-lightbox] {
     opacity: 0;
     transition-property: opacity, display, overlay;
-    transition-duration: var(--duration-base);
-    transition-timing-function: var(--ease-in-out);
+    transition-duration: var(--duration-normal);
+    transition-timing-function: var(--ease-out);
     transition-behavior: allow-discrete;
   }
 

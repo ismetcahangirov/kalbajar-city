@@ -37,11 +37,11 @@ const FOCUSABLE = "button:not([disabled])";
 const swipeDistance = 48;
 
 const control =
-  "grid size-target shrink-0 place-items-center rounded-full bg-surface text-text hover:bg-surface-alt";
+  "grid size-target shrink-0 place-items-center rounded-full bg-(--t-bg) text-(--t-text) hover:bg-graphite";
 
 /**
  * Thumbnails that open a full-screen viewer (#21): a native modal `<dialog>`
- * on `night`, so the page behind is inert and Escape closes it. Arrow keys,
+ * on the dark theme, so the page behind is inert and Escape closes it. Arrow keys,
  * Home and End, the buttons and a horizontal swipe move between images; the
  * position ("image 3 of 12") and the caption are announced in a live region;
  * closing returns focus to the thumbnail that opened it. Only `transform`
@@ -184,7 +184,7 @@ export function Lightbox({ items, layout, sizes, columns = 3, className }: Light
 
       <dialog
         ref={dialog}
-        data-tone="night"
+        data-theme="dark"
         data-lightbox=""
         aria-label={t("dialog")}
         onKeyDown={onKeyDown}
@@ -192,12 +192,12 @@ export function Lightbox({ items, layout, sizes, columns = 3, className }: Light
           setAnnouncement("");
           thumbnails.current[opener.current]?.focus();
         }}
-        className="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden border-0 p-0 text-text backdrop:bg-transparent"
+        className="m-0 h-dvh max-h-none w-full max-w-none overflow-hidden border-0 bg-(--t-bg) p-0 text-(--t-text) backdrop:bg-transparent"
       >
         {current && (
           <figure className="flex h-full flex-col">
             <div className="flex h-(--header-height) shrink-0 items-center justify-between gap-4 px-page">
-              <p aria-hidden className="text-small text-text-muted">
+              <p aria-hidden className="text-small text-(--t-small)">
                 {index + 1} / {total}
               </p>
               <button
@@ -249,11 +249,14 @@ export function Lightbox({ items, layout, sizes, columns = 3, className }: Light
 
             <figcaption className="flex min-h-(--header-height) shrink-0 flex-wrap items-center gap-x-4 gap-y-2 py-4 px-page">
               {current.image.illustrative && (
-                <Badge variant="illustrative">{media("illustrative")}</Badge>
+                // The chip is drawn for light grounds; on the dark viewer it takes the dark pair.
+                <Badge variant="illustrative" className="bg-ink-hover! text-sand!">
+                  {media("illustrative")}
+                </Badge>
               )}
               {current.caption && (
                 <span
-                  className="text-body text-text-muted"
+                  className="text-body text-(--t-small)"
                   lang={current.caption.fallback ? current.caption.locale : undefined}
                 >
                   {current.caption.value}

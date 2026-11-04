@@ -38,7 +38,7 @@ export function buttonClass({
   }
   return cx(
     "inline-flex items-center justify-center gap-2 rounded-full px-6 text-body font-medium",
-    "transition-transform duration-(--duration-fast) ease-standard active:scale-[0.98]",
+    "transition-transform duration-(--duration-fast) ease-out active:scale-[0.98]",
     "aria-disabled:pointer-events-none aria-disabled:opacity-(--opacity-disabled)",
     "disabled:pointer-events-none disabled:opacity-(--opacity-disabled)",
     size === "lg" ? "min-h-control-lg px-8" : "min-h-control",

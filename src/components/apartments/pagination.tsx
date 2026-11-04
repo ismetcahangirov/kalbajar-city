@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Icon } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { formatNumber } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";

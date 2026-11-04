@@ -4,7 +4,11 @@ import { CircleAlert, CircleCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
-import { Button, Checkbox, Icon, Input, Text, Textarea } from "@/components/ui";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowBlock } from "@/components/ui/arrow-block";
 import { FieldBox, FieldBoxInput, FieldNote } from "@/components/ui/field-box";
 import { formatPhone } from "@/i18n/format";
@@ -281,7 +285,7 @@ function LeadFormBody({
             </>
           ) : (
             <>
-              <Text tone="muted">{t("success.body")}</Text>
+              <p className="text-body text-pretty text-text-muted">{t("success.body")}</p>
               <Button variant="secondary" onClick={again}>
                 {t("success.again")}
               </Button>
@@ -434,7 +438,9 @@ function LeadFormBody({
           className="@container flex flex-col gap-6"
         >
           {apartment && (
-            <Text className="font-medium">{t("apartment", { label: apartment.label })}</Text>
+            <p className="text-body font-medium text-pretty text-text">
+              {t("apartment", { label: apartment.label })}
+            </p>
           )}
 
           <div className="grid gap-6 @lg:grid-cols-2">

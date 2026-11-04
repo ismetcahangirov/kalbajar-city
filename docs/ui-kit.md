@@ -13,7 +13,9 @@ is in
 Every value below is a token in **`src/styles/tokens.css`**, the only place a
 colour literal, font size, radius, shadow, duration or easing may be written
 (`pnpm lint:tokens`). New components read the **theme** tokens (`--t-*`);
-current components read the **semantic** tokens until #64–#68 rebuild them.
+the components the redesign did not rebuild (form fields, buttons, badges,
+the plan viewer, rich text) and the console read the **semantic** tokens
+([Current tokens](#current-tokens)).
 
 The console (`/admin`) uses shadcn/ui and the system font stack. It shares the
 semantic colour tokens and the focus ring, nothing else from this page; see
@@ -109,30 +111,32 @@ Rules:
 - Error text is `--color-error` on light only. On sand the message is
   `--t-text` and the red is the border and the icon (4.04 : 1, UI)
 
-### Semantic tokens (current components)
+### Semantic tokens (current components and the console)
 
-Kept so every current page and the console keep working until #64–#68 move
-them to the themes. They map onto the new palette; `data-tone="night"`
-redefines them for a subtree, as before.
+One light set, read by the console (through `admin.css`) and by the
+components the redesign did not rebuild. They map onto the new palette. There
+is no dark set any more: the old `data-tone="night"` was removed in the #61
+cleanup, and a dark section uses `data-theme`.
 
-| Token                      | Light surface | On `night` |
-| -------------------------- | ------------- | ---------- |
-| `--color-surface`          | cream         | ink        |
-| `--color-surface-alt`      | cream-hover   | graphite   |
-| `--color-surface-raised`   | cream-hover   | ink-hover  |
-| `--color-text`             | ink           | cream      |
-| `--color-text-muted`       | umber         | sand       |
-| `--color-text-accent`      | umber         | sand-hover |
-| `--color-border`           | sand (decor)  | umber      |
-| `--color-border-strong`    | taupe         | sand       |
-| `--color-action`           | ink           | cream      |
-| `--color-action-text`      | cream         | ink        |
-| `--color-accent`           | sand (decor)  | sand       |
-| `--color-focus`            | ink           | cream      |
-| `--color-status-available` | moss          | —          |
-| `--color-status-reserved`  | sepia         | —          |
-| `--color-status-sold`      | umber         | —          |
-| `--color-error`            | error         | —          |
+| Token                      | Value        |
+| -------------------------- | ------------ |
+| `--color-surface`          | cream        |
+| `--color-surface-alt`      | cream-hover  |
+| `--color-surface-raised`   | cream-hover  |
+| `--color-text`             | ink          |
+| `--color-text-muted`       | umber        |
+| `--color-text-accent`      | umber        |
+| `--color-border`           | sand (decor) |
+| `--color-border-strong`    | taupe        |
+| `--color-action`           | ink          |
+| `--color-action-text`      | cream        |
+| `--color-accent`           | sand (decor) |
+| `--color-focus`            | ink          |
+| `--color-status-available` | moss         |
+| `--color-status-reserved`  | sepia        |
+| `--color-status-sold`      | umber        |
+| `--color-error`            | error        |
+| `--color-scrim`            | ink at 55 %  |
 
 `--color-surface-alt` is cream-hover rather than sand because the current
 components set muted text (umber) on it, and umber on sand is 3.40 : 1.
@@ -277,8 +281,8 @@ components are not trimmed.
   `3xl:` (1920 px) and `4xl:` (2400 px)
 - Never name a spacing token `block`, `inline` or after an existing utility:
   Tailwind derives `inline-<name>` and `block-<name>` size utilities from
-  `--spacing-<name>` (the legacy `--spacing-block` already makes
-  `inline-block` a size; `pnpm lint:tokens` forbids that class)
+  `--spacing-<name>` (the removed `--spacing-block` once turned the
+  `inline-block` class into a 64 px size)
 - Verify at 320, 390, 768, 1024, 1440, 1920 and 2400 px: no horizontal scroll
 
 ### Grid lines
@@ -298,8 +302,8 @@ text columns, and draw in (motion-system → `lines`).
 - **Borders 1 px**, in `--t-line` for decoration or `--t-control` for a
   control's boundary
 - **One shadow:** the fixed round button, `--drop-shadow-button`
-  (`0 10px 6px`, ink at 15 %). `--shadow-raised` and `--shadow-frame` are
-  legacy (current cards and the pinned frame) and the console's
+  (`0 10px 6px`, ink at 15 %). `--shadow-raised` is the console's and the
+  current components' (popovers, the locale banner, the plan viewer)
 
 ## Imagery
 
@@ -393,8 +397,7 @@ full-screen list on mobile), preloader, page transition, footer and the
 panel, 90 × 90 taupe close tab). Pages: spec §7. The contracts pages use:
 
 - **Theme under the header** (A10): a section off the default light ground
-  carries `data-theme` (`dark`, `darker`, `dark-alt`, `sand`, `light`; the
-  legacy `data-tone="night"` counts as dark) on an element inside `main`.
+  carries `data-theme` (`dark`, `darker`, `dark-alt`, `sand`, `light`) on an element inside `main`.
   `observeThemeAt()` (`src/lib/shell/theme-observer.ts`) picks the last
   themed element in document order under the header's middle line; nothing
   is measured per frame. Elements are collected on each route change
@@ -414,24 +417,32 @@ panel, 90 × 90 taupe close tab). Pages: spec §7. The contracts pages use:
 - **Fixed round buttons** sit at `bottom: var(--floating-bottom)` and lift by
   `--locale-suggestion-space` while `[data-locale-suggestion]` shows
 
-The other current components (`Container`, `Section`, `Heading`, `Text`,
-`Button`, `Card`, `Badge`, `Stat`, the old form fields …) stay on the semantic
-tokens and the legacy type steps until their page's PR replaces them.
+The current components (`Button`, `Badge`, `Checkbox`, `Icon`, `Input`,
+`Select`, `Textarea`, `Field`, `Picture`) predate the redesign and stay on
+the semantic tokens; the console imports `Button`, `Icon`, `Input` and
+`Field`. Every component in `src/components/ui/` is imported by its path:
+there is no `@/components/ui` barrel any more (#61 cleanup), so nothing
+reaches the shared JS by accident. The old layout and type components
+(`Section`, `Container`, `Heading`, `Text`, `Card`, `Stat`, `Eyebrow`) are
+gone: pages write the `data-theme` section, `px-layout` and the type step
+directly, as the rebuilt pages do.
 
-## Legacy tokens
+## Current tokens
 
-Kept only while a current component uses them; #64–#68 delete them with the
-components.
+The #61 cleanup deleted every legacy token nothing used (the old display,
+heading, stat, body-lg and eyebrow type steps, `--spacing-block`,
+`--container-page`, `--shadow-frame`, `--ease-in-out`, `--ease-standard`,
+the old durations and motion distances, and `data-tone="night"`). What is
+left is read by the console or by the current components above, and goes
+when they are rebuilt:
 
-| Legacy token                                                                               | Now                                                                                 |
-| ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `--text-display-xl`, `--text-display`, `--text-heading`, `--text-stat`                     | Sizes of `--text-word`, `--text-title`, `--text-lead`, `--text-numeral`             |
-| `--text-body-lg`, `--text-small`, `--text-eyebrow`                                         | Sizes of `--text-lead`, `--text-small-t`, `--text-label`                            |
-| `--text-legacy-title`                                                                      | The old 18–22 px `title`, unchanged (the name `--text-title` is the new caps title) |
-| `--spacing-gutter`, `--spacing-block`, `--spacing-section`, `--container-*`                | Unchanged                                                                           |
-| `--shadow-raised`, `--shadow-frame`                                                        | Unchanged, in ink                                                                   |
-| The semantic `--color-*` tokens and `data-tone="night"`                                    | Remapped to the new palette (above)                                                 |
-| The old palette (chalk, paper, limestone, stone, basalt, night, mist, gold, timber, brick) | Removed: every reference now uses a semantic or new raw token                       |
+| Token                                                                                            | Read by                                                                                    |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| The semantic `--color-*` tokens, `--color-scrim`                                                 | The console (`admin.css`, dialogs), the form fields, badges, plan viewer, banners          |
+| `--text-legacy-title`                                                                            | The console's `text-lg`, console page titles, rich-text `h3`, plan viewer, lead form       |
+| `--text-small`                                                                                   | The console's `text-sm` (`admin.css`), the current components                              |
+| `--spacing-gutter` (`px-page`), `--spacing-section`, `--spacing-control`, `--spacing-control-lg` | The console's sign-in and error pages, the plan viewer and lightbox, form fields, `Button` |
+| `--shadow-raised`                                                                                | The console's shadows, the locale banner, the plan viewer                                  |
 
 ## Console
 

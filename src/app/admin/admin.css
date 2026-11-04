@@ -43,9 +43,6 @@
   --radius-sm: var(--console-radius-sm);
   --radius-md: var(--console-radius-md);
   --radius-lg: var(--console-radius-lg);
-  --text-eyebrow: var(--console-text-xs);
-  --text-eyebrow--line-height: var(--console-text-xs--line-height);
-  --text-eyebrow--letter-spacing: var(--console-text-xs--letter-spacing);
   --text-small: var(--console-text-sm);
   --text-small--line-height: var(--console-text-sm--line-height);
   --text-body: var(--console-text-base);
@@ -82,8 +79,8 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* shadcn's type, weight, radius and shadow names, on the project's scale. */
-  --text-xs: var(--text-eyebrow);
-  --text-xs--line-height: var(--text-eyebrow--line-height);
+  --text-xs: var(--console-text-xs);
+  --text-xs--line-height: var(--console-text-xs--line-height);
   --text-sm: var(--text-small);
   --text-sm--line-height: var(--text-small--line-height);
   --text-base: var(--text-body);

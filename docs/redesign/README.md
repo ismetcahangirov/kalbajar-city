@@ -63,11 +63,11 @@ even where the reference ignores them.
 
 ## Things learned so far
 
-- `--text-title` is the new 45/60 title step; the old 18–22 px step was renamed
-  `--text-legacy-title`. Other legacy type, colour and duration tokens are
-  aliased and listed in `docs/ui-kit.md` for #64–#68 to delete once nothing
-  uses them. `--duration-reveal` is now 1600 ms; the old primitives keep
-  900 ms through `--duration-entry`
+- `--text-title` is the new 45/60 title step; the old 18–22 px step is
+  `--text-legacy-title`, kept for the console's `text-lg` and the current
+  components. The tokens still read by the console or the current
+  components are listed in `docs/ui-kit.md` → Current tokens; every other
+  legacy token was deleted in the #61 cleanup
 - The console keeps its look through `--console-*` tokens in
   `src/app/admin/admin.css`; check it by screenshot when shared tokens change
 - `--t-control` exists because the reference's input borders fail 3 : 1
@@ -86,8 +86,8 @@ even where the reference ignores them.
 - The console has no "Default" label on empty image pickers yet; add it when
   the content editors (#25 part B) add pickers for these slots
 - (#67) Exporting a component from the `@/components/ui` barrel put it in the
-  shared JS (+1.5 KB): the shell's client components import the barrel. New
-  components are imported by path
+  shared JS (+1.5 KB). The barrel is gone (#61 cleanup): every component is
+  imported by path
 - (#67) Browsers lack Azerbaijani number data, so a client component that
   formats a decimal with `formatNumber(…, "az")` renders `62.09` where the
   server rendered `62,09` and hydration fails. Format decimals on the server,
@@ -103,11 +103,10 @@ even where the reference ignores them.
 - Scroll engine (#63): anything inside a pinned `SceneLayer` measures its
   range against the scene (`trigger: "scene"`), because a sticky layer's
   offset follows the scroll. A `Scrub`'s `style` is its server (final) state
-  and comes back when motion stops. Import primitives from their own files,
-  not `@/components/motion` (the legacy barrel), so a page loads only what it
-  uses. The legacy `PinnedCardZoom` owns `[data-scene]` and
-  `[data-scene-layer]`; the new scene uses `data-scroll-scene` and
-  `data-layer` until the legacy one is deleted
+  and comes back when motion stops. Import primitives from their own files
+  (there is no barrel), so a page loads only what it uses. The scene uses
+  `data-scroll-scene` and `data-layer` (the names `[data-scene]` and
+  `[data-scene-layer]` belonged to the deleted `PinnedCardZoom`)
 - Text over photos in scenes: pick a dark default (dominant colours are in
   `src/content/defaults/encoded.json`); overlays on photos are not allowed
 - (#64) With `cacheComponents`, Next keeps up to three visited routes in the
@@ -129,9 +128,9 @@ even where the reference ignores them.
 ## #63 Scroll-scene engine and primitives
 
 Branch `feat/scroll-scenes`. Spec §6, `docs/motion-system.md`, reference
-A1–A43. Build the engine and primitives; do not rebuild pages. Old primitives
-that pages still import (`FadeUp`, `LineReveal`, `ImageReveal`, `Parallax`,
-`PinnedCardZoom`, `CountUp`) stay until #66/#68 replace their uses.
+A1–A43. Build the engine and primitives; do not rebuild pages. (The old
+primitives, `FadeUp`, `LineReveal`, `ImageReveal`, `Parallax`,
+`PinnedCardZoom` and `CountUp`, were deleted in the #61 cleanup.)
 
 - Extend the shared frame loop (`src/lib/motion/frame.ts`), the Lenis setup
   (`src/components/motion/smooth-scroll.tsx`) and the hidden-until-ready
@@ -326,11 +325,8 @@ and screenshots `reference-shots/home/*`. Needs #63 and #64.
 - The wordmark is rendered with `lang="en"` so CSS uppercasing keeps
   "CITY" rather than the Azerbaijani "CİTY"; the shell's brand (header,
   menu, footer, page-transition curtain) is marked the same way
-- Home no longer uses the legacy motion primitives (FadeUp, LineReveal,
-  ImageReveal, Parallax, PinnedCardZoom, CountUp), the legacy ui components
-  (Section, Container, Heading, Text, Button, Card, Stat, Eyebrow, Icon) or
-  the `--color-scrim`, `--duration-crossfade` and `--duration-settle`
-  tokens; they stay for #68 until the joint cleanup
+- Home no longer uses the legacy motion primitives or the legacy ui
+  components (removed in the #61 cleanup)
 
 ## #68 Inner pages
 
@@ -384,15 +380,34 @@ parallel with #66.
 - `ScreenSlider` (`/qalereya`) takes the first five gallery items, only when
   no category is filtered; its thumbnail strip shows only where the scene
   pins (`content.css`). There is no scroll-driven active thumbnail yet
-- The lightbox imports `Reveal` and the UI pieces by path; it no longer uses
-  `ImageReveal` or the `@/components/motion` and `@/components/ui` barrels.
-  Inner pages no longer use `FadeUp`, `LineReveal`, `ImageReveal`,
-  `Parallax`, `PinnedCardZoom` or `CountUp`. `PageHead` (both),
-  `home/sections.tsx` (`About`, `Amenities`) and `home/section-head.tsx` are
-  removed, since nothing renders them any more. The legacy primitives stay:
-  `/menziller/[slug]` still uses `FadeUp` and `ImageReveal`, and the
-  `/primitivler/hereket/kohne` fixture shows them all
+- The lightbox imports `Reveal` and the UI pieces by path. `PageHead`
+  (both), `home/sections.tsx` (`About`, `Amenities`) and
+  `home/section-head.tsx` are removed, since nothing renders them any more
 - Not built: the `/kompleks` collage and the scattered `/yerlesme` photos
   (no image slots in `docs/defaults.md`), team cards on `/haqqimizda` (the
   content has one developer), an illustrated street map (the map is a drawn
   ground with the pin until the owner supplies `location.map`)
+
+## #61 cleanup: legacy primitives, components and tokens
+
+Branch `refactor/remove-legacy-motion`. The last users were migrated and the
+pre-redesign pieces deleted:
+
+- Motion: `FadeUp`, `LineReveal`, `ImageReveal`, `Parallax`,
+  `PinnedCardZoom`, `CountUp`, the `@/components/motion` barrel,
+  `src/lib/motion/entry.ts` and `pinned.ts`, their tokens and CSS, the
+  `/primitivler/hereket/kohne` playground and its E2E spec.
+  `/menziller/[slug]` uses `Reveal` (`text` for its section titles,
+  `image-in` for the first gallery image)
+- UI: `Section`, `Container`, `Heading`, `Text`, `Card`, `Stat`, `Eyebrow`
+  and the `@/components/ui` barrel. `Button`, `Icon`, `Input`, `Field`,
+  `Badge`, `Checkbox`, `Select`, `Textarea` and `Picture` stay: the console
+  and the current forms use them
+- `data-tone="night"` is gone (the lightbox is `data-theme="dark"`); the
+  header's theme observer reads only `data-theme`
+- The 404, error and placeholder pages, and the apartment page's lower
+  sections, use the new steps: `text-lead-lg` (the nearest non-caps step to
+  the old display heading) and `text-lead`, `px-layout`, `py-u6`/`desk:py-u9`
+- Still on the semantic tokens, not rebuilt by the redesign: the form fields,
+  `Button`, `Badge`, the plan viewer, the complex selector, the locale
+  banner, rich text and the console (`docs/ui-kit.md` → Current tokens)

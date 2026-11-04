@@ -1,4 +1,4 @@
-import { Picture } from "@/components/ui";
+import { Picture } from "@/components/ui/picture";
 import { cx } from "@/lib/cx";
 import type { PublicRichText } from "@/lib/public/rich-text";
 

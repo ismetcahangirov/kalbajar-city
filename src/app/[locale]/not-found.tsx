@@ -1,7 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 
 import { PlaceholderFrame } from "@/components/i18n/placeholder-frame";
-import { Button, Heading, Text } from "@/components/ui";
+import { Button } from "@/components/ui/button";
 import { getPathname } from "@/i18n/navigation";
 
 export default function NotFound() {
@@ -9,10 +9,8 @@ export default function NotFound() {
   const locale = useLocale();
   return (
     <PlaceholderFrame>
-      <Heading as="h1" size="display" align="center">
-        {t("title")}
-      </Heading>
-      <Text tone="muted">{t("body")}</Text>
+      <h1 className="text-lead-lg text-balance">{t("title")}</h1>
+      <p className="text-body text-pretty text-(--t-small)">{t("body")}</p>
       <div className="flex flex-wrap justify-center gap-3">
         <Button href={getPathname({ href: "/menziller", locale })}>{t("catalogue")}</Button>
         <Button href={getPathname({ href: "/", locale })} variant="secondary">

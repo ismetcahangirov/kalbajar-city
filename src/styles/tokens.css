@@ -6,8 +6,9 @@
  * Tailwind's default palette, type scale, radii, shadows and easings are
  * cleared so that only these tokens exist as utilities.
  *
- * Tokens marked "legacy" exist only because a current component still uses
- * them. #64–#68 rebuild those components on the new tokens and delete them.
+ * Tokens marked "current" are read by the components the redesign did not
+ * rebuild (the form fields, buttons and badges, the plan viewer, rich text)
+ * and by the console through admin.css (ui-kit.md → Current tokens).
  */
 
 @theme static {
@@ -40,8 +41,8 @@
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  /* Semantic colours, light set. [data-tone="night"] redefines them. The
-     current components use these; new ones read the theme tokens. */
+  /* Semantic colours (current): one light set, for the current components
+     and the console; new components read the theme tokens. */
   --color-surface: var(--color-cream);
   --color-surface-alt: var(--color-cream-hover);
   --color-surface-raised: var(--color-cream-hover);
@@ -57,7 +58,7 @@
   --color-status-available: var(--color-moss);
   --color-status-reserved: var(--color-sepia);
   --color-status-sold: var(--color-umber);
-  /* The hero scrim: ink at 55 % opacity, hero only (legacy). */
+  /* Ink at 55 %: the console's dialog and sheet overlays (current). */
   --color-scrim: rgb(18 16 14 / 0.55);
 
   /* Type. --font-alethia is set by next/font on <html>. */
@@ -126,44 +127,16 @@
   --text-hero-mark--letter-spacing: 0;
   --text-hero-mark--font-weight: 300;
 
-  /* Legacy type steps, aliased to the nearest new step. */
-  --text-display-xl: var(--text-word);
-  --text-display-xl--line-height: 1;
-  --text-display-xl--letter-spacing: 0;
-  --text-display-xl--font-weight: 300;
-
-  --text-display: var(--text-title);
-  --text-display--line-height: 1.1;
-  --text-display--letter-spacing: 0;
-  --text-display--font-weight: 300;
-
-  --text-heading: var(--text-lead);
-  --text-heading--line-height: 1.15;
-  --text-heading--letter-spacing: 0;
-  --text-heading--font-weight: 300;
-
-  /* The old 18–22 px `title`: no new step is close, so it keeps its value
-     under a legacy name (the new --text-title is the 30–45 px caps title). */
+  /* Current type steps. The old 18–22 px `title`: no new step is close, so
+     it keeps its value under this name (the new --text-title is the 30–45 px
+     caps title); the console's `text-lg`. */
   --text-legacy-title: clamp(1.125rem, 1.05rem + 0.36vw, 1.375rem);
   --text-legacy-title--line-height: 1.3;
   --text-legacy-title--letter-spacing: 0;
   --text-legacy-title--font-weight: 400;
 
-  --text-stat: var(--text-numeral);
-  --text-stat--line-height: 1;
-  --text-stat--letter-spacing: 0;
-  --text-stat--font-weight: 300;
-
-  --text-body-lg: var(--text-lead);
-  --text-body-lg--line-height: 1.3;
-
   --text-small: var(--text-small-t);
   --text-small--line-height: 1.4;
-
-  --text-eyebrow: var(--text-label);
-  --text-eyebrow--line-height: var(--text-label--line-height);
-  --text-eyebrow--letter-spacing: 0.2em;
-  --text-eyebrow--font-weight: 500;
 
   /* The typeset wordmark until the vector logo arrives (#7): the header's
      (the reference's 200 × 20 logo) and the footer's larger one. */
@@ -191,15 +164,13 @@
   --spacing-u9: calc(var(--u) * 9);
   --spacing-u12: calc(var(--u) * 12);
 
-  /* Legacy rhythm tokens. --spacing-block already collides with the
-     `inline-block` class (check-tokens.mjs forbids the class). */
+  /* Current rhythm and control sizes (the console, the form fields, the
+     plan viewer; `px-page` in shell.css). */
   --spacing-gutter: clamp(1rem, 0.571rem + 2.143vw, 2.5rem);
-  --spacing-block: clamp(2rem, 1.429rem + 2.857vw, 4rem);
   --spacing-section: clamp(5rem, 3.571rem + 7.143vw, 10rem);
   --spacing-control: 3rem;
   --spacing-control-lg: 3.5rem;
   --spacing-target: 2.75rem;
-  --container-page: 90rem;
   --container-prose: 40rem;
 
   /* The reference's breakpoints on top of Tailwind's: `desk:` is its switch
@@ -219,9 +190,8 @@
   --radius-full: 9999px;
   /* The only public shadow: the fixed round button. */
   --drop-shadow-button: 0 10px 6px rgb(18 16 14 / 0.15);
-  /* Legacy, and the console's: cards, menus and the pinned frame. */
+  /* Current, and the console's: raised menus, popovers and banners. */
   --shadow-raised: 0 1px 2px rgb(18 16 14 / 0.06), 0 12px 32px -16px rgb(18 16 14 / 0.18);
-  --shadow-frame: 0 24px 64px -24px rgb(18 16 14 / 0.45);
 
   /* Aspect ratios are CSS so images never shift layout. */
   --aspect-hero: 16 / 9;
@@ -234,9 +204,6 @@
   --ease-wipe: cubic-bezier(0.7, 0, 0.4, 1);
   --ease-exit: cubic-bezier(0.47, 0.04, 0.5, -0.06);
   --ease-carousel: cubic-bezier(0.6, 0, 0.1, 1);
-  /* Legacy, used by the current primitives until #63 replaces them. */
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root {
@@ -258,18 +225,6 @@
   /* `filter: blur()` start values: text and image reveals, the slideshow. */
   --motion-blur: 20px;
   --motion-blur-soft: 10px;
-
-  /* Legacy motion tokens, used by the current primitives until #63. */
-  --duration-base: 400ms;
-  --duration-crossfade: 600ms;
-  --duration-entry: 900ms;
-  --duration-wipe: 1200ms;
-  --duration-count: 1600ms;
-  --duration-settle: 2400ms;
-  --motion-rise: 24px;
-  --motion-stagger: 80ms;
-  --motion-stagger-image: 120ms;
-  --motion-parallax-scale: 1.16;
 
   /* Gradients (ui-kit.md → Colour). The curtain: hero, preloader, page
      transition, catalogue. The facade: the render panel. */
@@ -386,7 +341,7 @@
 
 /* Before the header's observer has run (first paint, no script), a page
    that opens on a dark hero gives the header the dark set. */
-html:has([data-header-overlay]:is([data-tone="night"], [data-theme="dark"], [data-theme="darker"]))
+html:has([data-header-overlay]:is([data-theme="dark"], [data-theme="darker"]))
   [data-site-header]:not([data-theme]),
 [data-theme="dark"] {
   --t-bg: var(--color-ink);
@@ -436,21 +391,4 @@ html:has([data-header-overlay]:is([data-tone="night"], [data-theme="dark"], [dat
   --t-line: rgb(18 16 14 / 0.1);
   --t-line-alt: rgb(18 16 14 / 0.1);
   --t-control: var(--color-umber);
-}
-
-/* Dark set for a section and its subtree (legacy: new sections use
-   data-theme). Components never branch on tone. */
-[data-tone="night"] {
-  --color-surface: var(--color-ink);
-  --color-surface-alt: var(--color-graphite);
-  --color-surface-raised: var(--color-ink-hover);
-  --color-text: var(--color-cream);
-  --color-text-muted: var(--color-sand);
-  --color-text-accent: var(--color-sand-hover);
-  --color-border: var(--color-umber);
-  --color-border-strong: var(--color-sand);
-  --color-action: var(--color-cream);
-  --color-action-text: var(--color-ink);
-  --color-accent: var(--color-sand);
-  --color-focus: var(--color-cream);
 }

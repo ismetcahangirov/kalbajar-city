@@ -12,7 +12,8 @@ import {
   type PointerEvent,
 } from "react";
 
-import { Icon, Picture } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
+import { Picture } from "@/components/ui/picture";
 import { formatPercent } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";

@@ -44,11 +44,6 @@
     outline-offset: var(--focus-ring-offset);
   }
 
-  [data-tone] {
-    background-color: var(--color-surface);
-    color: var(--color-text);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     *,
     ::before,
