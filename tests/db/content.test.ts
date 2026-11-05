@@ -495,10 +495,11 @@ describe("news", () => {
 });
 
 describe("scheduled publication", () => {
-  const cron = (token?: string) =>
-    scheduledRoute.POST(
+  // Vercel Cron sends GET; other schedulers may POST. Both behave the same.
+  const cron = (token?: string, method: "GET" | "POST" = "POST") =>
+    scheduledRoute[method](
       new Request(`${origin}/api/v1/internal/scheduled-publications`, {
-        method: "POST",
+        method,
         headers: token ? { authorization: `Bearer ${token}` } : {},
       }),
     );
@@ -582,15 +583,24 @@ describe("scheduled publication", () => {
     expect(again.constructionUpdates).not.toContain(update.id);
   });
 
-  it("lets only a caller with the cron secret trigger a run", async () => {
+  it("lets only a caller with the cron secret trigger a run, by GET or POST", async () => {
     vi.stubEnv("CRON_SECRET", "");
     expect((await cron("anything")).status).toBe(401);
+    expect((await cron("anything", "GET")).status).toBe(401);
     vi.stubEnv("CRON_SECRET", "a-cron-secret-for-tests");
     expect((await cron()).status).toBe(401);
     expect((await cron("wrong")).status).toBe(401);
+    expect((await cron(undefined, "GET")).status).toBe(401);
+    expect((await cron("wrong", "GET")).status).toBe(401);
     const ok = await cron("a-cron-secret-for-tests");
     expect(ok.status).toBe(200);
     expect(await ok.json()).toMatchObject({ news: expect.any(Array) });
+    const viaGet = await cron("a-cron-secret-for-tests", "GET");
+    expect(viaGet.status).toBe(200);
+    expect(await viaGet.json()).toMatchObject({
+      news: expect.any(Array),
+      constructionUpdates: expect.any(Array),
+    });
     vi.unstubAllEnvs();
     vi.stubEnv("S3_PUBLIC_URL", "http://localhost:9010/test");
   });

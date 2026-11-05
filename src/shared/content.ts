@@ -91,7 +91,7 @@ export type ContentMedia = z.input<typeof contentMediaSchema>;
  * `PUT .../publication`. Without `publishedAt` the entry keeps the date it
  * was first published, or gets the current time. A date in the future
  * schedules a draft instead: it stays a draft until the scheduled-publication
- * trigger (`POST /api/v1/internal/scheduled-publications`, run by a cron)
+ * trigger (`/api/v1/internal/scheduled-publications`, run by a cron)
  * publishes it and revalidates the cached pages. `DELETE` withdraws a
  * published entry or cancels a schedule.
  */

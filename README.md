@@ -112,7 +112,11 @@ public route's first load.
 Public pages are cached until a console write revalidates them, so a
 scheduled entry cannot appear on its own. A cron must call the trigger every
 few minutes; it publishes what is due, dated at its scheduled time, audited as
-the system, and revalidates the `content` tag:
+the system, and revalidates the `content` tag. The trigger answers `GET` and
+`POST` alike, with `Authorization: Bearer $CRON_SECRET`. Vercel Cron sends
+exactly that `GET` when `CRON_SECRET` is set in the project and
+`/api/v1/internal/scheduled-publications` is listed under `crons` in
+`vercel.json`; any other scheduler can call it with curl:
 
 ```bash
 */5 * * * * curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<site>/api/v1/internal/scheduled-publications
