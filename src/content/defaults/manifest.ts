@@ -69,6 +69,8 @@ export type DefaultEntry = {
   within?: readonly [number, number, number, number];
   /** The widest file to make; narrower slots (blurred backgrounds) need less. */
   maxWidth?: number;
+  /** A file below the standard widths, for a slot that only ever shows small. */
+  smallWidth?: number;
   /** No alt text: purely decorative, hidden from assistive technology. */
   decorative?: boolean;
   source: DefaultSource;
@@ -91,6 +93,8 @@ export const defaultEntries: Record<DefaultSlot, DefaultEntry> = {
     original: "instagram/DcIYfGcjyma-cover.jpg",
     aspect: 3 / 4,
     focus: { x: 0.5, y: 0.55 },
+    // The hero's tile: a third of a phone's width, a sixth of a desktop's.
+    smallWidth: 320,
     source: "instagram",
     ref: reel("DcIYfGcjyma"),
     date: collected,

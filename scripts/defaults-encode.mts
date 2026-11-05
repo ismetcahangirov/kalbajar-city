@@ -84,7 +84,10 @@ async function encode(slot: DefaultSlot): Promise<Encoded> {
     .png()
     .toBuffer();
 
-  const widths = planVariantWidths(Math.min(box.width, entry.maxWidth ?? box.width));
+  const widths = [
+    ...(entry.smallWidth ? [entry.smallWidth] : []),
+    ...planVariantWidths(Math.min(box.width, entry.maxWidth ?? box.width)),
+  ];
   const largest = widths[widths.length - 1]!;
   const dir = join(publicDir, slot);
   rmSync(dir, { recursive: true, force: true });

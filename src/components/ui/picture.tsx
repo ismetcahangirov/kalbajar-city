@@ -38,13 +38,15 @@ export function Picture({
 }: PictureProps) {
   const t = useTranslations("Media");
   const contain = fit === "contain";
+  // The centre is the default for `object-position`, and a page has dozens of
+  // images: spelling it out in each one's HTML and payload adds up.
+  const position = image.position === "50% 50%" ? undefined : image.position;
   const placeholder: CSSProperties = contain
     ? {}
     : image.blurDataURL
       ? {
           backgroundImage: `url("${image.blurDataURL}")`,
-          backgroundSize: "cover",
-          backgroundPosition: image.position,
+          ...(position && { backgroundPosition: position }),
         }
       : image.dominantColor
         ? { backgroundColor: image.dominantColor }
@@ -63,9 +65,13 @@ export function Picture({
           alt={image.alt}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : undefined}
-          decoding={priority ? undefined : "async"}
-          className={cx("size-full", contain ? "object-contain" : "object-cover", className)}
-          style={{ objectPosition: image.position, ...placeholder }}
+          decoding={priority ? "sync" : "async"}
+          className={cx(
+            "size-full bg-cover bg-center",
+            contain ? "object-contain" : "object-cover",
+            className,
+          )}
+          style={{ ...(position && { objectPosition: position }), ...placeholder }}
         />
       </picture>
       {image.illustrative && !contain && (

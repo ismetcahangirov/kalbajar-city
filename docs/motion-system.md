@@ -265,6 +265,10 @@ open with `@starting-style` transitions; one delegated client controller
 (`src/components/shell/shell-dialogs.tsx`) opens and closes them. The
 preloader's inline script sets `html[data-preloader="on"]` before the first
 paint, and a CSS failsafe removes the overlay after 8 s if script never runs.
+While it is `on` the page cannot scroll, so on phones the images below the hero
+are `display: none` and wait for the curtain to go: the hero image and the
+page's script get the bandwidth first (#30). The same 8 s failsafe releases
+them.
 
 The page transition intercepts same-origin navigations from
 `@/i18n/navigation` links only (`useRouter().push` after IN, OUT on the

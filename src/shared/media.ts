@@ -38,8 +38,12 @@ export type MediaVariant = {
   size: number;
 };
 
-/** Variant widths; none is ever wider than the original. */
-export const variantWidths = [480, 960, 1600, 2400] as const;
+/**
+ * Variant widths; none is ever wider than the original. 768 is a phone's
+ * full-bleed image (360–412 CSS px at DPR 1.75–2), which 960 overshoots by a
+ * third of the bytes.
+ */
+export const variantWidths = [480, 768, 960, 1600, 2400] as const;
 
 /**
  * The widths to make for an image `width` px wide: every standard width below

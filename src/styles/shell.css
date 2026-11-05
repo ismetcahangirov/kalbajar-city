@@ -534,6 +534,17 @@
     display: none;
   }
 
+  /* The curtain covers the first screen and the page cannot scroll yet, so
+     nothing below the hero can show. On a phone, where bandwidth is short and
+     no frame takes its height from its image, those images wait for the
+     curtain to go and leave the way to the hero image and the page's script. */
+  @media (width < 41.75rem) {
+    html[data-preloader="on"] main img:not([data-home-hero] img) {
+      display: none;
+      animation: shell-preloader-release 1ms 8s both;
+    }
+  }
+
   html[data-preloader="on"] [data-preloader-overlay],
   html[data-preloader="out"] [data-preloader-overlay] {
     display: block;
@@ -556,6 +567,13 @@
   @keyframes shell-preloader-failsafe {
     to {
       visibility: hidden;
+    }
+  }
+
+  /* The same failsafe for the images waiting under it. */
+  @keyframes shell-preloader-release {
+    to {
+      display: inline;
     }
   }
 
