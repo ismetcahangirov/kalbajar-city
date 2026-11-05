@@ -19,6 +19,11 @@ export const adminSeoApi = baseApi.injectEndpoints({
     }),
     adminSeoPages: build.query<SeoPage[], void>({
       query: () => "/admin/seo-overrides/pages",
+      // The suggestions list every apartment and article, so it follows their edits.
+      providesTags: [
+        { type: "Apartment", id: "LIST" },
+        { type: "News", id: "LIST" },
+      ],
     }),
     createSeoOverride: build.mutation<AdminSeoOverride, SeoOverrideCreate>({
       query: (body) => ({ url: "/admin/seo-overrides", method: "POST", body }),

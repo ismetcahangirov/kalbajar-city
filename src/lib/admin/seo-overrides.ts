@@ -8,6 +8,7 @@ import { invalidField, notFound } from "@/lib/api/errors";
 import { audit } from "@/lib/audit";
 import type { SessionUser } from "@/lib/auth/session";
 import { revalidatePublic } from "@/lib/cache/revalidate";
+import { publicTags } from "@/lib/cache/tags";
 import type { Translatable } from "@/i18n/content";
 import { locales } from "@/i18n/routing";
 import type {
@@ -113,7 +114,7 @@ export async function saveSeoOverride(
     });
     return toAdmin(after!);
   });
-  revalidatePublic("settings");
+  revalidatePublic(publicTags.settings);
   return saved;
 }
 
@@ -134,7 +135,7 @@ export async function deleteSeoOverride(
       headers,
     });
   });
-  revalidatePublic("settings");
+  revalidatePublic(publicTags.settings);
 }
 
 /** The site's own pages, by their Azerbaijani path, with the console's name for each. */

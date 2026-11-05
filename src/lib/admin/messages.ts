@@ -864,7 +864,8 @@ const messages = {
   "seo.deleteLead": "Səhifə yenidən öz başlığını və təsvirini göstərəcək.",
   "seo.delete": "Sil",
   "seo.error.slash": "Yol / ilə başlamalıdır.",
-  "seo.error.characters": "Yolda boşluq və ya # olmamalıdır.",
+  "seo.error.characters":
+    "Yolda boşluq, # və ya ə, ö kimi hərflər olmamalıdır: saytın yolları latın hərfləri, rəqəm və tire ilə yazılır.",
   "seo.error.reserved": "Dil prefiksi (/en, /ru) və ya /admin, /api yolları yazılmır.",
   "seo.error.tooLong": "Mətn çox uzundur.",
   "seo.error.empty": "Ən azı bir dəyər dəyişdirilməlidir.",

@@ -30,8 +30,11 @@ const reservedSegments = new Set<string>([
 
 /**
  * A page's key as `overrideKey()` in `@/lib/seo/metadata` makes it: the
- * Azerbaijani path without a locale prefix, decoded and without a trailing
- * slash, with the query of a query view (`/menziller?otaq=2`) kept as typed.
+ * Azerbaijani path without a locale prefix and without a trailing slash, with
+ * the query of a query view (`/menziller?otaq=2`) kept as typed. Escapes are
+ * decoded, so `/m%65nziller` is `/menziller`. Every route segment and slug is
+ * ASCII, and `overrideKey()` percent-encodes anything else, so `seoPathSchema`
+ * refuses a path that is not ASCII once decoded: it could never match.
  */
 export function normalizeOverridePath(value: string): string {
   const trimmed = value.trim();
@@ -59,6 +62,7 @@ export const seoPathSchema = z
   .refine((value) => value.startsWith("/") && !value.startsWith("//"), "seo.error.slash")
   .refine((value) => !/[\s#\\]/.test(value), "seo.error.characters")
   .transform(normalizeOverridePath)
+  .refine((value) => /^[!-~]*$/.test(value), "seo.error.characters")
   .refine((value) => !reservedSegments.has(firstSegment(value)), "seo.error.reserved");
 
 const text = (max: number) => z.string().trim().max(max, "seo.error.tooLong").default("");

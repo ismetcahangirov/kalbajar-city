@@ -13,7 +13,7 @@ const parse = (body: Record<string, unknown>) =>
 describe("SEO override paths", () => {
   it("keys a page the way overrideKey() does", () => {
     expect(normalizeOverridePath(" /menziller/ ")).toBe("/menziller");
-    expect(normalizeOverridePath("/xeb%C9%99rl%C9%99r")).toBe("/xebərlər");
+    expect(normalizeOverridePath("/m%65nziller")).toBe("/menziller");
     expect(normalizeOverridePath("/")).toBe("/");
     expect(normalizeOverridePath("/menziller?otaq=2")).toBe("/menziller?otaq=2");
     expect(normalizeOverridePath("/menziller/?")).toBe("/menziller");
@@ -26,6 +26,10 @@ describe("SEO override paths", () => {
     expect(parse({ path: "menziller" }).error?.issues[0]?.message).toBe("seo.error.slash");
     expect(parse({ path: "//host" }).error?.issues[0]?.message).toBe("seo.error.slash");
     expect(parse({ path: "/a b" }).error?.issues[0]?.message).toBe("seo.error.characters");
+    // overrideKey() percent-encodes non-ASCII, so a decoded one could never match a page.
+    for (const path of ["/xebərlər", "/xeb%C9%99rl%C9%99r", "/menziller?blok=ə"]) {
+      expect(parse({ path }).error?.issues[0]?.message).toBe("seo.error.characters");
+    }
     // A word that merely starts like a locale is a page.
     expect(parse({ path: "/english-page" }).success).toBe(true);
   });
