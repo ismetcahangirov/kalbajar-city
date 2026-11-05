@@ -17,6 +17,9 @@ import { Textarea } from "@/components/ui/textarea";
 // catalogues. The motion primitives are on /primitivler/hereket.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
+// The site shell reads the settings per request (#27), so no page under it is static.
+export const instant = false;
+
 const themes = ["light", "sand"] as const;
 
 export default function PrimitivesPage() {

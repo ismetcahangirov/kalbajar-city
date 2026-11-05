@@ -37,6 +37,11 @@ export const adminModules = {
     label: "nav.redirects",
     permission: { seo: ["read"] },
   },
+  seo: {
+    href: "/admin/seo",
+    label: "nav.seo",
+    permission: { seo: ["read"] },
+  },
   settings: {
     href: "/admin/ayarlar",
     label: "nav.settings",
