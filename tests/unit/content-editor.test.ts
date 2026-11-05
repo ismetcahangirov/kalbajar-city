@@ -2,9 +2,17 @@ import { getSchema } from "@tiptap/react";
 import { describe, expect, it } from "vitest";
 
 import { extensions } from "@/components/admin/content/rich-text-extensions";
-import { bakuInputToIso, bakuInputValue } from "@/lib/admin/format";
+import { adminMonth, bakuInputToIso, bakuInputValue } from "@/lib/admin/format";
 import { missingRichLocales } from "@/lib/admin/translatables";
-import { contentState, newsFormSchema, scheduleGraceMs, scheduleOverdue } from "@/shared/content";
+import { describeUsage } from "@/lib/admin/media-list";
+import {
+  constructionUpdateCreateSchema,
+  constructionUpdateFormSchema,
+  contentState,
+  newsFormSchema,
+  scheduleGraceMs,
+  scheduleOverdue,
+} from "@/shared/content";
 import { paragraphs, sanitizeRichText, type RichTextDoc } from "@/shared/rich-text";
 
 const mediaId = "0b4f8f0e-7d1a-4c55-9b9e-2f7a3c1d5e6f";
@@ -116,6 +124,65 @@ describe("the article form", () => {
     expect(missingRichLocales({ az: paragraphs("a"), en: empty, ru: paragraphs("b") })).toEqual([
       "en",
     ]);
+  });
+});
+
+describe("the construction update form", () => {
+  const empty: RichTextDoc = { type: "doc", content: [{ type: "paragraph" }] };
+  const valid = {
+    month: "2026-09",
+    title: { az: "Sentyabr" },
+    body: { az: empty, en: empty, ru: empty },
+    progressPercent: "40",
+    mediaIds: [mediaId],
+  };
+
+  it("gives a valid create body, with no text when nothing is written in az", () => {
+    const output = constructionUpdateFormSchema.parse(valid);
+    expect(output).toMatchObject({ month: "2026-09", progressPercent: 40, body: null });
+    expect(constructionUpdateCreateSchema.parse(output)).toMatchObject({
+      month: "2026-09-01",
+      progressPercent: 40,
+      mediaIds: [mediaId],
+    });
+  });
+
+  it("keeps written text, and refuses a translation without its Azerbaijani text", () => {
+    const body = paragraphs("Karkas işləri.");
+    expect(
+      constructionUpdateFormSchema.parse({ ...valid, body: { az: body, en: empty, ru: empty } })
+        .body?.az,
+    ).toEqual(body);
+    const refused = constructionUpdateFormSchema.safeParse({
+      ...valid,
+      body: { az: empty, en: body, ru: empty },
+    });
+    expect(refused.success).toBe(false);
+    expect(refused.error?.issues[0]?.path).toEqual(["body", "az"]);
+  });
+
+  it.each([
+    ["no month", { month: "" }, "month"],
+    ["a month that does not exist", { month: "2026-13" }, "month"],
+    ["no progress", { progressPercent: "" }, "progressPercent"],
+    ["progress over 100", { progressPercent: "101" }, "progressPercent"],
+    ["progress with a fraction", { progressPercent: "4.5" }, "progressPercent"],
+    ["the same file twice", { mediaIds: [mediaId, mediaId] }, "mediaIds"],
+  ])("refuses %s", (_name, change, field) => {
+    const result = constructionUpdateFormSchema.safeParse({ ...valid, ...change });
+    expect(result.error?.issues[0]?.path).toEqual([field]);
+  });
+
+  it("writes the month the console's way and links a file's usage to its update", () => {
+    expect(adminMonth("2026-09-01")).toBe("09.2026");
+    expect(
+      describeUsage({
+        entityType: "construction_update",
+        entityId: "u1",
+        field: "media",
+        label: "sentyabr",
+      }).href,
+    ).toBe("/admin/xeberler/tikinti/u1");
   });
 });
 

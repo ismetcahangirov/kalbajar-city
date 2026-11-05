@@ -107,7 +107,10 @@ News and construction updates are drafts, scheduled or published. The
 console's article editor (`/admin/xeberler`) writes rich text with TipTap,
 which loads only in the console: the site renders the stored JSON with plain
 React elements, and `pnpm budget:js` fails if ProseMirror code reaches a
-public route's first load.
+public route's first load. Construction updates (`/admin/xeberler/tikinti`)
+use the same editor, with their photos and video in order. A video's poster
+belongs to the file in the media library, so it is captured or chosen there or
+from the update's form, and every page showing that video gets it.
 
 Public pages are cached until a console write revalidates them, so a
 scheduled entry cannot appear on its own. A cron must call the trigger every

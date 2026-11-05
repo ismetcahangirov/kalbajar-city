@@ -70,8 +70,9 @@ function usageHref(usage: MediaUsage): string | null {
     case "gallery_item":
       return `${adminModules.news.href}/qalereya`;
     case "news":
-    case "construction_update":
       return adminModules.news.href;
+    case "construction_update":
+      return `${adminModules.news.href}/tikinti/${usage.entityId}`;
     case "settings":
       return usage.entityId === "developer"
         ? settingsSection("developer").href

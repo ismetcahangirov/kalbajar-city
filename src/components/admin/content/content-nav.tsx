@@ -9,6 +9,7 @@ const base = adminModules.news.href;
 /** The content module's pages; they share the module's menu item and permission. */
 export const contentPages = {
   news: { href: base, label: "content.nav.news" },
+  construction: { href: `${base}/tikinti`, label: "content.nav.construction" },
   gallery: { href: `${base}/qalereya`, label: "content.nav.gallery" },
   faq: { href: `${base}/suallar`, label: "content.nav.faq" },
 } as const satisfies Record<string, { href: string; label: MessageKey }>;
