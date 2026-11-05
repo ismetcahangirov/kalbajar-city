@@ -44,7 +44,6 @@ function Links({ className, search }: { className?: string; search: string }) {
               hrefLang={locale}
               lang={locale}
               aria-current={locale === current ? "true" : undefined}
-              aria-label={t(locale)}
               className={cx(
                 "inline-flex min-h-target min-w-target items-center justify-center text-label uppercase",
                 // The current language is underlined, not only coloured.
@@ -54,6 +53,8 @@ function Links({ className, search }: { className?: string; search: string }) {
               )}
             >
               {locale}
+              {/* The visible code starts the accessible name (WCAG 2.5.3, label in name). */}
+              <span className="sr-only"> {t(locale)}</span>
             </a>
           </li>
         ))}

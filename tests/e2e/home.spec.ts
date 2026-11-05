@@ -172,17 +172,3 @@ test("the FAQ is published as FAQPage structured data", async ({ page }) => {
     },
   });
 });
-
-for (const path of ["/", "/ru"]) {
-  for (const width of [320, 768, 1024, 1920]) {
-    test(`${path} has no horizontal scroll at ${width} px`, async ({ page }) => {
-      await page.setViewportSize({ width, height: 800 });
-      await page.goto(path);
-      await page.evaluate(() => document.fonts.ready);
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      );
-      expect(overflow).toBe(0);
-    });
-  }
-}

@@ -115,7 +115,10 @@ export function FlatCard({
       </p>
 
       <div className="relative mx-auto mt-u2 aspect-[280/240] w-4/5 desk:w-[70%]">
-        <div className={cx("size-full", reserved && "opacity-50")}>
+        <div
+          data-dimmed={reserved ? "" : undefined}
+          className={cx("size-full", reserved && "opacity-50")}
+        >
           {apartment.plan ? (
             <Picture
               image={apartment.plan}

@@ -18,9 +18,14 @@ export function FixedButtonsFrame({ children }: { children: ReactNode }) {
       (theme) => frame.setAttribute("data-theme", theme),
     );
     const footer = document.getElementById("site-footer");
-    const observer = new IntersectionObserver(([entry]) =>
-      frame.toggleAttribute("data-over-footer", entry?.isIntersecting ?? false),
-    );
+    // Faded out over the footer (src/styles/shell.css) and out of the tab
+    // order at once, so the keyboard never lands on a control that cannot be
+    // seen (WCAG 2.4.7).
+    const observer = new IntersectionObserver(([entry]) => {
+      const over = entry?.isIntersecting ?? false;
+      frame.toggleAttribute("data-over-footer", over);
+      frame.inert = over;
+    });
     if (footer) observer.observe(footer);
     return () => {
       stopTheme();
