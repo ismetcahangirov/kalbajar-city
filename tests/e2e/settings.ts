@@ -25,8 +25,16 @@ export async function flaggedPaths(): Promise<string[]> {
   }
 }
 
-/** Flags `paths` again, keeping every other flag as it is now. */
-export async function restoreFlags(paths: readonly string[]): Promise<void> {
+/**
+ * Flags `paths` again, keeping every other flag as it is now, then saves the
+ * contacts unchanged through `request` (signed in): that revalidates the
+ * cached pages, which may have been rendered while the flags were off, and
+ * clears no flag, since only a changed value loses its flag.
+ */
+export async function restoreFlags(
+  request: APIRequestContext,
+  paths: readonly string[],
+): Promise<void> {
   if (!paths.length) return;
   const { db, close } = connect(databaseUrl());
   try {
@@ -46,6 +54,7 @@ export async function restoreFlags(paths: readonly string[]): Promise<void> {
   } finally {
     await close();
   }
+  await patchContacts(request, {});
 }
 
 /** The current contacts, through the console's endpoint (the request must be signed in). */

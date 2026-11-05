@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { gtagInit, pixelInit } from "@/components/analytics/analytics-scripts";
 import { track } from "@/lib/analytics";
 import { llmsTxt, type LlmsDocument } from "@/lib/llms";
+import type { SiteContacts } from "@/lib/public/site";
+import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
 import { answerCrawlers, robotsRules } from "@/lib/seo/robots";
 import { analyticsOrigins, contentSecurityPolicy } from "@/lib/security/csp";
 
@@ -76,6 +78,37 @@ describe("llms.txt", () => {
       "## Frequently asked questions\n\n### When is it finished?\n\nIn 2027.\n",
     );
     expect(text).not.toContain("\u00a0");
+  });
+});
+
+describe("confirmed contacts", () => {
+  const contacts: SiteContacts = {
+    phones: ["+994124343232"],
+    whatsapp: "+994504343232",
+    email: "satis@kalbajarcity.com",
+    address: { value: "Kalbajar, Azerbaijan", locale: "en", fallback: false },
+    hours: { value: "Monday–Saturday, 10:00–19:00", locale: "en", fallback: false },
+    coordinates: { lat: 40.1053, lng: 46.0389 },
+    socials: { instagram: null, facebook: null, youtube: null, tiktok: null },
+    standIns: [],
+  };
+
+  it("passes confirmed values through", () => {
+    expect(confirmedContacts(contacts)).toEqual(contacts);
+  });
+
+  it("leaves every stand-in out, so no machine reads an invented value", () => {
+    const confirmed = confirmedContacts({
+      ...contacts,
+      standIns: ["coordinates", "hours", "email"],
+    });
+    expect(confirmed).toEqual({
+      ...contacts,
+      coordinates: null,
+      hours: null,
+      email: null,
+      standIns: [],
+    });
   });
 });
 
