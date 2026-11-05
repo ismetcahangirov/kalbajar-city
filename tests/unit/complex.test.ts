@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  asSentence,
   boxSize,
   canvas,
   drawnView,
@@ -214,6 +215,33 @@ describe("complex selector drawn hotspots", () => {
     expect(selectorPolygonSchema.safeParse(Array.from({ length: 65 }, () => [0, 0])).success).toBe(
       false,
     );
+  });
+
+  it("names why a draft is refused, so the editor can say so", () => {
+    const code = (points: number[][]) =>
+      selectorPolygonSchema.safeParse(points).error?.issues[0]?.code;
+    expect(code([[0, 0]])).toBe("too_small");
+    // Too few and on one line: the count is what the editor reports.
+    expect(
+      code([
+        [0, 0],
+        [1, 1],
+      ]),
+    ).toBe("too_small");
+    expect(code(Array.from({ length: 65 }, (_, i) => [i / 64, (i % 2) / 2]))).toBe("too_big");
+    expect(
+      code([
+        [0, 0],
+        [0.5, 0.5],
+        [1, 1],
+      ]),
+    ).toBe("custom");
+  });
+
+  it("joins a picture's alt text to the caption with one full stop", () => {
+    expect(asSentence("Fasad")).toBe("Fasad.");
+    expect(asSentence("Fasad. ")).toBe("Fasad.");
+    expect(asSentence("Nə gözəl!")).toBe("Nə gözəl!");
   });
 
   it("draws a level on its picture only when every hotspot is drawn", () => {

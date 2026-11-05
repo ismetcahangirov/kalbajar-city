@@ -178,6 +178,12 @@ export function drawnView(
   return { picture, canvas: pictureCanvas(picture), polygons: drawn };
 }
 
+/** Text as a sentence for a caption: a full stop unless it already ends in one. */
+export function asSentence(text: string): string {
+  const trimmed = text.trim();
+  return /[.!?…]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
 type Box = { x: number; y: number; w: number; h: number };
 
 function rect({ x, y, w, h }: Box): Polygon {

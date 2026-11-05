@@ -9,6 +9,7 @@ import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
 import { publicApartmentStatuses, type PublicApartmentStatus } from "@/shared/apartments";
 import {
+  asSentence,
   blockApartments,
   boxSize,
   canvas,
@@ -368,7 +369,7 @@ function Caption({ picture }: { picture: SelectorPicture | null }) {
   return (
     <figcaption className="flex flex-wrap items-center gap-u text-small-t text-(--t-small)">
       {picture.illustrative && <Badge variant="illustrative">{media("illustrative")}</Badge>}
-      <span>{picture.alt ? `${picture.alt}. ${t("drawn")}` : t("drawn")}</span>
+      <span>{picture.alt ? `${asSentence(picture.alt)} ${t("drawn")}` : t("drawn")}</span>
     </figcaption>
   );
 }
