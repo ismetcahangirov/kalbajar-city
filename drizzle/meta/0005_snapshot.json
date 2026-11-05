@@ -1,5 +1,5 @@
 {
-  "id": "b267348d-6692-4af0-8102-13449b46b60a",
+  "id": "759e0e05-5113-4566-bbf2-7f612c9698f4",
   "prevId": "bf920107-0496-40ca-81ef-1dce973b6085",
   "version": "7",
   "dialect": "postgresql",
@@ -614,12 +614,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "scheduled_at": {
-          "name": "scheduled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -656,10 +650,6 @@
       },
       "policies": {},
       "checkConstraints": {
-        "construction_updates_scheduled_is_draft": {
-          "name": "construction_updates_scheduled_is_draft",
-          "value": "\"construction_updates\".\"status\" = 'draft' or \"construction_updates\".\"scheduled_at\" is null"
-        },
         "construction_updates_progress_range": {
           "name": "construction_updates_progress_range",
           "value": "\"construction_updates\".\"progress_percent\" between 0 and 100"
@@ -1037,12 +1027,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "scheduled_at": {
-          "name": "scheduled_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1111,10 +1095,6 @@
         "news_published_has_date": {
           "name": "news_published_has_date",
           "value": "\"news\".\"status\" <> 'published' or \"news\".\"published_at\" is not null"
-        },
-        "news_scheduled_is_draft": {
-          "name": "news_scheduled_is_draft",
-          "value": "\"news\".\"status\" = 'draft' or \"news\".\"scheduled_at\" is null"
         }
       },
       "isRLSEnabled": false
@@ -1180,6 +1160,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'AZN'"
+        },
+        "plan_polygon": {
+          "name": "plan_polygon",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "is_demo": {
           "name": "is_demo",
@@ -1294,6 +1280,10 @@
         "apartments_currency_code": {
           "name": "apartments_currency_code",
           "value": "\"apartments\".\"currency\" ~ '^[A-Z]{3}$'"
+        },
+        "apartments_plan_polygon_array": {
+          "name": "apartments_plan_polygon_array",
+          "value": "\"apartments\".\"plan_polygon\" is null or jsonb_typeof(\"apartments\".\"plan_polygon\") = 'array'"
         }
       },
       "isRLSEnabled": false
@@ -1339,6 +1329,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "site_polygon": {
+          "name": "site_polygon",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         },
         "is_demo": {
           "name": "is_demo",
@@ -1412,7 +1408,12 @@
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "blocks_site_polygon_array": {
+          "name": "blocks_site_polygon_array",
+          "value": "\"blocks\".\"site_polygon\" is null or jsonb_typeof(\"blocks\".\"site_polygon\") = 'array'"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.buildings": {
@@ -1512,6 +1513,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "facade_polygon": {
+          "name": "facade_polygon",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "is_demo": {
           "name": "is_demo",
           "type": "boolean",
@@ -1575,7 +1582,12 @@
         }
       },
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "floors_facade_polygon_array": {
+          "name": "floors_facade_polygon_array",
+          "value": "\"floors\".\"facade_polygon\" is null or jsonb_typeof(\"floors\".\"facade_polygon\") = 'array'"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.layout_types": {
@@ -1698,6 +1710,119 @@
           "value": "\"layout_types\".\"area_total\" > 0"
         }
       },
+      "isRLSEnabled": false
+    },
+    "public.selector_views": {
+      "name": "selector_views",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "block_id": {
+          "name": "block_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "media_id": {
+          "name": "media_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "selector_views_site": {
+          "name": "selector_views_site",
+          "columns": [
+            {
+              "expression": "(\"block_id\" is null)",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"selector_views\".\"block_id\" is null",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "selector_views_media_idx": {
+          "name": "selector_views_media_idx",
+          "columns": [
+            {
+              "expression": "media_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "selector_views_block_id_blocks_id_fk": {
+          "name": "selector_views_block_id_blocks_id_fk",
+          "tableFrom": "selector_views",
+          "tableTo": "blocks",
+          "columnsFrom": [
+            "block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "selector_views_media_id_media_id_fk": {
+          "name": "selector_views_media_id_media_id_fk",
+          "tableFrom": "selector_views",
+          "tableTo": "media",
+          "columnsFrom": [
+            "media_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "selector_views_block": {
+          "name": "selector_views_block",
+          "nullsNotDistinct": false,
+          "columns": [
+            "block_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.lead_events": {

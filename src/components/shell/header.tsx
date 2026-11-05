@@ -2,8 +2,8 @@ import { Phone } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
-import { mainPhone } from "@/config/contacts";
 import { formatPhone, telHref } from "@/i18n/format";
+import type { SiteContacts } from "@/lib/public/site";
 
 import { Burger } from "./burger";
 import { HeaderFrame } from "./header-frame";
@@ -17,10 +17,12 @@ import { BrandLink } from "./wordmark";
  * left, a call button and the burger right; the languages live in the menu.
  * On the home page's phones the number stands where the wordmark will fade
  * in (A8). "MÜRACİƏT ET" opens the inquiry dialog, or without script leads
- * to the contact page and its forms.
+ * to the contact page and its forms. The number is the main line from the
+ * console's settings (#27), so a change there shows on the next request.
  */
-export function Header() {
+export function Header({ contacts }: { contacts: SiteContacts }) {
   const t = useTranslations("Shell");
+  const { mainPhone } = contacts;
   const phone = formatPhone(mainPhone);
   return (
     <HeaderFrame>

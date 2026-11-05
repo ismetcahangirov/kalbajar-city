@@ -9,7 +9,7 @@ import { adminModules, type AdminModule, type ModuleSpec, type NavGroup } from "
 const groups: Array<{ label: MessageKey | null; modules: AdminModule[] }> = [
   { label: null, modules: ["dashboard"] },
   { label: "nav.group.sales", modules: ["apartments", "leads"] },
-  { label: "nav.group.content", modules: ["news", "media", "redirects"] },
+  { label: "nav.group.content", modules: ["news", "media", "redirects", "seo"] },
   { label: "nav.group.system", modules: ["settings", "users", "audit"] },
 ];
 

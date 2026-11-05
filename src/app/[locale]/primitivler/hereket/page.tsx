@@ -25,6 +25,9 @@ import { CarouselDemo, TeaserDemo } from "./followers";
 // does not go through the message catalogues.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
+// The site shell reads the settings per request (#27), so no page under it is static.
+export const instant = false;
+
 /** The catalogue's clips (motion-system.md → Scenes). */
 const clip = {
   heroPanel: "inset(0 0 0 66.66%)",

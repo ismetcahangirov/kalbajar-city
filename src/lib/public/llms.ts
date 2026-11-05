@@ -11,6 +11,7 @@ import type { Locale } from "@/i18n/routing";
 import { publicTags } from "@/lib/cache/tags";
 import { factSentences } from "@/lib/facts";
 import { llmsTxt, type LlmsDocument, type LlmsLink } from "@/lib/llms";
+import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
 import { loadPublishedFaq } from "./home";
@@ -52,14 +53,14 @@ async function getFaq(locale: Locale): Promise<Array<{ question: string; answer:
 }
 
 /**
- * `llms.txt` in one locale: the facts block's sentences, the contacts, the
- * pages and the FAQ, all read from the database. The caller has called
+ * `llms.txt` in one locale: the facts block's sentences, the contacts (without
+ * stand-ins), the pages and the FAQ, all read from the database. The caller has called
  * `connection()`, so the origin is the server's.
  */
 export async function buildLlmsTxt(locale: LlmsLocale, origin: string): Promise<string> {
   const [about, contacts, questions] = await Promise.all([
     getAboutPage(locale),
-    getSiteContacts(locale),
+    getSiteContacts(locale).then(confirmedContacts),
     getFaq(locale),
   ]);
   const [meta, t, nav, shell, aboutT, factsT, switcher] = await Promise.all([

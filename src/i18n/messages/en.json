@@ -117,6 +117,7 @@
     "description": "An interactive plan of Kalbajar City: choose a block, a floor and an apartment, and see each apartment's rooms, area and status.",
     "lead": "Choose a block, then a floor, to see where each apartment is, how many rooms it has, its area and its status.",
     "schematic": "Schematic view, not a picture of the buildings; renders and floor plans will be added.",
+    "drawn": "Hotspots drawn on the picture; the list has the same information.",
     "blocksNav": "Blocks",
     "floorsNav": "Floors",
     "trail": "Selection",

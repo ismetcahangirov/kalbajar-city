@@ -117,6 +117,7 @@
     "description": "Kalbajar City-nin interaktiv sxemi: bloku, mərtəbəni və mənzili seçin, hər mənzilin otaq sayını, sahəsini və vəziyyətini görün.",
     "lead": "Bloku seçin, sonra mərtəbəni: hər mənzilin yerini, otaq sayını, sahəsini və vəziyyətini görəcəksiniz.",
     "schematic": "Sxematik görünüş. Binaların real görüntüsü deyil; render və mərtəbə planları əlavə olunacaq.",
+    "drawn": "Aktiv sahələr şəkil üzərində çəkilib; eyni məlumat siyahıda da var.",
     "blocksNav": "Bloklar",
     "floorsNav": "Mərtəbələr",
     "trail": "Seçim",
