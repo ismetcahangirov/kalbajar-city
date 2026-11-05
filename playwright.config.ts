@@ -51,7 +51,8 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
     { name: "mobile", testIgnore: exclusive, use: { ...devices["Pixel 7"] } },
-    // Tests that change what every page loads (the analytics IDs, say) or
+    // Tests that change what every page loads or shows (the analytics IDs,
+    // the main phone in the header) or
     // that read site-wide values other specs change for a moment run alone,
     // after the rest, one at a time.
     {

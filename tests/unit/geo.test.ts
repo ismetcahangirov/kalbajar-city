@@ -84,6 +84,7 @@ describe("llms.txt", () => {
 describe("confirmed contacts", () => {
   const contacts: SiteContacts = {
     phones: ["+994124343232"],
+    mainPhone: "+994124343232",
     whatsapp: "+994504343232",
     email: "satis@kalbajarcity.com",
     address: { value: "Kalbajar, Azerbaijan", locale: "en", fallback: false },
