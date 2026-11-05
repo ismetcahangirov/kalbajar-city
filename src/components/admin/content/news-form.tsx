@@ -15,6 +15,8 @@ import { FormAlert } from "@/components/admin/form-alert";
 import { MediaField } from "@/components/admin/settings/media-field";
 import { Button } from "@/components/admin/ui/button";
 import { Form } from "@/components/admin/ui/form";
+import { getPathname } from "@/i18n/navigation";
+import { defaultLocale } from "@/i18n/routing";
 import { t } from "@/lib/admin/messages";
 import { newsFormSchema, type AdminNews, type NewsForm as NewsFormValues } from "@/shared/content";
 import type { RichTextDoc } from "@/shared/rich-text";
@@ -78,7 +80,11 @@ export function NewsForm({ item, abilities }: { item?: AdminNews; abilities: New
   const coverMediaId = form.watch("coverMediaId");
   const busy = creating || updating || removing || publishing;
   const readOnly = !abilities.update;
-  const dirty = form.formState.isDirty && !form.formState.isSubmitSuccessful;
+  // A successful save resets the form to what was saved; a failed one does not,
+  // so `isDirty` alone says whether anything is unsaved. (`isSubmitSuccessful`
+  // stays true after a save until the next submit, and is true when a save the
+  // handler caught failed, so it cannot be part of this.)
+  const dirty = form.formState.isDirty;
   useUnsavedChangesGuard(dirty);
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -197,7 +203,14 @@ export function NewsForm({ item, abilities }: { item?: AdminNews; abilities: New
           />
           {current.state === "published" ? (
             <Button asChild variant="outline" className="self-start">
-              <a href={`/xeberler/${current.slug}`} target="_blank" rel="noopener">
+              <a
+                href={getPathname({
+                  href: { pathname: "/xeberler/[slug]", params: { slug: current.slug } },
+                  locale: defaultLocale,
+                })}
+                target="_blank"
+                rel="noopener"
+              >
                 <ExternalLink aria-hidden />
                 {t("news.view")}
               </a>

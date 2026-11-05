@@ -185,3 +185,75 @@ test("a scheduled article appears on the cached list once the cron trigger runs"
     await page.request.delete(`/api/v1/admin/news/${article.id}`);
   }
 });
+
+test("edits made after a save are unsaved: publishing waits and leaving asks", async ({
+  page,
+  baseURL,
+}) => {
+  const email = "e2e-news-dirty@test.kalbajarcity.com";
+  await ensureAccount("editor", email, "E2E News Editor");
+  await signIn(page, email, baseURL!);
+  const title = `Redaktə ${randomUUID().slice(0, 6)}`;
+  const created = await page.request.post("/api/v1/admin/news", {
+    data: { title: { az: title }, body: { az: paragraphs("Mətn.") } },
+  });
+  expect(created.status()).toBe(201);
+  const article = (await created.json()) as AdminNews;
+
+  try {
+    await page.goto(`/admin/xeberler/${article.id}`);
+    await waitForShell(page);
+    const field = page
+      .getByRole("group", { name: "Başlıq", exact: true })
+      .getByLabel("Başlıq (Azərbaycanca)");
+    const publication = page.getByRole("region", { name: "Dərc" });
+    const publishNow = publication.getByRole("button", { name: "İndi dərc et" });
+    const save = page.getByRole("button", { name: "Yadda saxla", exact: true });
+    await expect(publishNow).toBeEnabled();
+
+    // The first save: the form matches what is stored again.
+    await field.fill(`${title} 1`);
+    await expect(publishNow).toBeDisabled();
+    await save.click();
+    await expect(page.getByText("Dəyişikliklər yadda saxlanıldı.")).toBeVisible();
+    await expect(publishNow).toBeEnabled();
+
+    // Editing again after that save is unsaved work too.
+    await field.fill(`${title} 2`);
+    await expect(publishNow).toBeDisabled();
+    await expect(publication).toContainText("Əvvəlcə dəyişiklikləri yadda saxlayın.");
+    await page
+      .locator('[data-slot="sidebar"]')
+      .getByRole("link", { name: "Xəbərlər", exact: true })
+      .click();
+    const leave = page.getByRole("alertdialog", { name: "Dəyişikliklər yadda saxlanmayıb" });
+    await expect(leave).toBeVisible();
+    await leave.getByRole("button", { name: "Səhifədə qal" }).click();
+    await expect(page).toHaveURL(new RegExp(`/admin/xeberler/${article.id}$`));
+
+    // A save that fails with no field to blame keeps the edits unsaved.
+    await page.route(`**/api/v1/admin/news/${article.id}`, (route) =>
+      route.request().method() === "PATCH"
+        ? route.fulfill({
+            status: 409,
+            json: { error: { code: "CONFLICT", message: "Conflict." } },
+          })
+        : route.continue(),
+    );
+    await save.click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "artıq istifadə olunur" }),
+    ).toBeVisible();
+    await expect(publishNow).toBeDisabled();
+    await page.unroute(`**/api/v1/admin/news/${article.id}`);
+
+    await save.click();
+    await expect(publishNow).toBeEnabled();
+    const saved = (await (
+      await page.request.get(`/api/v1/admin/news/${article.id}`)
+    ).json()) as AdminNews;
+    expect(saved.title.az).toBe(`${title} 2`);
+  } finally {
+    await page.request.delete(`/api/v1/admin/news/${article.id}`);
+  }
+});
