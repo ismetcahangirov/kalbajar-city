@@ -25,7 +25,7 @@ function authorized(request: Request): boolean {
  * minutes: Vercel Cron sends `GET` with `Authorization: Bearer $CRON_SECRET`,
  * any other scheduler can send the same as `GET` or `POST`, e.g.
  * `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<site>/api/v1/internal/scheduled-publications`.
- * Answers with the ids it published.
+ * Answers with the ids it published and the ids it had to skip.
  */
 const run = handler({}, ({ request }) => {
   if (!authorized(request))

@@ -12,7 +12,12 @@ import { apiErrorMessage } from "@/lib/admin/api-error";
 import { adminDateTime } from "@/lib/admin/format";
 import { t } from "@/lib/admin/messages";
 import { missingLocales, missingRichLocales } from "@/lib/admin/translatables";
-import { contentStates, type AdminNews, type ContentState } from "@/shared/content";
+import {
+  contentStates,
+  scheduleOverdue,
+  type AdminNews,
+  type ContentState,
+} from "@/shared/content";
 import { useAdminNewsListQuery } from "@/store/endpoints/admin-content";
 
 import { contentPages } from "./content-nav";
@@ -20,9 +25,10 @@ import { ContentStateBadge } from "./content-state-badge";
 
 const pageSize = 20;
 
-function dateLine(item: AdminNews): string {
+function dateLine(item: AdminNews, overdue: boolean): string {
   if (item.state === "scheduled" && item.scheduledAt) {
-    return t("news.scheduledFor", { date: adminDateTime(item.scheduledAt) });
+    const date = adminDateTime(item.scheduledAt);
+    return overdue ? t("news.overdueSince", { date }) : t("news.scheduledFor", { date });
   }
   if (item.state === "published" && item.publishedAt) {
     return t("news.publishedOn", { date: adminDateTime(item.publishedAt) });
@@ -103,6 +109,8 @@ export function NewsList({ canCreate }: { canCreate: boolean }) {
         <ul className="flex flex-col divide-y rounded-md border">
           {items.map((item) => {
             const missing = missingOf(item);
+            // The list is fetched in the browser, so the clock here is the reader's.
+            const overdue = scheduleOverdue(item);
             return (
               <li
                 key={item.id}
@@ -115,10 +123,10 @@ export function NewsList({ canCreate }: { canCreate: boolean }) {
                   >
                     {item.title.az}
                   </Link>
-                  <span className="text-sm text-muted-foreground">{dateLine(item)}</span>
+                  <span className="text-sm text-muted-foreground">{dateLine(item, overdue)}</span>
                 </div>
                 <span className="flex flex-wrap gap-1 sm:justify-end">
-                  <ContentStateBadge state={item.state} />
+                  <ContentStateBadge state={item.state} overdue={overdue} />
                   {missing.length ? (
                     <Badge variant="outline">
                       <CircleDashed aria-hidden />

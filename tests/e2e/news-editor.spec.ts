@@ -257,3 +257,47 @@ test("edits made after a save are unsaved: publishing waits and leaving asks", a
     await page.request.delete(`/api/v1/admin/news/${article.id}`);
   }
 });
+
+test("a scheduled article whose time has long passed shows as overdue", async ({
+  page,
+  baseURL,
+}) => {
+  const email = "e2e-news-overdue@test.kalbajarcity.com";
+  await ensureAccount("editor", email, "E2E News Editor");
+  await signIn(page, email, baseURL!);
+  const title = `Gecikən xəbər ${randomUUID().slice(0, 6)}`;
+  const created = await page.request.post("/api/v1/admin/news", {
+    data: { title: { az: title }, body: { az: paragraphs("Planlı mətn.") } },
+  });
+  expect(created.status()).toBe(201);
+  const article = (await created.json()) as AdminNews;
+
+  try {
+    // A day ahead, so another test's cron run never publishes it; the
+    // browser's clock is then moved past it, as if no cron had run.
+    const at = Date.now() + 86_400_000;
+    const scheduled = await page.request.put(`/api/v1/admin/news/${article.id}/publication`, {
+      data: { publishedAt: new Date(at).toISOString() },
+    });
+    expect(await scheduled.json()).toMatchObject({ state: "scheduled" });
+    await page.clock.setFixedTime(at + 3_600_000);
+
+    await page.goto("/admin/xeberler");
+    await waitForShell(page);
+    await page.getByRole("button", { name: "Planlaşdırılıb" }).click();
+    const row = page.getByRole("listitem").filter({ hasText: title });
+    await expect(row).toContainText("Gecikir");
+    await expect(row).toContainText("dərc olunmalı idi, hələ dərc olunmayıb");
+
+    await row.getByRole("link", { name: title }).click();
+    const publication = page.getByRole("region", { name: "Dərc" });
+    await expect(publication).toContainText("Gecikir");
+    await expect(publication).toContainText("planlaşdırılmış dərc işləmir");
+
+    await publication.getByRole("button", { name: "Planı ləğv et" }).click();
+    await expect(page.getByText("Plan ləğv edildi.")).toBeVisible();
+    await expect(publication).toContainText("Qaralama");
+  } finally {
+    await page.request.delete(`/api/v1/admin/news/${article.id}`);
+  }
+});

@@ -14,6 +14,8 @@ export type ScheduledRun = {
   news: string[];
   /** Ids of the construction updates published by this run. */
   constructionUpdates: string[];
+  /** Ids of the due articles left scheduled because their Azerbaijani text is empty. */
+  skippedNews: string[];
 };
 
 const due = (table: typeof news | typeof constructionUpdates, now: Date) =>
@@ -23,17 +25,19 @@ const due = (table: typeof news | typeof constructionUpdates, now: Date) =>
  * Publishes every draft whose scheduled time has come (#25), dated at its
  * scheduled time, audited as the system. Public pages are cached until a
  * write revalidates them, so a scheduled entry cannot appear on its own: a
- * cron calls this through `POST /api/v1/internal/scheduled-publications`.
+ * cron calls this through `/api/v1/internal/scheduled-publications`.
  * Rows another run holds are skipped, so overlapping runs never publish an
  * entry twice. An article whose Azerbaijani text is empty stays scheduled
- * (the console refuses to empty a scheduled article, so this is a guard).
+ * (the console refuses to empty a scheduled article, so this is a guard);
+ * it is logged and returned in `skippedNews`, and the console shows it as
+ * overdue.
  */
 export async function publishScheduled(
   db: Executor,
   { headers, now = new Date() }: { headers?: Headers; now?: Date } = {},
 ): Promise<ScheduledRun> {
   const run = await db.transaction(async (tx) => {
-    const result: ScheduledRun = { news: [], constructionUpdates: [] };
+    const result: ScheduledRun = { news: [], constructionUpdates: [], skippedNews: [] };
 
     const articles = await tx
       .select()
@@ -41,7 +45,10 @@ export async function publishScheduled(
       .where(due(news, now))
       .for("update", { skipLocked: true });
     for (const before of articles) {
-      if (!hasRichContent(before.body.az)) continue;
+      if (!hasRichContent(before.body.az)) {
+        result.skippedNews.push(before.id);
+        continue;
+      }
       const [after] = await tx
         .update(news)
         .set({ status: "published", publishedAt: before.scheduledAt, scheduledAt: null })
@@ -83,6 +90,11 @@ export async function publishScheduled(
     }
     return result;
   });
+  if (run.skippedNews.length) {
+    console.warn(
+      `scheduled publication: articles left scheduled, their Azerbaijani text is empty: ${run.skippedNews.join(", ")}`,
+    );
+  }
   if (run.news.length || run.constructionUpdates.length) revalidatePublic(publicTags.content);
   return run;
 }

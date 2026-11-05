@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { extensions } from "@/components/admin/content/rich-text-extensions";
 import { bakuInputToIso, bakuInputValue } from "@/lib/admin/format";
 import { missingRichLocales } from "@/lib/admin/translatables";
-import { contentState, newsFormSchema } from "@/shared/content";
+import { contentState, newsFormSchema, scheduleGraceMs, scheduleOverdue } from "@/shared/content";
 import { paragraphs, sanitizeRichText, type RichTextDoc } from "@/shared/rich-text";
 
 const mediaId = "0b4f8f0e-7d1a-4c55-9b9e-2f7a3c1d5e6f";
@@ -126,6 +126,18 @@ describe("publication states", () => {
       "scheduled",
     );
     expect(contentState({ status: "published", scheduledAt: null })).toBe("published");
+  });
+
+  it("calls a scheduled entry overdue once its time is well past", () => {
+    const scheduledAt = "2026-11-10T07:00:00.000Z";
+    const at = new Date(scheduledAt).getTime();
+    const entry = { state: "scheduled", scheduledAt } as const;
+    expect(scheduleOverdue(entry, at - 60_000)).toBe(false);
+    // The cron runs every few minutes: a few minutes late is on time.
+    expect(scheduleOverdue(entry, at + 5 * 60_000)).toBe(false);
+    expect(scheduleOverdue(entry, at + scheduleGraceMs + 1)).toBe(true);
+    expect(scheduleOverdue({ state: "draft", scheduledAt: null }, at + 86_400_000)).toBe(false);
+    expect(scheduleOverdue({ state: "published", scheduledAt: null }, at + 86_400_000)).toBe(false);
   });
 
   it("reads the schedule picker in Baku time", () => {

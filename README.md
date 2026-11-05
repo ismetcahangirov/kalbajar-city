@@ -123,7 +123,8 @@ exactly that `GET` when `CRON_SECRET` is set in the project and
 ```
 
 Without `CRON_SECRET` the endpoint refuses every call, and scheduled entries
-wait.
+wait. The console marks a scheduled entry overdue ten minutes after its time,
+so a missing cron shows instead of going unnoticed.
 
 ## Database
 

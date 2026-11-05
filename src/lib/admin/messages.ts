@@ -977,6 +977,7 @@ const messages = {
   "contentState.draft": "Qaralama",
   "contentState.scheduled": "Planlaşdırılıb",
   "contentState.published": "Dərc edilib",
+  "contentState.overdue": "Gecikir",
   "contentState.filter": "Vəziyyət",
   "contentState.all": "Hamısı",
 
@@ -992,6 +993,7 @@ const messages = {
   "news.columnState": "Vəziyyət",
   "news.columnDate": "Tarix",
   "news.scheduledFor": "{date} tarixində dərc olunacaq",
+  "news.overdueSince": "{date} tarixində dərc olunmalı idi, hələ dərc olunmayıb",
   "news.publishedOn": "{date} tarixində dərc edilib",
   "news.updatedOn": "Son dəyişiklik: {date}",
   "news.fieldTitle": "Başlıq",
@@ -1020,6 +1022,8 @@ const messages = {
   "publication.draftLead": "Qaralama saytda görünmür.",
   "publication.scheduledLead":
     "{date} tarixində (Bakı vaxtı) avtomatik dərc olunacaq. O vaxta qədər saytda görünmür.",
+  "publication.overdueLead":
+    "{date} tarixində (Bakı vaxtı) dərc olunmalı idi, amma hələ saytda görünmür: planlaşdırılmış dərc işləmir. İndi dərc edin və administratora bildirin.",
   "publication.publishedLead": "Saytda görünür. Dərc tarixi: {date}.",
   "publication.publishNow": "İndi dərc et",
   "publication.schedule": "Planlaşdır",
@@ -1035,6 +1039,7 @@ const messages = {
   "publication.published": "Dərc edildi.",
   "publication.scheduled": "Planlaşdırıldı.",
   "publication.unpublished": "Qaralamaya çevrildi.",
+  "publication.scheduleCancelled": "Plan ləğv edildi. Xəbər qaralama olaraq qalır.",
   "publication.saveFirst": "Əvvəlcə dəyişiklikləri yadda saxlayın.",
   "publication.denied": "Dərc etmək üçün dərc icazəsi lazımdır.",
 

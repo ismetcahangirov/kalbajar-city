@@ -34,6 +34,22 @@ export function contentState(entry: {
   return entry.scheduledAt ? "scheduled" : "draft";
 }
 
+/**
+ * How late a scheduled entry may be before the console calls it overdue. The
+ * cron runs every few minutes, so an entry is normally a few minutes late;
+ * past this, the trigger is not running (no cron, or no `CRON_SECRET`).
+ */
+export const scheduleGraceMs = 10 * 60_000;
+
+/** Whether a scheduled entry's time has passed and it has still not gone out. */
+export function scheduleOverdue(
+  entry: { state: ContentState; scheduledAt: string | null },
+  now: number = Date.now(),
+): boolean {
+  if (entry.state !== "scheduled" || !entry.scheduledAt) return false;
+  return new Date(entry.scheduledAt).getTime() + scheduleGraceMs < now;
+}
+
 /** Azerbaijani, lower case, hyphenated (`CLAUDE.md` §3); made from the title when left out. */
 export const contentSlugSchema = z
   .string()

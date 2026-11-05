@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, Send, Undo2 } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useState, useSyncExternalStore } from "react";
 
 import { useConfirm } from "@/components/admin/feedback/confirm";
 import { toast } from "@/components/admin/feedback/toast";
@@ -10,11 +10,13 @@ import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { adminDateTime, bakuInputToIso, bakuInputValue } from "@/lib/admin/format";
 import { t } from "@/lib/admin/messages";
-import type { ContentState } from "@/shared/content";
+import { scheduleOverdue, type ContentState } from "@/shared/content";
 
 import { ContentStateBadge } from "./content-state-badge";
 
 export type PublicationRequest = { publish: boolean; publishedAt?: string };
+
+const noSubscription = () => () => {};
 
 /**
  * Where an entry stands and what can be done about it (#25): publish now,
@@ -42,6 +44,14 @@ export function PublicationPanel({
   const [at, setAt] = useState(() => (entry.scheduledAt ? bakuInputValue(entry.scheduledAt) : ""));
   const [error, setError] = useState<string | null>(null);
   const blocked = !canPublish || busy || dirty;
+  // Overdue depends on the clock, so it is decided after hydration: the
+  // server's render and the browser's first render must agree.
+  const hydrated = useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
+  const overdue = hydrated && scheduleOverdue(entry);
 
   const run = async (request: PublicationRequest, done: string) => {
     if (await onChange(request)) toast.success(done);
@@ -73,13 +83,15 @@ export function PublicationPanel({
         <h2 id={`${id}-title`} className="font-medium">
           {t("publication.title")}
         </h2>
-        <ContentStateBadge state={entry.state} />
+        <ContentStateBadge state={entry.state} overdue={overdue} />
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className={overdue ? "text-sm" : "text-sm text-muted-foreground"}>
         {entry.state === "published" && entry.publishedAt
           ? t("publication.publishedLead", { date: adminDateTime(entry.publishedAt) })
           : entry.state === "scheduled" && entry.scheduledAt
-            ? t("publication.scheduledLead", { date: adminDateTime(entry.scheduledAt) })
+            ? t(overdue ? "publication.overdueLead" : "publication.scheduledLead", {
+                date: adminDateTime(entry.scheduledAt),
+              })
             : t("publication.draftLead")}
       </p>
       {!canPublish ? (
@@ -141,7 +153,7 @@ export function PublicationPanel({
                 type="button"
                 variant="ghost"
                 disabled={blocked}
-                onClick={() => void run({ publish: false }, t("publication.unpublished"))}
+                onClick={() => void run({ publish: false }, t("publication.scheduleCancelled"))}
               >
                 {t("publication.cancelSchedule")}
               </Button>

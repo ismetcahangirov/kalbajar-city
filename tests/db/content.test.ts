@@ -583,6 +583,29 @@ describe("scheduled publication", () => {
     expect(again.constructionUpdates).not.toContain(update.id);
   });
 
+  it("leaves a due article without Azerbaijani text scheduled, and reports it", async () => {
+    const draft = await createArticle(article("Boşalacaq"));
+    const soon = new Date(Date.now() + 60_000);
+    await publishArticle(draft.id, { publishedAt: soon.toISOString() });
+    // The console refuses to empty a scheduled article; only a direct write gets here.
+    await db
+      .update(news)
+      .set({ body: { az: { type: "doc", content: [] } } })
+      .where(eq(news.id, draft.id));
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const run = await publishScheduled(db, { now: new Date(soon.getTime() + 1000) });
+      expect(run.news).not.toContain(draft.id);
+      expect(run.skippedNews).toContain(draft.id);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining(draft.id));
+    } finally {
+      warn.mockRestore();
+    }
+    const [row] = await db.select().from(news).where(eq(news.id, draft.id));
+    expect(row).toMatchObject({ status: "draft", scheduledAt: soon });
+  });
+
   it("lets only a caller with the cron secret trigger a run, by GET or POST", async () => {
     vi.stubEnv("CRON_SECRET", "");
     expect((await cron("anything")).status).toBe(401);
@@ -600,6 +623,7 @@ describe("scheduled publication", () => {
     expect(await viaGet.json()).toMatchObject({
       news: expect.any(Array),
       constructionUpdates: expect.any(Array),
+      skippedNews: expect.any(Array),
     });
     vi.unstubAllEnvs();
     vi.stubEnv("S3_PUBLIC_URL", "http://localhost:9010/test");
