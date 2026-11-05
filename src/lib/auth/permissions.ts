@@ -92,8 +92,9 @@ type Account = { id: string; role: UserRole };
 /**
  * Whether `actor` may change, deactivate or remove `target`'s account, or give
  * it `nextRole`. Only an owner touches an owner account or makes someone an
- * owner, and nobody demotes or deactivates themselves, so the console can
- * never be left without an owner.
+ * owner, and nobody demotes or deactivates themselves. This alone does not
+ * keep the console from losing its last owner: two owners may demote each other
+ * at once. `@/lib/admin/users` applies it under a lock with fresh rows.
  */
 export function canManageUser(actor: Account, target: Account, nextRole?: UserRole): boolean {
   if (!can(actor.role, { user: ["update"] })) return false;

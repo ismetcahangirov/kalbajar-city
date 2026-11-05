@@ -86,25 +86,12 @@ const audited: Record<string, Rule> = {
     target: (ctx, db) => resetTokenOwner(db, body(ctx).token),
   },
   "/admin/create-user": { action: "user.create", target: async () => undefined, diff: true },
-  "/admin/update-user": { action: "user.update", target: bodyUser, diff: true },
-  "/admin/set-role": { action: "user.set_role", target: bodyUser, diff: true },
-  "/admin/ban-user": { action: "user.deactivate", target: bodyUser, diff: true },
-  "/admin/unban-user": { action: "user.reactivate", target: bodyUser, diff: true },
-  "/admin/remove-user": { action: "user.remove", target: bodyUser, diff: true },
   "/admin/set-user-password": { action: "user.password_set", target: bodyUser },
   "/admin/revoke-user-sessions": { action: "user.sessions_revoke", target: bodyUser },
 };
 
 /** Admin endpoints that act on another account, so `canManageUser` applies. */
-const managing = new Set([
-  "/admin/update-user",
-  "/admin/set-role",
-  "/admin/ban-user",
-  "/admin/unban-user",
-  "/admin/remove-user",
-  "/admin/set-user-password",
-  "/admin/revoke-user-sessions",
-]);
+const managing = new Set(["/admin/set-user-password", "/admin/revoke-user-sessions"]);
 
 function requestedRole(ctx: Ctx): UserRole | undefined {
   const { role, data } = body(ctx);
@@ -174,14 +161,13 @@ export function createHooks(db: () => Executor) {
     }
     if (!targetId) return;
 
-    const removed = ctx.path === "/admin/remove-user";
     await audit(db(), {
       actorId: state.actorId,
       action: rule.action,
       entityType: "user",
       entityId: targetId,
       before: rule.diff ? (state.before ?? null) : undefined,
-      after: rule.diff && !removed ? await loadUser(db(), targetId) : undefined,
+      after: rule.diff ? await loadUser(db(), targetId) : undefined,
       headers: ctx.headers,
     });
   });
