@@ -10,6 +10,7 @@ export const tagTypes = [
   "Floor",
   "Gallery",
   "HomeSection",
+  "Invitation",
   "LayoutType",
   "Lead",
   "Media",
@@ -18,6 +19,7 @@ export const tagTypes = [
   "Selector",
   "SeoOverride",
   "Settings",
+  "User",
 ] as const;
 
 export type TagType = (typeof tagTypes)[number];
