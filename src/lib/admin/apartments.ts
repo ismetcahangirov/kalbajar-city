@@ -259,6 +259,8 @@ export async function updateApartment(
         ...(priceMinor !== undefined
           ? { priceMinor: priceMinor === null ? null : Number(priceMinor) }
           : {}),
+        // A hotspot drawn on the old floor's plan does not belong to the new one.
+        ...(input.floorId && input.floorId !== before.floorId ? { planPolygon: null } : {}),
       })
       .where(eq(apartments.id, id))
       .returning();

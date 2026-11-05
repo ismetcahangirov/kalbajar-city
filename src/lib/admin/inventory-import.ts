@@ -225,7 +225,8 @@ async function write(
     }
     const [after] = await tx
       .update(apartments)
-      .set(values)
+      // A hotspot drawn on the old floor's plan does not belong to the new one.
+      .set(match.floorId === values.floorId ? values : { ...values, planPolygon: null })
       .where(eq(apartments.id, match.id))
       .returning();
     report.updated++;
