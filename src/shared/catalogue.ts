@@ -1,11 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 
-import {
-  withPriceVisibility,
-  type ApartmentListParams,
-  type ApartmentListQuery,
-  type PublicApartmentStatus,
-} from "./apartments";
+import type { ApartmentListParams, ApartmentListQuery } from "./apartments";
+import { withPriceVisibility, type PublicApartmentStatus } from "./catalogue-rules";
 
 /**
  * The catalogue's public URL (`/menziller?otaq=2&sahe-min=60`). Query keys
