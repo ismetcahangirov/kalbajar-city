@@ -9,10 +9,10 @@ const port = Number(process.env.E2E_PORT ?? 3011);
 const baseURL = `http://localhost:${port}`;
 
 /** Where the E2E server sends lead e-mails; tests/e2e/leads.spec.ts reads them from Mailpit. */
-/** Specs that change every public page (analytics IDs) and so cannot share the run (#29). */
-const isolated = /analytics\.spec\.ts$/;
-
 const leadsInbox = "sales@e2e.kalbajarcity.test";
+
+/** Specs that change site-wide values; see the `exclusive` project. */
+const exclusive = /\.exclusive\.spec\.ts$/;
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -47,16 +47,20 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      testIgnore: isolated,
+      testIgnore: exclusive,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
-    { name: "mobile", testIgnore: isolated, use: { ...devices["Pixel 7"] } },
-    // Specs that change what every public page loads run alone, after the rest.
+    { name: "mobile", testIgnore: exclusive, use: { ...devices["Pixel 7"] } },
+    // Tests that change what every page loads (the analytics IDs, say) or
+    // that read site-wide values other specs change for a moment run alone,
+    // after the rest, one at a time.
     {
-      name: "isolated",
-      testMatch: isolated,
+      name: "exclusive",
+      testMatch: exclusive,
       dependencies: ["desktop", "mobile"],
-      use: { ...devices["Desktop Chrome"] },
+      fullyParallel: false,
+      workers: 1,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
   ],
   // Runs the production build, not the dev server, so tests see what users get.

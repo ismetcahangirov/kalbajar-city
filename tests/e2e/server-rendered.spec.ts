@@ -96,15 +96,19 @@ test("every primary page's main content is in the first HTML response", async ({
 }) => {
   test.setTimeout(120_000);
   for (const path of [...pages, await anApartment(request)]) {
-    await page.goto(path);
-    await waitForHydration(page);
-    const texts = await hydratedTexts(page);
-    expect(texts.length, `${path} has content`).toBeGreaterThan(0);
-    const server = await serverText(request, path);
-    // Without whitespace, which the line splitting changes.
-    const bare = (text: string) => text.replace(/\s+/g, "");
-    const missing = texts.map(plain).filter((text) => !bare(server).includes(bare(text)));
-    expect(missing, `${path}: text that appears only after JavaScript`).toEqual([]);
+    // Specs on other workers save the contacts for a moment (#27), so the two
+    // renders can differ while one runs: compare again until both agree.
+    await expect(async () => {
+      await page.goto(path);
+      await waitForHydration(page);
+      const texts = await hydratedTexts(page);
+      expect(texts.length, `${path} has content`).toBeGreaterThan(0);
+      const server = await serverText(request, path);
+      // Without whitespace, which the line splitting changes.
+      const bare = (text: string) => text.replace(/\s+/g, "");
+      const missing = texts.map(plain).filter((text) => !bare(server).includes(bare(text)));
+      expect(missing, `${path}: text that appears only after JavaScript`).toEqual([]);
+    }).toPass({ timeout: 30_000 });
   }
 });
 

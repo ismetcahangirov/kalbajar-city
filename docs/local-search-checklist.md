@@ -29,7 +29,7 @@ Google, Meta and Microsoft accounts.
 - **Analytics.** GA4 and the Meta Pixel load only once their IDs are saved in
   `/admin/ayarlar/analitika`, and only when the browser is idle after the page
   has loaded, so they never delay the first paint
-  (`tests/e2e/analytics.spec.ts` checks that both start after the load event
+  (`tests/e2e/analytics.exclusive.spec.ts` checks that both start after the load event
   and the LCP). The privacy notice then names both services automatically.
 - **Server-rendered.** Every primary page's main content is in the first HTML
   response, which is what many crawlers read (`tests/e2e/server-rendered.spec.ts`).
