@@ -187,7 +187,7 @@ test.describe("saving in the console", () => {
     } finally {
       await patchContacts(page.request, { address: originalAddress });
       await patchLocation(page.request, { distances: originalDistances });
-      await restoreFlags(flags);
+      await restoreFlags(page.request, flags);
     }
   });
 });

@@ -173,7 +173,7 @@ test.describe("the map on /yerlesme", () => {
       await expect(page.getByRole("button", { name: az.Map.show })).toHaveCount(0);
     } finally {
       await patchContacts(page.request, { coordinates: original });
-      await restoreFlags(flagged);
+      await restoreFlags(page.request, flagged);
     }
   });
 });

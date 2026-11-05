@@ -51,13 +51,16 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
     { name: "mobile", testIgnore: exclusive, use: { ...devices["Pixel 7"] } },
-    // Tests that change what every page shows (the main phone in the header,
-    // say) run alone, after the rest, so no other test sees their values.
+    // Tests that change what every page loads or shows (the analytics IDs,
+    // the main phone in the header) or
+    // that read site-wide values other specs change for a moment run alone,
+    // after the rest, one at a time.
     {
       name: "exclusive",
       testMatch: exclusive,
       dependencies: ["desktop", "mobile"],
       fullyParallel: false,
+      workers: 1,
       use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } },
     },
   ],

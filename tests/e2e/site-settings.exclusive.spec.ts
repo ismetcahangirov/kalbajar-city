@@ -54,7 +54,7 @@ test("a new main phone shows in the header, footer, contact page and structured 
     expect(await structuredData(page.request, "/elaqe")).toContain(`"telephone":"${phone}"`);
   } finally {
     await patchContacts(page.request, { phones: original });
-    await restoreFlags(flags);
+    await restoreFlags(page.request, flags);
   }
 
   await page.goto("/");
