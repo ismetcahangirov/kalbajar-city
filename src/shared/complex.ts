@@ -12,25 +12,55 @@ import type { PublicApartmentStatus } from "./apartments";
  * schematic ones computed here without changing how they are drawn.
  */
 
+/**
+ * A picture hotspots are drawn on: the site render, a block's facade, a
+ * floor's plan. Only what an SVG `<image>` needs.
+ */
+export type SelectorPicture = {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+  /** Shown with the "Illustrative" chip, as everywhere else. */
+  illustrative: boolean;
+};
+
 export type SelectorApartment = {
   slug: string;
   number: string;
   status: PublicApartmentStatus;
   rooms: number;
   areaTotal: string;
+  /** Drawn on the floor's plan in the console; null until then. */
+  planPolygon: Polygon | null;
 };
 
-export type SelectorFloor = { number: number; apartments: SelectorApartment[] };
+export type SelectorFloor = {
+  number: number;
+  apartments: SelectorApartment[];
+  /** Drawn on the block's facade. */
+  facadePolygon: Polygon | null;
+  /** The floor plan the apartments' hotspots are drawn on. */
+  plan: SelectorPicture | null;
+};
 
 export type SelectorBlock = {
   code: string;
   name: Localized;
   building: { slug: string; name: Localized };
   floors: SelectorFloor[];
+  /** Drawn on the site render. */
+  sitePolygon: Polygon | null;
+  /** The facade render the floors' hotspots are drawn on. */
+  facade: SelectorPicture | null;
 };
 
 /** Public apartments only, grouped by block and floor in natural order. */
-export type ComplexSelectorData = { blocks: SelectorBlock[] };
+export type ComplexSelectorData = {
+  /** The site render the blocks' hotspots are drawn on. */
+  site: SelectorPicture | null;
+  blocks: SelectorBlock[];
+};
 
 export type StatusCounts = Record<PublicApartmentStatus, number> & { total: number };
 
@@ -93,12 +123,68 @@ export function hasSelectionParams(params: SearchParams): boolean {
 export type Point = readonly [x: number, y: number];
 export type Polygon = readonly Point[];
 
-/** The schematic picture's size in SVG user units; hotspots scale into it. */
-export const canvas = { width: 1000, height: 625 } as const;
+/** A drawing's size in SVG user units; normalised hotspots scale into it. */
+export type Canvas = { readonly width: number; readonly height: number };
 
-type Box = { x: number; y: number; w: number; h: number };
+/** The schematic picture's size in SVG user units; hotspots scale into it. */
+export const canvas = { width: 1000, height: 625 } as const satisfies Canvas;
 
 const round = (value: number) => Math.round(value * 10_000) / 10_000;
+
+const unit = z.number().min(0).max(1);
+
+/** Twice the signed area of a polygon (shoelace), in normalised units. */
+function doubleArea(polygon: Polygon): number {
+  let sum = 0;
+  polygon.forEach(([x1, y1], index) => {
+    const [x2, y2] = polygon[(index + 1) % polygon.length] ?? [x1, y1];
+    sum += x1 * y2 - x2 * y1;
+  });
+  return sum;
+}
+
+/**
+ * A hotspot as the console stores it: 3 to 64 points, each 0–1 on both axes
+ * of its picture, rounded to four places (a tenth of a pixel on a 1000 px
+ * render), and enclosing some area, so a misclick cannot save a line.
+ */
+export const selectorPolygonSchema = z
+  .array(z.tuple([unit, unit]))
+  .min(3, "Draw at least three points")
+  .max(64, "Use at most 64 points")
+  .transform((points): Polygon => points.map(([x, y]) => [round(x), round(y)] as const))
+  .refine((polygon) => Math.abs(doubleArea(polygon)) / 2 >= 0.0001, "The shape has no area");
+
+/** The canvas of a picture: 1000 user units wide, as tall as its aspect ratio. */
+export function pictureCanvas(picture: Pick<SelectorPicture, "width" | "height">): Canvas {
+  return {
+    width: canvas.width,
+    height: Math.round((canvas.width * picture.height) / picture.width),
+  };
+}
+
+/**
+ * A level is drawn on its picture once the picture is set and every hotspot
+ * on it is drawn; until then the schematic layout stands in, so a half-drawn
+ * render never hides an apartment from the plan.
+ */
+export function drawnView(
+  picture: SelectorPicture | null,
+  polygons: ReadonlyArray<Polygon | null>,
+): { picture: SelectorPicture; canvas: Canvas; polygons: Polygon[] } | null {
+  if (!picture || !polygons.length) return null;
+  const drawn = polygons.filter((polygon): polygon is Polygon => polygon !== null);
+  if (drawn.length !== polygons.length) return null;
+  return { picture, canvas: pictureCanvas(picture), polygons: drawn };
+}
+
+/** Text as a sentence for a caption: a full stop unless it already ends in one. */
+export function asSentence(text: string): string {
+  const trimmed = text.trim();
+  return /[.!?…]$/.test(trimmed) ? trimmed : `${trimmed}.`;
+}
+
+type Box = { x: number; y: number; w: number; h: number };
 
 function rect({ x, y, w, h }: Box): Polygon {
   return [
@@ -110,29 +196,49 @@ function rect({ x, y, w, h }: Box): Polygon {
 }
 
 /** `points` for an SVG `<polygon>` in the canvas's user units. */
-export function toSvgPoints(polygon: Polygon): string {
-  return polygon
-    .map(([x, y]) => `${round(x * canvas.width)},${round(y * canvas.height)}`)
-    .join(" ");
+export function toSvgPoints(polygon: Polygon, size: Canvas = canvas): string {
+  return polygon.map(([x, y]) => `${round(x * size.width)},${round(y * size.height)}`).join(" ");
 }
 
-/** The centre of a polygon's bounding box, in user units, for its label. */
-export function labelPoint(polygon: Polygon): { x: number; y: number } {
-  const xs = polygon.map(([x]) => x);
-  const ys = polygon.map(([, y]) => y);
-  return {
-    x: round(((Math.min(...xs) + Math.max(...xs)) / 2) * canvas.width),
-    y: round(((Math.min(...ys) + Math.max(...ys)) / 2) * canvas.height),
-  };
+/**
+ * Where a polygon's label goes, in user units: its centroid, which stays
+ * inside the L and T shapes drawn on renders, or the centre of its bounding
+ * box when the shape has no area to weigh.
+ */
+export function labelPoint(polygon: Polygon, size: Canvas = canvas): { x: number; y: number } {
+  const a = doubleArea(polygon);
+  let cx: number;
+  let cy: number;
+  if (Math.abs(a) < 1e-9) {
+    const xs = polygon.map(([x]) => x);
+    const ys = polygon.map(([, y]) => y);
+    cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  } else {
+    let sx = 0;
+    let sy = 0;
+    polygon.forEach(([x1, y1], index) => {
+      const [x2, y2] = polygon[(index + 1) % polygon.length] ?? [x1, y1];
+      const cross = x1 * y2 - x2 * y1;
+      sx += (x1 + x2) * cross;
+      sy += (y1 + y2) * cross;
+    });
+    cx = sx / (3 * a);
+    cy = sy / (3 * a);
+  }
+  return { x: round(cx * size.width), y: round(cy * size.height) };
 }
 
 /** A polygon's bounding-box size in user units, for fitting its text. */
-export function boxSize(polygon: Polygon): { width: number; height: number } {
+export function boxSize(
+  polygon: Polygon,
+  size: Canvas = canvas,
+): { width: number; height: number } {
   const xs = polygon.map(([x]) => x);
   const ys = polygon.map(([, y]) => y);
   return {
-    width: (Math.max(...xs) - Math.min(...xs)) * canvas.width,
-    height: (Math.max(...ys) - Math.min(...ys)) * canvas.height,
+    width: (Math.max(...xs) - Math.min(...xs)) * size.width,
+    height: (Math.max(...ys) - Math.min(...ys)) * size.height,
   };
 }
 

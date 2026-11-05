@@ -12,6 +12,7 @@ import {
   media,
   mediaUsages as mediaUsageRows,
   news,
+  selectorViews,
   seoOverrides,
   settings,
 } from "@/db/schema";
@@ -37,6 +38,7 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
     settingRows,
     videoRows,
     rows,
+    viewRows,
   ] = await Promise.all([
     db
       .select({ id: floors.id, number: floors.number, block: blocks.code })
@@ -80,6 +82,12 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
       })
       .from(mediaUsageRows)
       .where(eq(mediaUsageRows.mediaId, id)),
+    // The complex selector's site render and block facades (#19).
+    db
+      .select({ id: selectorViews.id, block: blocks.code })
+      .from(selectorViews)
+      .leftJoin(blocks, eq(blocks.id, selectorViews.blockId))
+      .where(eq(selectorViews.mediaId, id)),
   ]);
 
   return [
@@ -142,6 +150,12 @@ export async function mediaUsages(db: Executor, id: string): Promise<MediaUsage[
       label: row.name,
     })),
     ...rows.map((row) => ({ ...row, label: null })),
+    ...viewRows.map((row) => ({
+      entityType: "selector_view",
+      entityId: row.id,
+      field: row.block ? "facade" : "site",
+      label: row.block,
+    })),
   ];
 }
 

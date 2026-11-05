@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, type SQLWrapper } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -12,9 +12,11 @@ import {
   smallint,
   text,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
+import type { Polygon } from "@/shared/complex";
 import { apartmentStatuses, type RoomArea } from "@/shared/inventory";
 
 import { area, id, slug, timestamps, translatable } from "./columns";
@@ -29,6 +31,18 @@ export const apartmentStatus = pgEnum("apartment_status", apartmentStatuses);
 const isDemo = () => boolean("is_demo").notNull().default(false);
 
 const sortOrder = () => integer("sort_order").notNull().default(0);
+
+/**
+ * A hotspot of the complex selector (#19): a polygon in normalised
+ * coordinates (0–1 on both axes) drawn in the console on the picture of the
+ * level above: a block on the site render, a floor on its block's facade, an
+ * apartment on its floor's plan. Null until drawn; `selectorPolygonSchema`
+ * in `@/shared/complex` validates it on the way in.
+ */
+const selectorPolygon = (name: string) => jsonb(name).$type<Polygon>();
+
+const polygonIsArray = (column: SQLWrapper) =>
+  sql`${column} is null or jsonb_typeof(${column}) = 'array'`;
 
 export const buildings = pgTable("buildings", {
   id: id(),
@@ -51,10 +65,15 @@ export const blocks = pgTable(
     code: text("code").notNull().unique(),
     name: translatable("name").notNull(),
     sortOrder: sortOrder(),
+    /** The block's hotspot on the site render (`selector_views` without a block). */
+    sitePolygon: selectorPolygon("site_polygon"),
     isDemo: isDemo(),
     ...timestamps,
   },
-  (t) => [index("blocks_building_idx").on(t.buildingId)],
+  (t) => [
+    index("blocks_building_idx").on(t.buildingId),
+    check("blocks_site_polygon_array", polygonIsArray(t.sitePolygon)),
+  ],
 );
 
 export const floors = pgTable(
@@ -67,10 +86,15 @@ export const floors = pgTable(
     /** 0 is the ground floor, negative numbers are below ground. */
     number: smallint("number").notNull(),
     planMediaId: uuid("plan_media_id").references(() => media.id, { onDelete: "restrict" }),
+    /** The floor's hotspot on its block's facade render. */
+    facadePolygon: selectorPolygon("facade_polygon"),
     isDemo: isDemo(),
     ...timestamps,
   },
-  (t) => [unique("floors_block_number").on(t.blockId, t.number)],
+  (t) => [
+    unique("floors_block_number").on(t.blockId, t.number),
+    check("floors_facade_polygon_array", polygonIsArray(t.facadePolygon)),
+  ],
 );
 
 export const layoutTypes = pgTable(
@@ -114,6 +138,8 @@ export const apartments = pgTable(
     /** In the currency's minor unit (qəpik for AZN). Null until the owner sets it. */
     priceMinor: bigint("price_minor", { mode: "number" }),
     currency: char("currency", { length: 3 }).notNull().default("AZN"),
+    /** The apartment's hotspot on its floor's plan. */
+    planPolygon: selectorPolygon("plan_polygon"),
     isDemo: isDemo(),
     ...timestamps,
   },
@@ -124,5 +150,31 @@ export const apartments = pgTable(
     check("apartments_area_positive", sql`${t.areaTotal} > 0`),
     check("apartments_price_non_negative", sql`${t.priceMinor} >= 0`),
     check("apartments_currency_code", sql`${t.currency} ~ '^[A-Z]{3}$'`),
+    check("apartments_plan_polygon_array", polygonIsArray(t.planPolygon)),
+  ],
+);
+
+/**
+ * The pictures the complex selector draws its hotspots on (#19): the site
+ * render (no block, at most one row) and each block's facade render. A
+ * floor's picture is its plan, `floors.plan_media_id`.
+ */
+export const selectorViews = pgTable(
+  "selector_views",
+  {
+    id: id(),
+    blockId: uuid("block_id")
+      .unique("selector_views_block")
+      .references(() => blocks.id, { onDelete: "cascade" }),
+    mediaId: uuid("media_id")
+      .notNull()
+      .references(() => media.id, { onDelete: "restrict" }),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("selector_views_site")
+      .on(sql`(${t.blockId} is null)`)
+      .where(sql`${t.blockId} is null`),
+    index("selector_views_media_idx").on(t.mediaId),
   ],
 );

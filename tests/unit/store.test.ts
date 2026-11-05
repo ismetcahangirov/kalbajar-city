@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { makeStore } from "@/store";
 import { adminApartmentsApi } from "@/store/endpoints/admin-apartments";
+import { adminMediaApi } from "@/store/endpoints/admin-media";
+import { adminSelectorApi } from "@/store/endpoints/admin-selector";
 import { apartmentsApi } from "@/store/endpoints/apartments";
 import { apiErrorOf } from "@/store/errors";
 
@@ -137,6 +139,53 @@ describe("the store", () => {
     await update;
     expect(cached()).toBe("available");
     list.unsubscribe();
+  });
+
+  it("refreshes the selector editor after inventory and media edits made elsewhere", async () => {
+    const view = {
+      level: "block",
+      id: "b1",
+      picture: { id: "m1", url: null, previewUrl: null, width: 1, height: 1, alt: "Facade" },
+      hotspots: [],
+    };
+    vi.stubGlobal("fetch", async (request: Request) => {
+      const { pathname, search } = new URL(request.url);
+      calls.push(`${request.method} ${pathname}${search}`);
+      if (pathname === "/api/v1/admin/selector") return Response.json(view);
+      if (pathname === "/api/v1/admin/selector/picture") return Response.json(view);
+      return Response.json({ id: "m1" });
+    });
+    const store = makeStore();
+    const editor = store.dispatch(
+      adminSelectorApi.endpoints.selectorView.initiate({ block: "b1" }),
+    );
+    const library = store.dispatch(adminMediaApi.endpoints.adminMedia.initiate("m2"));
+    await Promise.all([editor, library]);
+
+    for (const write of [
+      () => store.dispatch(adminApartmentsApi.endpoints.deleteApartment.initiate("a1")),
+      () =>
+        store.dispatch(
+          adminMediaApi.endpoints.updateMedia.initiate({ id: "m1", alt: { az: "Fasad" } }),
+        ),
+    ]) {
+      calls = [];
+      await write();
+      await vi.waitFor(() => expect(calls).toContain("GET /api/v1/admin/selector?block=b1"));
+    }
+
+    // Setting a picture changes the usages of the old and the new one.
+    calls = [];
+    await store.dispatch(
+      adminSelectorApi.endpoints.setSelectorPicture.initiate({
+        level: "block",
+        id: "b1",
+        mediaId: "m2",
+      }),
+    );
+    await vi.waitFor(() => expect(calls).toContain("GET /api/v1/admin/media/m2"));
+    editor.unsubscribe();
+    library.unsubscribe();
   });
 
   it("reads no error from a network failure", () => {
