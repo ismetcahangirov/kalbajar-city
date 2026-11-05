@@ -328,6 +328,8 @@ const messages = {
   "selector.saved": "Sahə yadda saxlanıldı.",
   "selector.removed": "Sahə silindi.",
   "selector.tooFew": "Ən azı 3 nöqtə qeyd edin.",
+  "selector.tooMany": "Ən çoxu 64 nöqtə qeyd edin.",
+  "selector.noArea": "Nöqtələr bir xətt üzərindədir: sahə əmələ gətirmir.",
 
   "structure.title": "Bina və bloklar",
   "structure.lead": "Binalar, bloklar və mərtəbələr. Hər mənzil bir mərtəbəyə bağlıdır.",

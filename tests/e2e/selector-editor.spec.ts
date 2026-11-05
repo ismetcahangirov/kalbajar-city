@@ -101,6 +101,13 @@ test("staff draw a block's floors on its facade and the public selector shows th
         await press("Backspace"); // … removed again
       } else {
         const box = (await canvas.boundingBox())!;
+        if (index === 1) {
+          // A drag (a swipe on a phone) adds no corner: the count below stays 4.
+          await page.mouse.move(box.x + 0.5 * box.width, box.y + 0.2 * box.height);
+          await page.mouse.down();
+          await page.mouse.move(box.x + 0.5 * box.width, box.y + 0.6 * box.height, { steps: 5 });
+          await page.mouse.up();
+        }
         for (const [x, y] of [
           [0.1, top],
           [0.9, top],
@@ -149,6 +156,17 @@ test("staff draw a block's floors on its facade and the public selector shows th
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(0);
+
+    // Removing a shape in the editor clears its points from the canvas too.
+    await page.goto("/admin/menziller/secici");
+    await waitForShell(page);
+    await page.getByLabel("Şəkil", { exact: true }).click();
+    await page.getByRole("option", { name: `${code} blok: fasad (mərtəbələr)` }).click();
+    await page.getByRole("button", { name: /^Mərtəbə 4\b/ }).click();
+    await expect(page.getByRole("status").filter({ hasText: "4 nöqtə" })).toBeVisible();
+    await page.getByRole("button", { name: "Sahəni sil", exact: true }).click();
+    await expect(page.getByTestId("selector-progress")).toContainText("3 / 4 sahə çəkilib.");
+    await expect(page.getByRole("status").filter({ hasText: "0 nöqtə" })).toBeVisible();
   } finally {
     for (const hotspot of (await viewOf()).hotspots) {
       await page.request.put("/api/v1/admin/selector/hotspot", {

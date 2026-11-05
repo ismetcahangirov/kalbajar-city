@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Eraser, Save, Trash2, Undo2 } from "lucide-react";
-import { useId, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useId, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 import { toast, toastApiError } from "@/components/admin/feedback/toast";
 import { Badge } from "@/components/admin/ui/badge";
@@ -16,7 +16,7 @@ import {
 } from "@/components/admin/ui/select";
 import { Skeleton } from "@/components/admin/ui/skeleton";
 import { apiErrorMessage } from "@/lib/admin/api-error";
-import { t } from "@/lib/admin/messages";
+import { t, type MessageKey } from "@/lib/admin/messages";
 import { cn } from "@/lib/admin/utils";
 import {
   labelPoint,
@@ -270,6 +270,15 @@ function HotspotList({
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 const round = (value: number) => Math.round(value * 10_000) / 10_000;
+/** How far, in CSS pixels, a pointer may move and still count as a tap. */
+const tapSlop = 6;
+
+/** Why a draft is not a shape yet, from the first thing the schema refused. */
+function draftProblem(code: string | undefined): MessageKey {
+  if (code === "too_small") return "selector.tooFew";
+  if (code === "too_big") return "selector.tooMany";
+  return "selector.noArea";
+}
 
 function DrawingCanvas({
   level,
@@ -289,6 +298,7 @@ function DrawingCanvas({
   const [cursor, setCursor] = useState<Point>([0.5, 0.5]);
   const [keyboard, setKeyboard] = useState(false);
   const [save, saveState] = useSetSelectorHotspotMutation();
+  const press = useRef<{ id: number; x: number; y: number } | null>(null);
   const size: Canvas = pictureCanvas(picture);
   const editable = canEdit && hotspot !== null;
 
@@ -296,8 +306,18 @@ function DrawingCanvas({
     setPoints((current) => [...current, [round(point[0]), round(point[1])]]);
   const undo = () => setPoints((current) => current.slice(0, -1));
 
+  // A point is a tap, not a swipe: the canvas lets a phone scroll the page,
+  // so the point is added when the pointer lifts where it went down. A
+  // scroll cancels the pointer and adds nothing.
   const onPointerDown = (event: PointerEvent<SVGSVGElement>) => {
     if (!editable || event.button !== 0) return;
+    press.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  };
+  const onPointerUp = (event: PointerEvent<SVGSVGElement>) => {
+    const start = press.current;
+    press.current = null;
+    if (!editable || !start || start.id !== event.pointerId) return;
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > tapSlop) return;
     const box = event.currentTarget.getBoundingClientRect();
     setKeyboard(false);
     add([
@@ -338,6 +358,7 @@ function DrawingCanvas({
         id: hotspot.id,
         polygon: polygon ? polygon.map(([x, y]): [number, number] => [x, y]) : null,
       }).unwrap();
+      if (!polygon) setPoints([]);
       toast.success(polygon ? t("selector.saved") : t("selector.removed"));
     } catch (error) {
       toastApiError(error);
@@ -372,6 +393,8 @@ function DrawingCanvas({
           aria-label={name ? t("selector.canvas", { name }) : t("selector.pickHotspot")}
           aria-describedby={editable ? hintId : undefined}
           onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={() => (press.current = null)}
           onKeyDown={onKeyDown}
           onFocus={() => setKeyboard(true)}
           onBlur={() => setKeyboard(false)}
@@ -445,7 +468,9 @@ function DrawingCanvas({
           </p>
           <p className="text-sm" role="status" aria-live="polite">
             {name}: {t("selector.points", { count: points.length })}
-            {points.length && !parsed.success ? ` · ${t("selector.tooFew")}` : ""}
+            {points.length && !parsed.success
+              ? ` · ${t(draftProblem(parsed.error.issues[0]?.code))}`
+              : ""}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button
