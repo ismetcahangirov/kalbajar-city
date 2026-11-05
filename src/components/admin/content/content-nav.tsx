@@ -11,6 +11,7 @@ export const contentPages = {
   news: { href: base, label: "content.nav.news" },
   gallery: { href: `${base}/qalereya`, label: "content.nav.gallery" },
   faq: { href: `${base}/suallar`, label: "content.nav.faq" },
+  home: { href: `${base}/ana-sehife`, label: "content.nav.home" },
 } as const satisfies Record<string, { href: string; label: MessageKey }>;
 
 export type ContentPage = keyof typeof contentPages;
