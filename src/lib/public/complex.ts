@@ -30,7 +30,7 @@ import { toPublicImage } from "./media";
  */
 export async function getComplexSelector(locale: Locale): Promise<ComplexSelectorData> {
   "use cache";
-  cacheTag(publicTags.inventory);
+  cacheTag(publicTags.inventory, publicTags.media);
   cacheLife("days");
 
   const db = getDb();
