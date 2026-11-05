@@ -29,7 +29,7 @@ import { gzipSync } from "node:zlib";
 
 const KB = 1024;
 /** CLAUDE.md §5. Change them there and here together. */
-export const budgets = { shared: 190 * KB, route: 40 * KB };
+export const budgets = { shared: 160 * KB, route: 40 * KB };
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const next = join(root, ".next");

@@ -295,7 +295,7 @@ jobs:
           --collect.url=http://localhost:3011/menziller
           --collect.url=http://localhost:3011/menziller/blok-c-menzil-102
           --collect.url=http://localhost:3011/xeberler/lighthouse-meqale
-      - name: Mobile, CLS enforced, score reported
+      - name: Mobile, enforced
         if: success() || failure()
         run: >-
           pnpm exec lhci autorun --config=tests/lighthouse/lighthouserc.mobile.json
