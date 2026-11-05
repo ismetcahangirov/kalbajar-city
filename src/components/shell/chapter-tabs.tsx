@@ -83,6 +83,9 @@ export function ChapterTabs({ tabs, label }: ChapterTabsProps) {
       data-chapter-tabs=""
       data-theme="dark"
       data-over-footer={overFooter ? "" : undefined}
+      // Faded out over the footer and out of the tab order at once, so the
+      // keyboard never lands on a control that cannot be seen (WCAG 2.4.7).
+      inert={overFooter}
       className="fixed inset-x-0 bottom-(--floating-bottom) z-30 flex justify-center px-layout"
     >
       <ul className="hidden divide-x divide-(--t-line-alt) bg-(--t-bg) desk:flex">

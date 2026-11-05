@@ -29,7 +29,7 @@ export async function NextChapter({ current }: { current: ChapterHref }) {
 
   return (
     <aside aria-label={t("next")} data-theme="dark" className="relative">
-      <NextChapterLink href={next.href} label={`${t("next")}: ${title}`} go={t("go")}>
+      <NextChapterLink href={next.href} go={t("go")}>
         <span className="absolute inset-0 -z-10">
           <Picture image={image} sizes="100vw" />
         </span>
@@ -37,8 +37,8 @@ export async function NextChapter({ current }: { current: ChapterHref }) {
           aria-hidden="true"
           className="absolute inset-0 -z-10 bg-(image:--gradient-teaser-scrim)"
         />
+        {/* The visible copy is the link's name, "Next About" (WCAG 2.5.3, label in name). */}
         <span
-          aria-hidden="true"
           data-teaser-copy=""
           className="flex flex-col items-center gap-u text-center text-cream"
         >

@@ -386,8 +386,9 @@ test.describe("footer", () => {
   test("teases the next chapter, and the last chapter has none", async ({ page }) => {
     await page.goto("/kompleks");
     const teaser = page.getByRole("complementary", { name: az.Shell.next });
+    // Named by its visible copy (WCAG 2.5.3, label in name).
     await expect(teaser.getByRole("link")).toHaveAccessibleName(
-      `${az.Shell.next}: ${az.Navigation.about}`,
+      `${az.Shell.next} ${az.Navigation.about}`,
     );
     await expect(teaser.getByRole("link")).toHaveAttribute("href", "/haqqimizda");
 

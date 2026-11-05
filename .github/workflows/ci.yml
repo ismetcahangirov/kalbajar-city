@@ -107,9 +107,15 @@ jobs:
 
   # Builds without DATABASE_URL on purpose: the build must never need a
   # database. E2E then runs the build against a migrated, seeded one.
+  # Sharded since the quality suites of #30 (every route × locale × width,
+  # axe, keyboard, reduced motion) roughly doubled the E2E run.
   build-e2e:
-    name: Build and E2E
+    name: Build and E2E (${{ matrix.shard }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/3, 2/3, 3/3]
     services:
       postgres:
         image: postgres:17-alpine
@@ -175,7 +181,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       # A throwaway secret for the E2E server's sessions; never used elsewhere.
       - run: echo "BETTER_AUTH_SECRET=$(openssl rand -base64 32)" >> "$GITHUB_ENV"
-      - run: pnpm test:e2e
+      - run: pnpm test:e2e --shard=${{ matrix.shard }}
         env:
           DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
           SMTP_HOST: localhost
@@ -191,8 +197,16 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: playwright-report
+          retention-days: 7
+      # tests/e2e/quality-responsive.spec.ts: every route, locale and width.
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: responsive-screenshots-${{ strategy.job-index }}
+          path: test-results/responsive
+          if-no-files-found: ignore
           retention-days: 7
 
   # The JS budget per public route (CLAUDE.md §5), read from the production
@@ -219,10 +233,87 @@ jobs:
       - run: pnpm build
       - run: pnpm budget:js
 
+  # Lighthouse on home, the catalogue, an apartment and an article, median of
+  # three runs each (CLAUDE.md §5, #30), against the production build and a
+  # seeded database, as a first visit (the preloader included). Desktop must
+  # score 93+; CLS must stay under 0.05 on both form factors. The mobile
+  # score is measured and reported against the same 93 but does not fail the
+  # job yet: it is at ~84, held back by the bytes the home page requests
+  # before its LCP under simulated slow 4G, which is tracked in #30.
+  lighthouse:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: kalbajar
+          POSTGRES_PASSWORD: kalbajar
+          POSTGRES_DB: kalbajar
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kalbajar -d kalbajar"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The same exact key as build-e2e: the same sources, never another
+      # commit's cache.
+      - uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**') }}
+      # Built without DATABASE_URL, as in build-e2e: the build never needs one.
+      - run: pnpm build
+      - name: Migrate, seed and publish the measured article
+        env:
+          DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+        run: pnpm db:migrate && pnpm db:seed && pnpm exec tsx tests/lighthouse/publish-article.mts
+      # A throwaway secret for the server's sessions; never used elsewhere.
+      - name: Start the production server
+        env:
+          DATABASE_URL: postgres://kalbajar:kalbajar@localhost:5432/kalbajar
+          PORT: 3011
+          BETTER_AUTH_URL: http://localhost:3011
+          NEXT_PUBLIC_SITE_URL: http://localhost:3011
+        run: |
+          BETTER_AUTH_SECRET=$(openssl rand -base64 32) nohup pnpm start > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -sf http://localhost:3011/api/health > /dev/null && exit 0; sleep 1; done
+          cat server.log; exit 1
+      - name: Desktop, enforced
+        run: >-
+          pnpm exec lhci autorun --config=tests/lighthouse/lighthouserc.desktop.json
+          --collect.url=http://localhost:3011/
+          --collect.url=http://localhost:3011/menziller
+          --collect.url=http://localhost:3011/menziller/blok-c-menzil-102
+          --collect.url=http://localhost:3011/xeberler/lighthouse-meqale
+      - name: Mobile, CLS enforced, score reported
+        if: success() || failure()
+        run: >-
+          pnpm exec lhci autorun --config=tests/lighthouse/lighthouserc.mobile.json
+          --collect.url=http://localhost:3011/
+          --collect.url=http://localhost:3011/menziller
+          --collect.url=http://localhost:3011/menziller/blok-c-menzil-102
+          --collect.url=http://localhost:3011/xeberler/lighthouse-meqale
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: lighthouse-report
+          retention-days: 14
+
   ci-complete:
     name: CI complete
     if: always()
-    needs: [checks, unit, database, build-e2e, js-budget]
+    needs: [checks, unit, database, build-e2e, js-budget, lighthouse]
     runs-on: ubuntu-latest
     steps:
       - name: Every job that ran succeeded
@@ -230,7 +321,7 @@ jobs:
           RESULTS: ${{ toJSON(needs) }}
         run: |
           echo "$RESULTS"
-          for job in checks unit database build-e2e js-budget; do
+          for job in checks unit database build-e2e js-budget lighthouse; do
             echo "$RESULTS" | jq -e --arg j "$job" 'has($j)' > /dev/null || { echo "missing job: $job"; exit 1; }
           done
           failed=$(echo "$RESULTS" | jq -r 'to_entries[] | select(.value.result != "success" and .value.result != "skipped") | .key')
