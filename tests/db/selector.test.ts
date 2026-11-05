@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, inject, it, vi } from "vitest";
 
 import { connect } from "@/db/client";
@@ -15,6 +15,7 @@ import {
   selectorViews,
 } from "@/db/schema";
 import type { Polygon } from "@/shared/complex";
+import { csvColumns } from "@/shared/inventory-csv";
 import type { AdminSelectorView } from "@/shared/selector";
 
 import { createUser, origin, type TestUser } from "./accounts";
@@ -32,6 +33,8 @@ vi.stubEnv("S3_PUBLIC_URL", "https://cdn.test/kalbajar");
 const viewRoute = await import("@/app/api/v1/admin/selector/route");
 const pictureRoute = await import("@/app/api/v1/admin/selector/picture/route");
 const hotspotRoute = await import("@/app/api/v1/admin/selector/hotspot/route");
+const apartmentRoute = await import("@/app/api/v1/admin/apartments/[id]/route");
+const { importApartments } = await import("@/lib/admin/inventory-import");
 const { getComplexSelector } = await import("@/lib/public/complex");
 const { mediaUsages } = await import("@/lib/media/usages");
 
@@ -243,6 +246,72 @@ describe("complex selector editor endpoints", () => {
     expect(first!.apartments.every((item) => item.planPolygon === null)).toBe(true);
   });
 
+  it("drops an apartment's plan hotspot when it moves to another floor", async () => {
+    const [moved, stays] = fixture.apartments as [string, string];
+    const [first, second] = fixture.floors as [string, string];
+    const polygonOf = async (id: string) =>
+      (await db.select().from(apartments).where(eq(apartments.id, id)))[0]!.planPolygon;
+    const draw = async (id: string, polygon: Polygon | null) => {
+      const drawn = await hotspotRoute.PUT(
+        request("/admin/selector/hotspot", {
+          body: { level: "floor", id, polygon },
+          cookie: owner(),
+        }),
+      );
+      expect(drawn.status).toBe(200);
+    };
+    const patch = async (id: string, body: unknown) => {
+      const response = await apartmentRoute.PATCH(
+        request(`/admin/apartments/${id}`, { method: "PATCH", body, cookie: owner() }),
+        { params: Promise.resolve({ id }) },
+      );
+      expect(response.status).toBe(200);
+    };
+
+    await draw(moved, square(0.1, 0.1));
+    await draw(stays, square(0.5, 0.1));
+
+    // Edits that keep the floor keep the hotspot.
+    await patch(moved, { status: "reserved" });
+    await patch(moved, { floorId: first });
+    expect(await polygonOf(moved)).toEqual(square(0.1, 0.1));
+
+    await patch(moved, { floorId: second });
+    expect(await polygonOf(moved)).toBeNull();
+    const [logged] = await db
+      .select()
+      .from(auditLog)
+      .where(and(eq(auditLog.entityId, moved), eq(auditLog.action, "apartment.update")))
+      .orderBy(desc(auditLog.id))
+      .limit(1);
+    expect(logged!.after).toMatchObject({ floorId: second, planPolygon: null });
+
+    // The CSV import moves it back to floor 1, and only reprices the other one.
+    await draw(moved, square(0.1, 0.1));
+    const csv = [
+      csvColumns.map((column) => column.header).join(";"),
+      `${fixture.code};1;101;S${tag}-1;40;satışda;`,
+      `${fixture.code};1;102;S${tag}-1;40;satışda;125 000`,
+    ].join("\n");
+    const report = await importApartments(db, {
+      input: { csv, mode: "upsert", dryRun: false, detachLeads: false },
+      user: {
+        id: people.owner.id,
+        name: "Test owner",
+        email: people.owner.email,
+        role: people.owner.role,
+      },
+      headers: new Headers({ "user-agent": "vitest" }),
+    });
+    expect(report).toMatchObject({ applied: true, updated: 2, created: 0 });
+    const [back] = await db.select().from(apartments).where(eq(apartments.id, moved));
+    expect(back).toMatchObject({ floorId: first, planPolygon: null });
+    expect(await polygonOf(stays)).toEqual(square(0.5, 0.1));
+
+    // The tests that follow expect the plan undrawn.
+    await draw(stays, null);
+  });
+
   it("refuses shapes that are not polygons inside the picture", async () => {
     for (const polygon of [
       [
@@ -313,6 +382,26 @@ describe("complex selector editor endpoints", () => {
         { blockId: null, mediaId: fixture.media[1]! },
       ]);
     });
+    // A save that races another first save updates its row instead of failing.
+    const [facade, plan] = fixture.media as [string, string];
+    let raced: Promise<Response> | undefined;
+    await db.transaction(async (tx) => {
+      await tx.insert(selectorViews).values({ blockId: fixture.block, mediaId: facade });
+      raced = pictureRoute.PUT(
+        request("/admin/selector/picture", {
+          body: { level: "block", id: fixture.block, mediaId: plan },
+          cookie: owner(),
+        }),
+      );
+      // Let the second save reach its insert, which waits for this one.
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    });
+    expect((await raced!).status).toBe(200);
+    const rows = await db
+      .select()
+      .from(selectorViews)
+      .where(eq(selectorViews.blockId, fixture.block));
+    expect(rows.map((row) => row.mediaId)).toEqual([plan]);
     await violates(db as never, "apartments_plan_polygon_array", async (sp) => {
       await sp
         .update(apartments)

@@ -192,8 +192,19 @@ export async function setSelectorPicture(
     if (level === "block") await blockExists(tx, id!);
     const where =
       level === "block" ? eq(selectorViews.blockId, id!) : isNull(selectorViews.blockId);
-    const [before] = await tx.select().from(selectorViews).where(where).for("update");
+    let [before] = await tx.select().from(selectorViews).where(where).for("update");
     let after: typeof before | null = null;
+    if (!before && mediaId) {
+      // Two first saves race on the unique index (the site's is partial, so
+      // no conflict target can name it): the later one waits for the earlier
+      // one's row, then updates it.
+      [after] = await tx
+        .insert(selectorViews)
+        .values({ blockId: level === "block" ? id : null, mediaId })
+        .onConflictDoNothing()
+        .returning();
+      if (!after) [before] = await tx.select().from(selectorViews).where(where).for("update");
+    }
     if (!mediaId) {
       if (before) await tx.delete(selectorViews).where(eq(selectorViews.id, before.id));
     } else if (before) {
@@ -201,11 +212,6 @@ export async function setSelectorPicture(
         .update(selectorViews)
         .set({ mediaId })
         .where(eq(selectorViews.id, before.id))
-        .returning();
-    } else {
-      [after] = await tx
-        .insert(selectorViews)
-        .values({ blockId: level === "block" ? id : null, mediaId })
         .returning();
     }
     if (before || after) {
