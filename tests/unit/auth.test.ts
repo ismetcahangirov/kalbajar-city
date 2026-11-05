@@ -5,6 +5,7 @@ import { clientIp, diff } from "@/lib/audit";
 import { safeAdminRedirect } from "@/lib/auth/paths";
 import { can, canManageUser, type Permission, type UserRole } from "@/lib/auth/permissions";
 import { guardAdmin } from "@/lib/auth/guard";
+import { isMessageKey } from "@/lib/admin/messages";
 import { roleValues } from "@/shared/users";
 import { userRoles } from "@/db/schema/auth";
 
@@ -197,5 +198,20 @@ describe("the invitation page", () => {
 describe("roleValues", () => {
   it("is the database enum, which the shared schemas cannot import into forms", () => {
     expect([...roleValues]).toEqual([...userRoles]);
+  });
+});
+
+describe("the audit log's labels", () => {
+  it.each([
+    "user.create",
+    "user.set_role",
+    "user.deactivate",
+    "user.reactivate",
+    "invitation.create",
+    "invitation.resend",
+    "invitation.revoke",
+    "invitation.accept",
+  ])("name %s, which user management records", (action) => {
+    expect(isMessageKey(`audit.${action}`)).toBe(true);
   });
 });
