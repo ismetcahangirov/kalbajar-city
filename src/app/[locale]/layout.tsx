@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
@@ -16,6 +16,7 @@ import { Menu } from "@/components/shell/menu";
 import { PageTransition } from "@/components/shell/page-transition";
 import { ShellDialogs } from "@/components/shell/shell-dialogs";
 import { SkipLink } from "@/components/shell/skip-link";
+import { pickMessages, shellMessages } from "@/i18n/client-messages";
 import { routing, type Locale } from "@/i18n/routing";
 import { getSiteContacts } from "@/lib/public/site";
 import { siteOrigin } from "@/lib/seo/url";
@@ -48,13 +49,14 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   await connection();
   const locale = (await getLocale()) as Locale;
   const contacts = await getSiteContacts(locale);
+  const messages = pickMessages(await getMessages(), shellMessages);
   return (
     <html
       lang={locale}
       className={`${alethia.variable} ${alethiaItalic.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={messages} formats={null}>
           <SkipLink />
           <Header contacts={contacts} />
           <main

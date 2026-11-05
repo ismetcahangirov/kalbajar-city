@@ -4,6 +4,7 @@ import { connection } from "next/server";
 
 import { EmptyState } from "@/components/content/empty-state";
 import { Lightbox } from "@/components/content/lightbox";
+import { PageMessages } from "@/components/i18n/page-messages";
 import { ProgressBar } from "@/components/content/progress-bar";
 import { RichText } from "@/components/content/rich-text";
 import { Localized } from "@/components/home/localized";
@@ -174,12 +175,14 @@ export default async function ConstructionPage() {
                   {media && (
                     <div className="flex min-w-0 flex-col gap-u2">
                       {images.length > 0 && (
-                        <Lightbox
-                          layout="grid"
-                          items={images}
-                          columns={2}
-                          sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
-                        />
+                        <PageMessages namespaces={["Lightbox", "Media"]}>
+                          <Lightbox
+                            layout="grid"
+                            items={images}
+                            columns={2}
+                            sizes="(min-width: 64rem) 25vw, (min-width: 40rem) 50vw, 100vw"
+                          />
+                        </PageMessages>
                       )}
                       {videos.map((video) => (
                         <ConstructionVideo

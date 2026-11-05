@@ -9,6 +9,7 @@ import { AreaTable } from "@/components/apartments/area-table";
 import { CurtainLines } from "@/components/apartments/curtain-lines";
 import { PlanViewer } from "@/components/apartments/plan-viewer";
 import { ShareActions } from "@/components/apartments/share-actions";
+import { PageMessages } from "@/components/i18n/page-messages";
 import { Localized } from "@/components/home/localized";
 import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
 import { Reveal } from "@/components/motion/reveal";
@@ -113,7 +114,9 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
     cx(surface(section), "px-layout py-u6 text-(--t-text) desk:py-u9");
 
   const plan = apartment.plan ? (
-    <PlanViewer image={apartment.plan} name={name} locale={locale} />
+    <PageMessages namespaces={["ApartmentPage", "Media"]}>
+      <PlanViewer image={apartment.plan} name={name} locale={locale} />
+    </PageMessages>
   ) : (
     <p className="p-u2 text-body">{t("planMissing")}</p>
   );
@@ -146,7 +149,9 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
                     />
                   }
                 />
-                <ShareActions title={name} />
+                <PageMessages namespaces={["ApartmentPage"]}>
+                  <ShareActions title={name} />
+                </PageMessages>
               </div>
               <p className="text-label-xs text-(--t-small) uppercase">
                 <Localized text={apartment.building.name} />
@@ -229,12 +234,14 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
                       id: "floor",
                       label: t("tabFloor"),
                       content: (
-                        <PlanViewer
-                          image={apartment.floorPlan}
-                          name={`${name}, ${t("tabFloor")}`}
-                          locale={locale}
-                          priority={false}
-                        />
+                        <PageMessages namespaces={["ApartmentPage", "Media"]}>
+                          <PlanViewer
+                            image={apartment.floorPlan}
+                            name={`${name}, ${t("tabFloor")}`}
+                            locale={locale}
+                            priority={false}
+                          />
+                        </PageMessages>
                       ),
                     },
                   ]}

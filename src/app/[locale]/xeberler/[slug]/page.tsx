@@ -5,6 +5,7 @@ import { connection } from "next/server";
 
 import { RichText } from "@/components/content/rich-text";
 import { ShareButton } from "@/components/content/share-button";
+import { PageMessages } from "@/components/i18n/page-messages";
 import { Localized } from "@/components/home/localized";
 import { Reveal } from "@/components/motion/reveal";
 import { NewsCard } from "@/components/news/news-card";
@@ -96,7 +97,9 @@ export default async function ArticlePage({ params }: PageProps<"/[locale]/xeber
               </p>
             )}
             <RichText text={article.body} />
-            <ShareButton title={article.title.value} />
+            <PageMessages namespaces={["Share"]}>
+              <ShareButton title={article.title.value} />
+            </PageMessages>
           </div>
         </div>
       </article>

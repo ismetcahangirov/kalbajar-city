@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { ApartmentRow } from "@/components/apartments/apartment-card";
 import { CatalogueFilters } from "@/components/apartments/catalogue-filters";
 import { CatalogueSort } from "@/components/apartments/catalogue-sort";
+import { PageMessages } from "@/components/i18n/page-messages";
 import { CurtainLines } from "@/components/apartments/curtain-lines";
 import { Pagination } from "@/components/apartments/pagination";
 import { ViewSwitch } from "@/components/apartments/view-switch";
@@ -109,7 +110,14 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
             so the filters and results set it in the text colour. */}
         <div className="grid gap-y-u2 pb-[calc(var(--floating-bottom)+var(--u)*8)] [--t-small:var(--t-text)] lg:grid-cols-3 lg:pb-u12">
           <div className="px-layout">
-            <CatalogueFilters facets={facets} applied={state} total={page.total} locale={locale} />
+            <PageMessages namespaces={["Catalogue", "Status"]}>
+              <CatalogueFilters
+                facets={facets}
+                applied={state}
+                total={page.total}
+                locale={locale}
+              />
+            </PageMessages>
           </div>
 
           <section
@@ -135,7 +143,9 @@ export default async function CataloguePage({ searchParams }: PageProps<"/[local
               </p>
               <div className="ms-auto flex flex-wrap items-center justify-end gap-x-u2">
                 <ViewSwitch state={state} />
-                <CatalogueSort applied={state} pricesVisible={pricesVisible} locale={locale} />
+                <PageMessages namespaces={["Catalogue"]}>
+                  <CatalogueSort applied={state} pricesVisible={pricesVisible} locale={locale} />
+                </PageMessages>
               </div>
             </div>
 

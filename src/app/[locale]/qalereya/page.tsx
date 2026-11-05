@@ -4,6 +4,7 @@ import { connection } from "next/server";
 
 import { EmptyState } from "@/components/content/empty-state";
 import { Lightbox } from "@/components/content/lightbox";
+import { PageMessages } from "@/components/i18n/page-messages";
 import { PageHero } from "@/components/pages/page-hero";
 import { ScreenSlider } from "@/components/pages/screen-slider";
 import { breadcrumbs, StructuredData } from "@/components/seo/structured-data";
@@ -141,12 +142,14 @@ export default async function GalleryPage({ searchParams }: PageProps<"/[locale]
               </nav>
             )}
             {/* Keyed by the filter, so the lightbox's state starts over with the new set. */}
-            <Lightbox
-              key={active ?? "all"}
-              layout="masonry"
-              items={items}
-              sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
-            />
+            <PageMessages namespaces={["Lightbox", "Media"]}>
+              <Lightbox
+                key={active ?? "all"}
+                layout="masonry"
+                items={items}
+                sizes="(min-width: 64rem) 30vw, (min-width: 40rem) 50vw, 100vw"
+              />
+            </PageMessages>
           </>
         )}
       </section>
