@@ -5,10 +5,11 @@ import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { ArrowBlock } from "@/components/ui/arrow-block";
 import { Picture } from "@/components/ui/picture";
 import { defaultImage } from "@/content/defaults";
-import { contacts, mainPhone, whatsappHref } from "@/config/contacts";
+import { whatsappHref } from "@/config/contacts";
 import { formatPhone, telHref } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
+import type { SiteContacts } from "@/lib/public/site";
 
 import {
   chapterImage,
@@ -56,10 +57,11 @@ function Close({ label }: { label: string }) {
  *
  * Images are the bundled `page.*` defaults until the console can set them.
  */
-export async function Menu() {
+export async function Menu({ contacts }: { contacts: SiteContacts }) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Shell");
   const nav = await getTranslations("Navigation");
+  const { mainPhone } = contacts;
   const phone = formatPhone(mainPhone);
 
   return (
@@ -127,12 +129,14 @@ export async function Menu() {
                   label={t("whatsapp")}
                 />
               )}
-              <RollLink
-                as="a"
-                href={contacts.instagram}
-                rel="noopener noreferrer"
-                label={t("instagram")}
-              />
+              {contacts.socials.instagram && (
+                <RollLink
+                  as="a"
+                  href={contacts.socials.instagram}
+                  rel="noopener noreferrer"
+                  label={t("instagram")}
+                />
+              )}
               <RollLink
                 href={privacyLink.href}
                 label={nav(privacyLink.key)}
@@ -196,14 +200,16 @@ export async function Menu() {
                   />
                 </li>
               )}
-              <li>
-                <RollLink
-                  as="a"
-                  href={contacts.instagram}
-                  rel="noopener noreferrer"
-                  label={t("instagram")}
-                />
-              </li>
+              {contacts.socials.instagram && (
+                <li>
+                  <RollLink
+                    as="a"
+                    href={contacts.socials.instagram}
+                    rel="noopener noreferrer"
+                    label={t("instagram")}
+                  />
+                </li>
+              )}
               <li>
                 <RollLink
                   href={privacyLink.href}

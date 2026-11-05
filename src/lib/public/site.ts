@@ -25,6 +25,8 @@ export type Coordinates = NonNullable<SettingsValue<"contacts">["coordinates"]>;
 export type SiteContacts = {
   /** E.164; the first is the main line. */
   phones: string[];
+  /** The main line, which the call buttons in the header and menu dial. */
+  mainPhone: string;
   whatsapp: string | null;
   email: string | null;
   address: Localized | null;
@@ -32,7 +34,24 @@ export type SiteContacts = {
   /** Null until the owner confirms them (#7); no map is shown without them. */
   coordinates: Coordinates | null;
   socials: SettingsValue<"socials">;
+  /**
+   * The fields above that still hold a seeded stand-in (`settings.placeholders`,
+   * #27). Pages show them, as the owner chose; machine-readable output leaves
+   * them out (`confirmedContacts`).
+   */
+  standIns: ContactStandIn[];
 };
+
+/** The contact fields that can hold a stand-in, as named in a `contacts.*` placeholder path. */
+export const contactStandInFields = [
+  "whatsapp",
+  "email",
+  "address",
+  "hours",
+  "coordinates",
+] as const;
+
+export type ContactStandIn = (typeof contactStandInFields)[number];
 
 export type AboutPage = {
   /** The home page's about section, so the console edits that copy in one place. */
@@ -76,14 +95,18 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
   cacheLife("days");
 
   const db = getDb();
-  const [contacts, socials] = await Promise.all([
+  const [contacts, socials, placeholders] = await Promise.all([
     readSetting(db, "contacts"),
     readSetting(db, "socials"),
+    readSetting(db, "placeholders"),
   ]);
+  const flagged = new Set(placeholders?.paths ?? []);
   const maybe = (field: Translatable | null | undefined) =>
     field ? localize(field, locale) : null;
+  const phones = contacts?.phones.length ? contacts.phones : [...fallbackContacts.phones];
   return {
-    phones: contacts?.phones ?? [...fallbackContacts.phones],
+    phones,
+    mainPhone: phones[0] ?? fallbackContacts.phones[0],
     whatsapp: contacts ? contacts.whatsapp : fallbackContacts.whatsapp,
     email: contacts?.email ?? null,
     address: maybe(contacts?.address),
@@ -95,6 +118,7 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
       youtube: null,
       tiktok: null,
     },
+    standIns: contactStandInFields.filter((field) => flagged.has(`contacts.${field}`)),
   };
 }
 
