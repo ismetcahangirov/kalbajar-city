@@ -3,7 +3,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Scene, SceneLayer } from "@/components/motion/scene";
 import { Scrub } from "@/components/motion/scrub";
 import { StatSwap, type StatSet } from "@/components/motion/stat-swap";
-import { defaultImage } from "@/content/defaults";
 import { formatNumber, unitSymbol } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import type { HomeSection, HomeStat } from "@/lib/public/home";
@@ -28,7 +27,7 @@ const iris = {
  * photo is too light under them for AA. Stacked (phones, reduced motion, no
  * script) every set is its own row over the open photo.
  */
-export async function Stats({ items }: StatsProps) {
+export async function Stats({ items, background }: StatsProps) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Home.stats");
 
@@ -71,7 +70,7 @@ export async function Stats({ items }: StatsProps) {
             to={{ translate: "0 -23%" }}
             className="h-[130%]"
           >
-            <Photo image={defaultImage("home.stats.background", locale)} sizes={fullBleed} />
+            <Photo image={background} sizes={fullBleed} />
           </Scrub>
         </Scrub>
         <div className="absolute inset-0 flex items-center">

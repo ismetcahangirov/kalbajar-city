@@ -6,7 +6,6 @@ import { Scrub } from "@/components/motion/scrub";
 import { SplitWord } from "@/components/motion/split-word";
 import { Threshold } from "@/components/motion/threshold";
 import { underlineLinkClass } from "@/components/shell/underline-link";
-import { defaultImage, type DefaultSlot } from "@/content/defaults";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
@@ -17,8 +16,6 @@ import { Localized } from "../localized";
 import { fullBleed, langOf, Photo } from "./photo";
 
 type LocationProps = Extract<HomeSection, { kind: "location" }> & { locale: Locale };
-
-const cardSlots = [1, 2, 3, 4, 5, 6].map((n) => `home.location.card.${n}` as DefaultSlot);
 
 /** The giant word at a scene's foot; every scene has its own copy in its own colour (A17). */
 function Word({ word, locale }: { word: string; locale: Locale }) {
@@ -40,7 +37,17 @@ function Word({ word, locale }: { word: string; locale: Locale }) {
  * so as one scene slides over the other the word recolours at the edge
  * (A17). Text over the photo sits on its own surface.
  */
-export async function Location({ title, body, map, distances, locale }: LocationProps) {
+export async function Location({
+  title,
+  body,
+  map,
+  distances,
+  intro,
+  moverLeft,
+  moverRight,
+  cards,
+  locale,
+}: LocationProps) {
   const t = await getTranslations("Home");
   const word = t("words.location");
   const rows: Array<typeof distances> = [];
@@ -58,7 +65,7 @@ export async function Location({ title, body, map, distances, locale }: Location
               to={{ translate: "0 8%" }}
               className="absolute inset-x-0 -inset-y-[10%]"
             >
-              <Photo image={defaultImage("home.location.intro", locale)} sizes={fullBleed} />
+              <Photo image={intro} sizes={fullBleed} />
             </Scrub>
           </div>
           <GridLines variant="thirds" alt />
@@ -93,10 +100,7 @@ export async function Location({ title, body, map, distances, locale }: Location
               to={{ translate: "0 50svh" }}
               className="relative aspect-[440/524]"
             >
-              <Photo
-                image={defaultImage("home.location.moverLeft", locale)}
-                sizes="(width >= 41.75rem) 31vw, 46vw"
-              />
+              <Photo image={moverLeft} sizes="(width >= 41.75rem) 31vw, 46vw" />
             </Scrub>
             <Scrub
               trigger="scene"
@@ -105,10 +109,7 @@ export async function Location({ title, body, map, distances, locale }: Location
               to={{ translate: "0 0%" }}
               className="relative aspect-[440/524] desk:col-start-3"
             >
-              <Photo
-                image={defaultImage("home.location.moverRight", locale)}
-                sizes="(width >= 41.75rem) 31vw, 46vw"
-              />
+              <Photo image={moverRight} sizes="(width >= 41.75rem) 31vw, 46vw" />
             </Scrub>
           </div>
           <Word word={word} locale={locale} />
@@ -142,7 +143,7 @@ export async function Location({ title, body, map, distances, locale }: Location
                   className="transition-[clip-path] duration-(--duration-reveal) ease-(--ease-wipe) group-data-[state=out]:duration-(--duration-slow) group-data-[state=out]:[clip-path:inset(100%_0_0_0)]"
                 >
                   <LocationCard
-                    image={defaultImage(cardSlots[(r * 3 + i) % cardSlots.length]!, locale)}
+                    image={cards[(r * 3 + i) % cards.length]!}
                     place={distance.place}
                     minutes={distance.minutes}
                     unit={t("location.unit")}
