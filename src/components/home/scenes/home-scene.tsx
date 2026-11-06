@@ -23,7 +23,7 @@ export function HomeScene({ section, locale }: { section: HomeSection; locale: L
     case "hero":
       return <Hero {...section} />;
     case "about":
-      return <About {...section} locale={locale} />;
+      return <About {...section} />;
     case "stats":
       return <Stats {...section} />;
     case "layouts":
@@ -41,6 +41,6 @@ export function HomeScene({ section, locale }: { section: HomeSection; locale: L
     case "faq":
       return <Faq {...section} />;
     case "cta":
-      return <Cta {...section} locale={locale} />;
+      return <Cta {...section} />;
   }
 }

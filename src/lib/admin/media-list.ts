@@ -66,7 +66,9 @@ function usageHref(usage: MediaUsage): string | null {
       return adminModules.apartments.href;
     case "home_section":
       // The location section is edited with the settings (#27).
-      return usage.label === "location" ? settingsSection("yerlesme").href : adminModules.news.href;
+      return usage.label === "location"
+        ? settingsSection("yerlesme").href
+        : `${adminModules.news.href}/ana-sehife`;
     case "gallery_item":
       return `${adminModules.news.href}/qalereya`;
     case "news":

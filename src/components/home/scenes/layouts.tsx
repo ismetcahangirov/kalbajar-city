@@ -2,7 +2,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { GridLines } from "@/components/motion/grid-lines";
 import { underlineLinkClass } from "@/components/shell/underline-link";
-import { defaultImage } from "@/content/defaults";
 import { formatArea, formatNumber } from "@/i18n/format";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -24,7 +23,7 @@ type LayoutsProps = Extract<HomeSection, { kind: "layouts" }>;
  * accordion under the photo. The captions sit on a solid surface: the
  * default photo is too light for AA under text.
  */
-export async function Layouts({ title, body, groups }: LayoutsProps) {
+export async function Layouts({ title, body, groups, background }: LayoutsProps) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations("Home.layouts");
   const range = (min: number, max: number) =>
@@ -40,10 +39,7 @@ export async function Layouts({ title, body, groups }: LayoutsProps) {
     >
       <GridLines variant="half" alt />
       <div className="relative aspect-[4/3] desk:aspect-auto">
-        <Photo
-          image={defaultImage("home.layouts.background", locale)}
-          sizes="(width >= 41.75rem) 50vw, 100vw"
-        />
+        <Photo image={background} sizes="(width >= 41.75rem) 50vw, 100vw" />
       </div>
       <div className="flex flex-col justify-center gap-u4 py-u6 desk:py-u12">
         <h2 id="planlar" className="px-layout text-label text-(--t-small) uppercase">
