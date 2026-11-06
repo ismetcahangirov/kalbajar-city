@@ -2,7 +2,10 @@ import { expect, test, type APIRequestContext, type Page } from "@playwright/tes
 import { asc, eq } from "drizzle-orm";
 
 import { connect, databaseUrl } from "@/db/client";
-import { faq } from "@/db/schema";
+import { faq, layoutTypes, settings } from "@/db/schema";
+import * as seed from "@/db/seed/data";
+import { publicFaqItems } from "@/lib/faq-facts";
+import { settingsSchemas } from "@/shared/settings";
 
 import { waitForHydration } from "./hydration";
 
@@ -114,18 +117,26 @@ test("every primary page's main content is in the first HTML response", async ({
 
 test("the FAQ's answers are in the home page's HTML and in llms-az.txt", async ({ request }) => {
   const { db, close } = connect(databaseUrl());
-  const rows = await db
-    .select({ question: faq.question, answer: faq.answer })
-    .from(faq)
-    .where(eq(faq.status, "published"))
-    .orderBy(asc(faq.sortOrder))
-    .finally(close);
+  const [rows, [complexRow], layouts] = await Promise.all([
+    db
+      .select({ question: faq.question, answer: faq.answer })
+      .from(faq)
+      .where(eq(faq.status, "published"))
+      .orderBy(asc(faq.sortOrder)),
+    db.select().from(settings).where(eq(settings.key, "complex")),
+    db.select({ rooms: layoutTypes.rooms, areaTotal: layoutTypes.areaTotal }).from(layoutTypes),
+  ]).finally(close);
   expect(rows.length, "the seed publishes FAQ entries").toBeGreaterThan(0);
+  // As the site prints them: fact placeholders filled from the settings and the layouts (#29).
+  const saved = settingsSchemas.complex.safeParse(complexRow?.value);
+  const complex = saved.success ? saved.data : seed.settings.complex;
+  const items = publicFaqItems(rows, "az", { complex, layouts });
+  expect(items.length, "the seeded facts fill every seeded placeholder").toBe(rows.length);
 
   const home = await serverText(request, "/");
   const llms = plain(await (await request.get("/llms-az.txt")).text());
-  for (const { question, answer } of rows) {
-    for (const text of [question.az, answer.az].map(plain)) {
+  for (const { question, answer } of items) {
+    for (const text of [question.value, answer.value].map(plain)) {
       expect(home, text).toContain(text);
       expect(llms, text).toContain(text);
     }

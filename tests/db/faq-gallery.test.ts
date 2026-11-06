@@ -4,7 +4,8 @@ import { and, eq, inArray, like } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, inject, it, vi } from "vitest";
 
 import { connect } from "@/db/client";
-import { auditLog, faq, galleryCategories, media } from "@/db/schema";
+import { auditLog, faq, galleryCategories, media, settings } from "@/db/schema";
+import * as seed from "@/db/seed/data";
 import type { UserRole } from "@/lib/auth/permissions";
 import type { AdminFaq } from "@/shared/faq";
 import type { AdminGallery, AdminGalleryCategory, AdminGalleryItem } from "@/shared/gallery";
@@ -33,7 +34,8 @@ const itemsOrderRoute =
   await import("@/app/api/v1/admin/gallery/categories/[id]/items/order/route");
 const itemsRoute = await import("@/app/api/v1/admin/gallery/items/route");
 const itemRoute = await import("@/app/api/v1/admin/gallery/items/[id]/route");
-const { loadPublishedFaq } = await import("@/lib/public/home");
+const settingsRoute = await import("@/app/api/v1/admin/settings/[key]/route");
+const { getHomePage, loadPublishedFaq } = await import("@/lib/public/home");
 const { loadGallery } = await import("@/lib/public/gallery");
 const { faqNode } = await import("@/lib/seo/json-ld");
 
@@ -46,12 +48,13 @@ const createdMedia: string[] = [];
 const createdFaq: string[] = [];
 
 beforeAll(async () => {
-  for (const role of ["editor", "sales"] as const) people[role] = await createUser(role);
+  for (const role of ["admin", "editor", "sales"] as const) people[role] = await createUser(role);
 });
 
 // Other files count rows from an empty database (the seed skips a filled FAQ).
 afterAll(async () => {
   if (createdFaq.length) await db.delete(faq).where(inArray(faq.id, createdFaq));
+  await db.delete(settings).where(eq(settings.key, "complex"));
   await db.delete(galleryCategories).where(like(galleryCategories.slug, `t-${tag}-%`));
   if (createdMedia.length) await db.delete(media).where(inArray(media.id, createdMedia));
 });
@@ -196,6 +199,71 @@ describe("faq", () => {
   it("is closed to sales", async () => {
     const response = await faqListRoute.GET(request("/admin/faq", { role: "sales" }), none);
     expect(response.status).toBe(403);
+  });
+
+  it("refuses a placeholder the site cannot fill, on its field", async () => {
+    const response = await faqListRoute.POST(
+      request("/admin/faq", {
+        body: { question: { az: `Sual ${tag}?` }, answer: { az: "Cəmi {flats} mənzil." } },
+      }),
+      none,
+    );
+    expect(response.status).toBe(422);
+    const { fields } = ((await response.json()) as ErrorBody).error;
+    expect(fields?.["answer.az"]?.[0]).toContain("{flats}");
+  });
+
+  it("fills placeholders from the settings: a changed fact changes the FAQ and its FAQPage", async () => {
+    const apartments = await createFaq(`Mənzil ${tag}?`, {
+      answer: { az: "Kompleksdə {apartments} mənzil var.", en: "It has {apartments} homes." },
+    });
+    const parking = await createFaq(`Qaraj ${tag}?`, {
+      answer: { az: "Qarajda {parking} yer var." },
+    });
+    const setComplex = async (change: Partial<typeof seed.settings.complex>) => {
+      const response = await settingsRoute.PUT(
+        request("/admin/settings/complex", {
+          method: "PUT",
+          role: "admin",
+          body: { ...seed.settings.complex, ...change },
+        }),
+        { params: Promise.resolve({ key: "complex" }) },
+      );
+      expect(response.status).toBe(200);
+      expect(cache.revalidated).toContainEqual(["settings", { expire: 0 }]);
+    };
+    /** The FAQ on the home page and in its structured data, by question. */
+    const published = async (locale: "az" | "en") => {
+      const section = (await getHomePage(locale)).find((candidate) => candidate.kind === "faq");
+      const items = section?.kind === "faq" ? section.items : [];
+      const node = faqNode(
+        items.map((item) => ({ question: item.question.value, answer: item.answer.value })),
+      );
+      const structured = (
+        node.mainEntity as Array<{ name: string; acceptedAnswer: { text: string } }>
+      ).map((entry) => [entry.name, entry.acceptedAnswer.text]);
+      return {
+        shown: Object.fromEntries(items.map((item) => [item.question.value, item.answer.value])),
+        structured: Object.fromEntries(structured),
+      };
+    };
+
+    await setComplex({ apartments: 1250, parkingSpaces: 160 });
+    let az = await published("az");
+    expect(az.shown[apartments.question.az]).toBe("Kompleksdə 1\u00a0250 mənzil var.");
+    expect(az.structured[apartments.question.az]).toBe("Kompleksdə 1\u00a0250 mənzil var.");
+    expect(az.structured[parking.question.az]).toBe("Qarajda 160 yer var.");
+    expect((await published("en")).structured[apartments.question.az]).toBe("It has 1,250 homes.");
+
+    // A fact that is not known (zero) takes its question off the page and out of FAQPage.
+    await setComplex({ apartments: 151, parkingSpaces: 0 });
+    az = await published("az");
+    expect(az.structured[apartments.question.az]).toBe("Kompleksdə 151 mənzil var.");
+    expect(az.shown).not.toHaveProperty(parking.question.az);
+    expect(az.structured).not.toHaveProperty(parking.question.az);
+    // The stored text keeps its placeholders.
+    const [stored] = await db.select().from(faq).where(eq(faq.id, apartments.id));
+    expect(stored?.answer.az).toBe("Kompleksdə {apartments} mənzil var.");
   });
 });
 

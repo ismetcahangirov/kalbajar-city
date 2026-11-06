@@ -1285,6 +1285,21 @@ const messages = {
   "faq.answer": "Cavab",
   "faq.answerHint":
     "Cavab sadə mətndir: o, axtarış sistemlərinə olduğu kimi göstərilir. Formatlama və link əlavə etməyin.",
+  "faq.placeholders": "Rəqəmlər üçün dəyişənlər",
+  "faq.placeholdersHint":
+    "Rəqəmi əl ilə yazmayın: sual və ya cavabda dəyişəni yazın, sayt onu parametrlərdəki və planlardakı cari dəyərlə əvəz edir. Dəyər hələ məlum deyilsə (0 və ya plan yoxdur), sual saytda göstərilmir.",
+  "faq.placeholder.apartments": "Mənzillərin sayı",
+  "faq.placeholder.buildings": "Yaşayış binalarının sayı",
+  "faq.placeholder.blocks": "Blokların sayı",
+  "faq.placeholder.parking": "Qarajdakı yerlərin sayı",
+  "faq.placeholder.totalArea": "Kompleksin ümumi sahəsi, m² ilə",
+  "faq.placeholder.layouts": "Planların sayı",
+  "faq.placeholder.roomsMin": "Ən az otaq sayı",
+  "faq.placeholder.roomsMax": "Ən çox otaq sayı",
+  "faq.placeholder.areaMin": "Ən kiçik planın sahəsi, m² ilə",
+  "faq.placeholder.areaMax": "Ən böyük planın sahəsi, m² ilə",
+  "faq.error.placeholder":
+    "Naməlum dəyişən: {names}. Yalnız siyahıdakı dəyişənlərdən istifadə edin.",
   "faq.empty": "Hələ sual yoxdur.",
   "faq.deleteTitle": "Bu sual silinsin?",
   "faq.delete": "Sualı sil",

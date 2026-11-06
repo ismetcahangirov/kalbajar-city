@@ -20,6 +20,7 @@ import { localize, type Localized, type Translatable } from "@/i18n/content";
 import type { Unit } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import { publicTags } from "@/lib/cache/tags";
+import { publicFaqItems } from "@/lib/faq-facts";
 import { homeSectionMedia } from "@/shared/home-sections";
 import { settingsSchemas, type ComplexFactKey, type SettingsValue } from "@/shared/settings";
 
@@ -103,9 +104,8 @@ const factUnits: Partial<Record<ComplexFactKey, Unit>> = {
 };
 
 /**
- * The published FAQ in the console's order (`faqOrder`), ties included. The
- * home page shows it, and its `FAQPage` structured data lists it word for
- * word, in this order.
+ * The published FAQ in the console's order (`faqOrder`), ties included, as
+ * stored: placeholders unfilled. Readers output it through `publicFaqItems`.
  */
 export async function loadPublishedFaq(db: Executor) {
   return db
@@ -113,6 +113,27 @@ export async function loadPublishedFaq(db: Executor) {
     .from(faq)
     .where(eq(faq.status, "published"))
     .orderBy(asc(faq.sortOrder), asc(faq.createdAt), asc(faq.id));
+}
+
+/** The complex's facts and amenities; the seed's while no valid row is saved. */
+async function readComplex(db: Executor): Promise<SettingsValue<"complex">> {
+  const [row] = await db.select().from(settings).where(eq(settings.key, "complex"));
+  const saved = settingsSchemas.complex.safeParse(row?.value);
+  return saved.success ? saved.data : seedSettings.complex;
+}
+
+/**
+ * The published FAQ in one locale, its placeholders filled from the same facts
+ * the home page shows, for readers other than the home page (`llms.txt`).
+ * The home page and its `FAQPage` structured data list the same items.
+ */
+export async function loadPublicFaq(db: Executor, locale: Locale) {
+  const [rows, complex, layouts] = await Promise.all([
+    loadPublishedFaq(db),
+    readComplex(db),
+    db.select({ rooms: layoutTypes.rooms, areaTotal: layoutTypes.areaTotal }).from(layoutTypes),
+  ]);
+  return publicFaqItems(rows, locale, { complex, layouts });
 }
 
 /** The card-zoom scenes shown while the console has chosen none (spec §8). */
@@ -147,9 +168,9 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   cacheLife("days");
 
   const db = getDb();
-  const [sectionRows, complexRow, layouts, faqRows, [latestUpdate]] = await Promise.all([
+  const [sectionRows, complex, layouts, faqRows, [latestUpdate]] = await Promise.all([
     db.select().from(homeSections),
-    db.select().from(settings).where(eq(settings.key, "complex")),
+    readComplex(db),
     db.select().from(layoutTypes).orderBy(asc(layoutTypes.rooms), asc(layoutTypes.areaTotal)),
     loadPublishedFaq(db),
     db
@@ -160,8 +181,6 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
       .limit(1),
   ]);
 
-  const savedComplex = settingsSchemas.complex.safeParse(complexRow[0]?.value);
-  const complex = savedComplex.success ? savedComplex.data : seedSettings.complex;
   const sections = resolveHomeSections(sectionRows).filter((section) => section.visible);
 
   const updateMedia = latestUpdate
@@ -347,17 +366,11 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
             body: text(step.body),
           })),
         };
-      case "faq":
-        return faqRows.length
-          ? {
-              kind: "faq",
-              title: text(section.content.title),
-              items: faqRows.map((row) => ({
-                question: text(row.question),
-                answer: text(row.answer),
-              })),
-            }
-          : null;
+      case "faq": {
+        // Placeholders filled from the facts above; a question quoting an unknown fact is left out.
+        const items = publicFaqItems(faqRows, locale, { complex, layouts });
+        return items.length ? { kind: "faq", title: text(section.content.title), items } : null;
+      }
       case "cta":
         return {
           kind: "cta",
