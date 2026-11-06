@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { useConfirm } from "@/components/admin/feedback/confirm";
 import { toast, toastApiError } from "@/components/admin/feedback/toast";
@@ -12,7 +12,7 @@ import { Button } from "@/components/admin/ui/button";
 import { Skeleton } from "@/components/admin/ui/skeleton";
 import { apiErrorMessage } from "@/lib/admin/api-error";
 import { t } from "@/lib/admin/messages";
-import { faqCreateSchema, type AdminFaq, type FaqCreate } from "@/shared/faq";
+import { faqCreateSchema, faqPlaceholders, type AdminFaq, type FaqCreate } from "@/shared/faq";
 import {
   useAdminFaqQuery,
   useCreateFaqMutation,
@@ -209,7 +209,33 @@ function FaqForm({
       <TranslatableField<FaqCreate> name="question" label={t("faq.question")} />
       <TranslatableField<FaqCreate> name="answer" label={t("faq.answer")} multiline />
       <p className="text-sm text-muted-foreground">{t("faq.answerHint")}</p>
+      <FaqPlaceholderHint />
       <PublishedField<FaqCreate> name="status" disabled={!canPublish} />
     </DialogForm>
+  );
+}
+
+/** The facts a question or answer can quote; the site fills them in (#29). */
+function FaqPlaceholderHint() {
+  return (
+    <section
+      aria-labelledby="faq-placeholders-heading"
+      className="text-sm flex flex-col gap-2 rounded-md border p-3"
+    >
+      <h3 id="faq-placeholders-heading" className="font-medium">
+        {t("faq.placeholders")}
+      </h3>
+      <p className="text-muted-foreground">{t("faq.placeholdersHint")}</p>
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-1">
+        {faqPlaceholders.map((name) => (
+          <Fragment key={name}>
+            <dt>
+              <code className="font-mono">{`{${name}}`}</code>
+            </dt>
+            <dd className="text-muted-foreground break-words">{t(`faq.placeholder.${name}`)}</dd>
+          </Fragment>
+        ))}
+      </dl>
+    </section>
   );
 }

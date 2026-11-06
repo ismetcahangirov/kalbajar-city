@@ -34,10 +34,18 @@ test("an editor adds a question and reorders it by button and by keyboard on a p
   await page.getByRole("button", { name: "Yeni sual" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Sual (Azərbaycanca)").fill(question);
-  await dialog.getByLabel("Cavab (Azərbaycanca)").fill("E2E cavab.");
   const shown = dialog.getByRole("switch", { name: "Saytda göstər" });
   await expect(shown).toBeChecked();
   await shown.click();
+  // The facts an answer can quote are listed; a misspelt one is refused on its field.
+  await expect(dialog.getByRole("region", { name: "Rəqəmlər üçün dəyişənlər" })).toContainText(
+    "{apartments}",
+  );
+  const answer = dialog.getByLabel("Cavab (Azərbaycanca)");
+  await answer.fill("Cəmi {flats} mənzil.");
+  await dialog.getByRole("button", { name: "Əlavə et" }).click();
+  await expect(dialog.getByText("Naməlum dəyişən: {flats}.")).toBeVisible();
+  await answer.fill("Cəmi {apartments} mənzil.");
   await dialog.getByRole("button", { name: "Əlavə et" }).click();
   await expect(dialog).toBeHidden();
 
