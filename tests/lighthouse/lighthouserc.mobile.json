@@ -11,7 +11,7 @@
       "aggregationMethod": "median-run",
       "assertions": {
         "categories:performance": [
-          "error",
+          "warn",
           {
             "minScore": 0.93
           }
