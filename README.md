@@ -129,6 +129,14 @@ Without `CRON_SECRET` the endpoint refuses every call, and scheduled entries
 wait. The console marks a scheduled entry overdue ten minutes after its time,
 so a missing cron shows instead of going unnoticed.
 
+## Deployment
+
+Production setup is tracked in #13. What must be true before launch, and the
+evidence for each item, is the launch checklist:
+[`docs/runbooks/launch.md`](docs/runbooks/launch.md). The environment
+variables are in `.env.example`; the proxy, cron and object-storage steps are
+described under Leads, Content and Media above.
+
 ## Database
 
 The schema lives in `src/db/schema`, one file per area (inventory, media,
