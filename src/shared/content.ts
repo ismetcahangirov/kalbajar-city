@@ -3,7 +3,12 @@ import { z } from "zod";
 import type { Translatable } from "@/i18n/content";
 
 import { listOf, paginationSchema } from "./api";
-import { translatableRichTextSchema, type TranslatableRichText } from "./rich-text";
+import {
+  hasRichContent,
+  richTextDocSchema,
+  translatableRichTextSchema,
+  type TranslatableRichText,
+} from "./rich-text";
 import { translatableSchema } from "./translatable";
 
 /**
@@ -66,9 +71,12 @@ export const monthSchema = z
   .regex(/^\d{4}-(0[1-9]|1[0-2])(-01)?$/, "Give the month as YYYY-MM")
   .transform((value) => `${value.slice(0, 7)}-01`);
 
+/** How many photos and videos one update can carry. */
+export const contentMediaMax = 50;
+
 const mediaIdList = z
   .array(z.uuid())
-  .max(50)
+  .max(contentMediaMax)
   .refine((ids) => new Set(ids).size === ids.length, "A file may appear only once");
 
 const notEmpty = (value: object) => Object.keys(value).length > 0;
@@ -84,6 +92,43 @@ export const constructionUpdateCreateSchema = z.object({
 });
 
 export type ConstructionUpdateCreate = z.input<typeof constructionUpdateCreateSchema>;
+
+/**
+ * The console's update form (#25), whose output is a valid create body and,
+ * without its media, a valid update body: the month and percentage come as an
+ * input's text, and a text with nothing in Azerbaijani is no text at all.
+ * Text translated without its Azerbaijani version is refused, as elsewhere.
+ */
+export const constructionUpdateFormSchema = z.object({
+  month: z
+    .string()
+    .min(1)
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+  title: translatableSchema,
+  body: z
+    .object({
+      az: richTextDocSchema,
+      en: richTextDocSchema.nullish(),
+      ru: richTextDocSchema.nullish(),
+    })
+    .superRefine((value, context) => {
+      if (!hasRichContent(value.az) && (hasRichContent(value.en) || hasRichContent(value.ru))) {
+        // A console catalogue key: this schema only validates the console's form.
+        context.addIssue({ code: "custom", message: "error.required", path: ["az"] });
+      }
+    })
+    .transform((value) => (hasRichContent(value.az) ? value : null)),
+  progressPercent: z
+    .string()
+    .trim()
+    .min(1)
+    .regex(/^\d+$/)
+    .transform(Number)
+    .pipe(z.int().min(0).max(100)),
+  mediaIds: mediaIdList,
+});
+
+export type ConstructionUpdateForm = z.input<typeof constructionUpdateFormSchema>;
 
 export const constructionUpdateUpdateSchema = z
   .object({

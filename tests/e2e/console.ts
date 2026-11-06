@@ -1,12 +1,14 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, type Page } from "@playwright/test";
+import { expect, type APIRequestContext, type Page } from "@playwright/test";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
+import sharp from "sharp";
 
 import { connect, databaseUrl } from "@/db/client";
 import { accounts, sessions, users } from "@/db/schema";
 import type { UserRole } from "@/lib/auth/permissions";
+import type { AdminMedia, UploadTicket } from "@/shared/media";
 
 export const password = "an e2e passphrase that is long";
 
@@ -71,4 +73,46 @@ export async function waitForShell(page: Page): Promise<void> {
     const trigger = document.querySelector('[data-slot="sidebar-trigger"]');
     return trigger !== null && Object.keys(trigger).some((key) => key.startsWith("__reactFiber"));
   });
+}
+
+/** Puts a file in the library through the presigned flow. */
+export async function uploadFile(
+  request: APIRequestContext,
+  file: { name: string; mimeType: string; bytes: Buffer; alt?: string },
+): Promise<AdminMedia> {
+  const ticket = (await (
+    await request.post("/api/v1/admin/media/uploads", {
+      data: { filename: file.name, mimeType: file.mimeType, size: file.bytes.byteLength },
+    })
+  ).json()) as UploadTicket;
+  const put = await request.fetch(ticket.url, {
+    method: ticket.method,
+    headers: ticket.headers,
+    data: file.bytes,
+  });
+  expect(put.status()).toBe(200);
+  const created = await request.post("/api/v1/admin/media", {
+    data: {
+      key: ticket.key,
+      originalName: file.name,
+      source: "generated",
+      ...(file.alt ? { alt: { az: file.alt } } : {}),
+    },
+  });
+  expect(created.status()).toBe(201);
+  return (await created.json()) as AdminMedia;
+}
+
+/** A small generated image with Azerbaijani alt text, in the library. */
+export async function uploadImage(
+  request: APIRequestContext,
+  name: string,
+  alt: string,
+): Promise<AdminMedia> {
+  const bytes = await sharp({
+    create: { width: 1200, height: 800, channels: 3, background: { r: 120, g: 140, b: 110 } },
+  })
+    .jpeg()
+    .toBuffer();
+  return uploadFile(request, { name, mimeType: "image/jpeg", bytes, alt });
 }

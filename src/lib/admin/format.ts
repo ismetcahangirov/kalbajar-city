@@ -39,6 +39,11 @@ export function adminDateTime(value: string | Date): string {
   return `${date}, ${pad(baku.getUTCHours())}:${pad(baku.getUTCMinutes())}`;
 }
 
+/** `09.2026`, from the stored first day of the month (`2026-09-01`). */
+export function adminMonth(month: string): string {
+  return `${month.slice(5, 7)}.${month.slice(0, 4)}`;
+}
+
 /** `2026-11-10T11:00`, a datetime-local value, for a moment in Baku time. */
 export function bakuInputValue(value: string | Date): string {
   const baku = new Date(new Date(value).getTime() + bakuOffset);

@@ -1,49 +1,17 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test, type APIRequestContext } from "@playwright/test";
-import sharp from "sharp";
+import { expect, test } from "@playwright/test";
 
 import type { AdminNews } from "@/shared/content";
-import type { AdminMedia, UploadTicket } from "@/shared/media";
 import { paragraphs } from "@/shared/rich-text";
 
-import { ensureAccount, signIn, waitForShell } from "./console";
+import { ensureAccount, signIn, uploadImage, waitForShell } from "./console";
 
 /** CRON_SECRET of the E2E server (playwright.config.ts). */
 const cronSecret = "e2e-cron-secret";
 
 // Articles are published and removed again; the viewport does not matter.
 test.skip(({ isMobile }) => isMobile, "publishing does not depend on the viewport");
-
-/** A small generated image with Azerbaijani alt text, uploaded through the presigned flow. */
-async function upload(request: APIRequestContext, name: string): Promise<AdminMedia> {
-  const jpeg = await sharp({
-    create: { width: 1200, height: 800, channels: 3, background: { r: 120, g: 140, b: 110 } },
-  })
-    .jpeg()
-    .toBuffer();
-  const ticket = (await (
-    await request.post("/api/v1/admin/media/uploads", {
-      data: { filename: name, mimeType: "image/jpeg", size: jpeg.byteLength },
-    })
-  ).json()) as UploadTicket;
-  const put = await request.fetch(ticket.url, {
-    method: ticket.method,
-    headers: ticket.headers,
-    data: jpeg,
-  });
-  expect(put.status()).toBe(200);
-  const created = await request.post("/api/v1/admin/media", {
-    data: {
-      key: ticket.key,
-      originalName: name,
-      source: "generated",
-      alt: { az: "Sınaq üz şəkli" },
-    },
-  });
-  expect(created.status()).toBe(201);
-  return (await created.json()) as AdminMedia;
-}
 
 test("an editor writes an article in three languages with a cover and publishes it", async ({
   page,
@@ -53,7 +21,7 @@ test("an editor writes an article in three languages with a cover and publishes 
   await ensureAccount("editor", email, "E2E News Editor");
   await signIn(page, email, baseURL!);
   const run = randomUUID().slice(0, 6);
-  const cover = await upload(page.request, `e2e-news-cover-${run}.jpg`);
+  const cover = await uploadImage(page.request, `e2e-news-cover-${run}.jpg`, "Sınaq üz şəkli");
   const titles = {
     az: `Sınaq xəbəri ${run}`,
     en: `Test article ${run}`,
