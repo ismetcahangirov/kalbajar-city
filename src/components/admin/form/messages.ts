@@ -66,7 +66,8 @@ export function fieldMessage(error: { type?: string | number; message?: string }
   const at = message.indexOf(separator);
   const key = at === -1 ? message : message.slice(0, at);
   if (isMessageKey(key)) {
-    const values = at === -1 ? {} : (JSON.parse(message.slice(at + 1)) as Record<string, number>);
+    const values =
+      at === -1 ? {} : (JSON.parse(message.slice(at + 1)) as Record<string, string | number>);
     return t(key, values);
   }
   return t(byKind[String(error.type)] ?? "error.invalid");

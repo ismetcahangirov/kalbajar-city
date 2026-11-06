@@ -4,7 +4,6 @@ import { cacheLife, cacheTag } from "next/cache";
 import { getTranslations } from "next-intl/server";
 
 import { getDb } from "@/db";
-import { localize } from "@/i18n/content";
 import { formatPhone } from "@/i18n/format";
 import { getPathname } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
@@ -14,7 +13,7 @@ import { llmsTxt, type LlmsDocument, type LlmsLink } from "@/lib/llms";
 import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
-import { loadPublishedFaq } from "./home";
+import { loadPublicFaq } from "./home";
 import { getAboutPage, getSiteContacts } from "./site";
 
 /** The locales `llms.txt` is published in, and where (#29). */
@@ -39,17 +38,17 @@ const pages = [
   { href: "/mexfilik-siyaseti", nav: "privacy", namespace: "Privacy" },
 ] as const;
 
-/** Published FAQ entries in the console's order, as the home page lists them, in one locale. */
+/**
+ * Published FAQ entries in the console's order, as the home page lists them,
+ * in one locale, their placeholders filled from the settings and the layouts.
+ */
 async function getFaq(locale: Locale): Promise<Array<{ question: string; answer: string }>> {
   "use cache";
-  cacheTag(publicTags.content);
+  cacheTag(publicTags.content, publicTags.settings, publicTags.inventory);
   cacheLife("days");
 
-  const rows = await loadPublishedFaq(getDb());
-  return rows.map((row) => ({
-    question: localize(row.question, locale).value,
-    answer: localize(row.answer, locale).value,
-  }));
+  const items = await loadPublicFaq(getDb(), locale);
+  return items.map((item) => ({ question: item.question.value, answer: item.answer.value }));
 }
 
 /**

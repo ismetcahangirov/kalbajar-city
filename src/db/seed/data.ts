@@ -288,7 +288,13 @@ export const galleryCategories = [
   { slug: "tikinti", name: t("Tikinti", "Construction", "Строительство") },
 ];
 
-/** Answers use only the facts above; the owner adds the rest in the console. */
+/**
+ * Answers use only the facts above; the owner adds the rest in the console.
+ * Numbers are placeholders (`@/shared/faq`) the site fills from the settings
+ * and the layout types, so an answer follows the console when a fact changes
+ * (#29). Russian puts the count after a dash, where the noun's form does not
+ * depend on the number.
+ */
 export const faq = [
   {
     question: t(
@@ -297,9 +303,9 @@ export const faq = [
       "Сколько квартир в комплексе?",
     ),
     answer: t(
-      "Kalbajar City-də 6 yaşayış binasında, 9 blokda 143 mənzil var.",
-      "Kalbajar City has 143 apartments in 6 residential buildings with 9 blocks.",
-      "В Kalbajar City 143 квартиры в 6 жилых домах, 9 блоков.",
+      "Kalbajar City-də {buildings} yaşayış binasında, {blocks} blokda {apartments} mənzil var.",
+      "Kalbajar City has {apartments} apartments in {buildings} residential buildings with {blocks} blocks.",
+      "Квартир в Kalbajar City — {apartments}, жилых домов — {buildings}, блоков — {blocks}.",
     ),
   },
   {
@@ -309,17 +315,17 @@ export const faq = [
       "Какие планировки предлагаются?",
     ),
     answer: t(
-      "1 otaqlıdan 4 otaqlıya qədər 10 plan var: sahəsi 62,09 m²-dən 186,9 m²-ə qədər.",
-      "There are 10 layouts from one to four rooms, from 62.09 m² to 186.9 m².",
-      "10 планировок от одной до четырёх комнат, площадью от 62,09 м² до 186,9 м².",
+      "{roomsMin} otaqlıdan {roomsMax} otaqlıya qədər {layouts} plan var: sahəsi {areaMin}-dən {areaMax}-ə qədər.",
+      "There are {layouts} layouts with {roomsMin} to {roomsMax} rooms, from {areaMin} to {areaMax}.",
+      "Планировок — {layouts}: от {roomsMin}- до {roomsMax}-комнатных, площадью от {areaMin} до {areaMax}.",
     ),
   },
   {
     question: t("Avtomobil üçün yer varmı?", "Is there parking?", "Есть ли парковка?"),
     answer: t(
-      "Bəli, kompleksdə 160 yerlik yeraltı qaraj var.",
-      "Yes, the complex has an underground car park with 160 spaces.",
-      "Да, в комплексе есть подземный паркинг на 160 мест.",
+      "Bəli, kompleksdə {parking} yerlik yeraltı qaraj var.",
+      "Yes, the complex has an underground car park with {parking} spaces.",
+      "Да, в комплексе есть подземный паркинг. Машино-мест — {parking}.",
     ),
   },
   {
