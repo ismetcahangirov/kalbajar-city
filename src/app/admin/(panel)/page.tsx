@@ -14,9 +14,10 @@ import {
   missingTranslationCount,
   recentActivity,
 } from "@/lib/admin/dashboard";
+import { auditActionLabel } from "@/lib/admin/audit-labels";
 import { adminDateTime } from "@/lib/admin/format";
 import { canOpen } from "@/lib/admin/menu";
-import { isMessageKey, t } from "@/lib/admin/messages";
+import { t } from "@/lib/admin/messages";
 import { adminModules, type AdminModule } from "@/lib/admin/navigation";
 import { getPlaceholders } from "@/lib/admin/placeholders";
 import { placeholderLabel, sectionOfPath } from "@/lib/admin/settings-sections";
@@ -165,7 +166,7 @@ export default async function DashboardPage() {
                   <li key={entry.id} className="flex flex-wrap justify-between gap-x-4 py-2">
                     <span>
                       <span className="font-medium">{entry.actor ?? t("dashboard.system")}</span>{" "}
-                      {auditLabel(entry.action)}
+                      {auditActionLabel(entry.action)}
                     </span>
                     <time
                       dateTime={entry.createdAt.toISOString()}
@@ -182,11 +183,6 @@ export default async function DashboardPage() {
       </div>
     </>
   );
-}
-
-function auditLabel(action: string): string {
-  const key = `audit.${action}`;
-  return isMessageKey(key) ? t(key) : t("audit.other", { action });
 }
 
 function DashboardCard({

@@ -33,7 +33,8 @@ export default async function PanelLayout({ children }: LayoutProps<"/admin">) {
           menu={buildMenu(user.role)}
           user={{ name: user.name, role: roleLabel(user.role) }}
         />
-        <SidebarInset>
+        {/* min-w-0: a wide table scrolls in its own box, not the whole page. */}
+        <SidebarInset className="min-w-0">
           <TopBar />
           <div
             id="content"
