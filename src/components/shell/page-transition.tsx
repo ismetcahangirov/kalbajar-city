@@ -41,11 +41,39 @@ function mainHeading(): HTMLElement | null {
   return null;
 }
 
-function focusHeading() {
+function focusNow(): boolean {
   const heading = mainHeading();
-  if (!heading) return;
+  if (!heading) return false;
   if (!heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
   heading.focus({ preventScroll: true });
+  return true;
+}
+
+/**
+ * Moves focus to the new page's main heading. The pathname can change before
+ * the new page is in the DOM (the old one is already hidden, the new one is
+ * still rendering on a slow device), so it waits for the heading, up to the
+ * route limit, unless the visitor moves focus in the meantime. Answers a
+ * function that stops waiting.
+ */
+function focusHeading(): () => void {
+  if (focusNow()) return () => {};
+  const start = document.activeElement;
+  const observer = new MutationObserver(() => {
+    if (document.activeElement !== start || focusNow()) stop();
+  });
+  const timer = setTimeout(() => stop(), ROUTE_WAIT);
+  function stop() {
+    observer.disconnect();
+    clearTimeout(timer);
+  }
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["style", "hidden"],
+  });
+  return stop;
 }
 
 /** The new page's images in the viewport, decoded, or the time limit. */
@@ -124,10 +152,12 @@ export function PageTransition() {
     if (!clicked.current) return;
     clicked.current = false;
     // After the new page's commit: the curtain may lift, focus may move.
+    let stop: (() => void) | undefined;
     requestAnimationFrame(() => {
       arrived.current?.();
-      focusHeading();
+      stop = focusHeading();
     });
+    return () => stop?.();
   }, [pathname]);
 
   return (

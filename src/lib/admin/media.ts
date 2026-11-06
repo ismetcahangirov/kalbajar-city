@@ -330,6 +330,7 @@ export async function listMedia(
   const where: SQL | undefined = and(
     query.kind.length ? inArray(media.kind, query.kind) : undefined,
     query.source.length ? inArray(media.source, query.source) : undefined,
+    query.ids.length ? inArray(media.id, query.ids) : undefined,
     pattern
       ? or(
           ilike(media.originalName, pattern),

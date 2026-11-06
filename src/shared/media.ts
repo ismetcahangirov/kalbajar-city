@@ -155,11 +155,13 @@ export const mediaSortFields = ["createdAt"] as const;
 /**
  * `GET /api/v1/admin/media`, newest first by default. `q` searches the alt
  * text and caption in every language and the original file name;
- * `missingAlt=true` keeps the images the public site will not show yet.
+ * `missingAlt=true` keeps the images the public site will not show yet;
+ * `ids` keeps the named files, for an editor showing the ones it links.
  */
 export const mediaListQuerySchema = paginationSchema.extend({
   kind: listOf(z.enum(mediaKinds)),
   source: listOf(z.enum(mediaSources)),
+  ids: listOf(z.uuid()),
   q: z.string().trim().max(100).optional(),
   missingAlt: z.stringbool().optional(),
   sort: sortSchema(mediaSortFields, "-createdAt"),
@@ -172,6 +174,7 @@ export type MediaListParams = {
   pageSize?: number;
   kind?: MediaKind[];
   source?: MediaSource[];
+  ids?: string[];
   q?: string;
   missingAlt?: boolean;
   sort?: MediaSort;

@@ -5,6 +5,9 @@ import { clientIp, diff } from "@/lib/audit";
 import { safeAdminRedirect } from "@/lib/auth/paths";
 import { can, canManageUser, type Permission, type UserRole } from "@/lib/auth/permissions";
 import { guardAdmin } from "@/lib/auth/guard";
+import { isMessageKey } from "@/lib/admin/messages";
+import { roleValues } from "@/shared/users";
+import { userRoles } from "@/db/schema/auth";
 
 // The matrix from #9, one row per role: what it must be able to do and what
 // it must not.
@@ -182,5 +185,33 @@ describe("proxy guard", () => {
     expect(guardAdmin(request("/api/v1/admin/me", session)).headers.get("x-middleware-next")).toBe(
       "1",
     );
+  });
+});
+
+describe("the invitation page", () => {
+  it("is open to signed-out visitors, who have only the e-mailed link", () => {
+    const request = new NextRequest("http://localhost:3010/admin/devet?token=abc");
+    expect(guardAdmin(request).headers.get("location")).toBeNull();
+  });
+});
+
+describe("roleValues", () => {
+  it("is the database enum, which the shared schemas cannot import into forms", () => {
+    expect([...roleValues]).toEqual([...userRoles]);
+  });
+});
+
+describe("the audit log's labels", () => {
+  it.each([
+    "user.create",
+    "user.set_role",
+    "user.deactivate",
+    "user.reactivate",
+    "invitation.create",
+    "invitation.resend",
+    "invitation.revoke",
+    "invitation.accept",
+  ])("name %s, which user management records", (action) => {
+    expect(isMessageKey(`audit.${action}`)).toBe(true);
   });
 });

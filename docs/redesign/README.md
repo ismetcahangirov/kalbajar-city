@@ -83,8 +83,6 @@ even where the reference ignores them.
   `defaultImage()`
 - Tailwind v4 makes `inline-<name>` / `block-<name>` utilities from
   `--spacing-<name>`: never name a spacing token `block` or `inline`
-- The console has no "Default" label on empty image pickers yet; add it when
-  the content editors (#25 part B) add pickers for these slots
 - (#67) Exporting a component from the `@/components/ui` barrel put it in the
   shared JS (+1.5 KB). The barrel is gone (#61 cleanup): every component is
   imported by path
@@ -411,3 +409,12 @@ pre-redesign pieces deleted:
 - Still on the semantic tokens, not rebuilt by the redesign: the form fields,
   `Button`, `Badge`, the plan viewer, the complex selector, the locale
   banner, rich text and the console (`docs/ui-kit.md` → Current tokens)
+- (#17) The home sections screen is `/admin/xeberler/ana-sehife`; the location
+  section's copy and images stay in `/admin/ayarlar/yerlesme`. Sections live in
+  `home_sections`; `resolveHomeSections()` (`src/lib/public/home-sections.ts`)
+  gives every reader the same order and falls back to the seed's text, so the
+  home page renders on an unseeded database. The hero is always first and
+  shown: `Stats` overlaps the scene before it (`underPrevious`), which needs a
+  scene above. Scenes take their images as props from the loader; a new slot is
+  a nullable id in `homeSectionContentSchemas`, one line in `homeSectionMedia()`
+  and a `MediaField`. Empty pickers now say the default shows (`hasDefault`)

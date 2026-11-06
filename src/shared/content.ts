@@ -3,7 +3,12 @@ import { z } from "zod";
 import type { Translatable } from "@/i18n/content";
 
 import { listOf, paginationSchema } from "./api";
-import { translatableRichTextSchema, type TranslatableRichText } from "./rich-text";
+import {
+  hasRichContent,
+  richTextDocSchema,
+  translatableRichTextSchema,
+  type TranslatableRichText,
+} from "./rich-text";
 import { translatableSchema } from "./translatable";
 
 /**
@@ -16,6 +21,39 @@ import { translatableSchema } from "./translatable";
 export const publishStatuses = ["draft", "published"] as const;
 
 export type PublishStatus = (typeof publishStatuses)[number];
+
+/**
+ * What the console shows and filters by: a draft with a scheduled date is
+ * `scheduled` (#25). The scheduled-publication trigger publishes it when its
+ * time comes.
+ */
+export const contentStates = ["draft", "scheduled", "published"] as const;
+
+export type ContentState = (typeof contentStates)[number];
+
+export function contentState(entry: {
+  status: PublishStatus;
+  scheduledAt: string | Date | null;
+}): ContentState {
+  if (entry.status === "published") return "published";
+  return entry.scheduledAt ? "scheduled" : "draft";
+}
+
+/**
+ * How late a scheduled entry may be before the console calls it overdue. The
+ * cron runs every few minutes, so an entry is normally a few minutes late;
+ * past this, the trigger is not running (no cron, or no `CRON_SECRET`).
+ */
+export const scheduleGraceMs = 10 * 60_000;
+
+/** Whether a scheduled entry's time has passed and it has still not gone out. */
+export function scheduleOverdue(
+  entry: { state: ContentState; scheduledAt: string | null },
+  now: number = Date.now(),
+): boolean {
+  if (entry.state !== "scheduled" || !entry.scheduledAt) return false;
+  return new Date(entry.scheduledAt).getTime() + scheduleGraceMs < now;
+}
 
 /** Azerbaijani, lower case, hyphenated (`CLAUDE.md` §3); made from the title when left out. */
 export const contentSlugSchema = z
@@ -33,9 +71,12 @@ export const monthSchema = z
   .regex(/^\d{4}-(0[1-9]|1[0-2])(-01)?$/, "Give the month as YYYY-MM")
   .transform((value) => `${value.slice(0, 7)}-01`);
 
+/** How many photos and videos one update can carry. */
+export const contentMediaMax = 50;
+
 const mediaIdList = z
   .array(z.uuid())
-  .max(50)
+  .max(contentMediaMax)
   .refine((ids) => new Set(ids).size === ids.length, "A file may appear only once");
 
 const notEmpty = (value: object) => Object.keys(value).length > 0;
@@ -51,6 +92,43 @@ export const constructionUpdateCreateSchema = z.object({
 });
 
 export type ConstructionUpdateCreate = z.input<typeof constructionUpdateCreateSchema>;
+
+/**
+ * The console's update form (#25), whose output is a valid create body and,
+ * without its media, a valid update body: the month and percentage come as an
+ * input's text, and a text with nothing in Azerbaijani is no text at all.
+ * Text translated without its Azerbaijani version is refused, as elsewhere.
+ */
+export const constructionUpdateFormSchema = z.object({
+  month: z
+    .string()
+    .min(1)
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/),
+  title: translatableSchema,
+  body: z
+    .object({
+      az: richTextDocSchema,
+      en: richTextDocSchema.nullish(),
+      ru: richTextDocSchema.nullish(),
+    })
+    .superRefine((value, context) => {
+      if (!hasRichContent(value.az) && (hasRichContent(value.en) || hasRichContent(value.ru))) {
+        // A console catalogue key: this schema only validates the console's form.
+        context.addIssue({ code: "custom", message: "error.required", path: ["az"] });
+      }
+    })
+    .transform((value) => (hasRichContent(value.az) ? value : null)),
+  progressPercent: z
+    .string()
+    .trim()
+    .min(1)
+    .regex(/^\d+$/)
+    .transform(Number)
+    .pipe(z.int().min(0).max(100)),
+  mediaIds: mediaIdList,
+});
+
+export type ConstructionUpdateForm = z.input<typeof constructionUpdateFormSchema>;
 
 export const constructionUpdateUpdateSchema = z
   .object({
@@ -72,9 +150,11 @@ export type ContentMedia = z.input<typeof contentMediaSchema>;
 
 /**
  * `PUT .../publication`. Without `publishedAt` the entry keeps the date it
- * was first published, or gets the current time. A date in the future is
- * refused: public pages are cached until the next write, so a scheduled
- * entry would not appear on its own.
+ * was first published, or gets the current time. A date in the future
+ * schedules a draft instead: it stays a draft until the scheduled-publication
+ * trigger (`/api/v1/internal/scheduled-publications`, run by a cron)
+ * publishes it and revalidates the cached pages. `DELETE` withdraws a
+ * published entry or cancels a schedule.
  */
 export const publicationSchema = z.object({
   publishedAt: z.iso.datetime({ offset: true }).optional(),
@@ -92,6 +172,31 @@ export const newsCreateSchema = z.object({
 
 export type NewsCreate = z.input<typeof newsCreateSchema>;
 
+const optionalText = z.string().trim().nullish();
+
+/**
+ * The console's article form (#25), whose output is a valid create or update
+ * body: a blank slug is made from the title, a blank excerpt is none. An
+ * excerpt translated without its Azerbaijani text is refused, as elsewhere.
+ */
+export const newsFormSchema = z.object({
+  slug: z.union([contentSlugSchema, z.literal("")]).transform((value) => value || undefined),
+  title: translatableSchema,
+  excerpt: z
+    .object({ az: z.string().trim(), en: optionalText, ru: optionalText })
+    .superRefine((value, context) => {
+      if (!value.az && (value.en || value.ru)) {
+        // A console catalogue key: this schema only validates the console's form.
+        context.addIssue({ code: "custom", message: "error.required", path: ["az"] });
+      }
+    })
+    .transform((value) => (value.az ? { az: value.az, en: value.en, ru: value.ru } : null)),
+  body: translatableRichTextSchema,
+  coverMediaId: z.uuid().nullable(),
+});
+
+export type NewsForm = z.input<typeof newsFormSchema>;
+
 export const newsUpdateSchema = z
   .object({
     slug: contentSlugSchema,
@@ -107,10 +212,10 @@ export type NewsUpdate = z.input<typeof newsUpdateSchema>;
 
 /** `GET` of either list, newest first. */
 export const contentListQuerySchema = paginationSchema.extend({
-  status: listOf(z.enum(publishStatuses)),
+  status: listOf(z.enum(contentStates)),
 });
 
-export type ContentListParams = { page?: number; pageSize?: number; status?: PublishStatus[] };
+export type ContentListParams = { page?: number; pageSize?: number; status?: ContentState[] };
 
 export const contentIdParamsSchema = z.object({ id: z.uuid() });
 
@@ -123,7 +228,10 @@ export type AdminConstructionUpdate = {
   body: TranslatableRichText | null;
   progressPercent: number;
   status: PublishStatus;
+  state: ContentState;
   publishedAt: string | null;
+  /** When a scheduled draft publishes itself. */
+  scheduledAt: string | null;
   mediaIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -137,7 +245,10 @@ export type AdminNews = {
   body: TranslatableRichText;
   coverMediaId: string | null;
   status: PublishStatus;
+  state: ContentState;
   publishedAt: string | null;
+  /** When a scheduled draft publishes itself. */
+  scheduledAt: string | null;
   createdAt: string;
   updatedAt: string;
 };

@@ -13,6 +13,8 @@ const byCode: Record<string, MessageKey> = {
   IN_USE: "error.inUseGeneric",
   IMPORT_INVALID: "error.importInvalid",
   LEADS_LINKED: "error.leadsLinked",
+  LAST_OWNER: "users.error.lastOwner",
+  INVITATION_INVALID: "invite.invalid",
 };
 
 /**

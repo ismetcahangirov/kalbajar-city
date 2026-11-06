@@ -1,12 +1,13 @@
 import "server-only";
 
-import { and, eq, inArray, like, ne, type SQL } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, like, ne, or, type SQL } from "drizzle-orm";
 
 import type { Executor } from "@/db/client";
 import { constructionUpdates, galleryCategories, media, news } from "@/db/schema";
 import type { Translatable } from "@/i18n/content";
 import { invalidField } from "@/lib/api/errors";
 import { slugify, uniqueSlug } from "@/lib/slug";
+import type { ContentState, PublishStatus } from "@/shared/content";
 import type { MediaKind } from "@/shared/media";
 
 /**
@@ -69,21 +70,61 @@ export async function assertMedia(
 }
 
 /**
- * When a published entry says it was published. A requested date must not be
- * in the future (`publicationSchema`); without one, an entry published before
- * keeps its date, so unpublishing to fix a typo does not move it up the list.
+ * When a published entry says it was published: the requested date, or else
+ * the date it was first published, so unpublishing to fix a typo does not
+ * move it up the list, or else now.
  */
 export function publicationDate(
   current: Date | null,
-  requested: string | undefined,
+  requested: Date | undefined,
   now = new Date(),
 ): Date {
-  if (requested) {
-    const date = new Date(requested);
-    if (date.getTime() > now.getTime()) {
-      throw invalidField("publishedAt", "The publication date cannot be in the future.");
-    }
-    return date;
-  }
+  if (requested) return requested;
   return current && current.getTime() <= now.getTime() ? current : now;
+}
+
+export type PublicationChange =
+  | { status: "published"; publishedAt: Date; scheduledAt: null }
+  | { status: "draft"; scheduledAt: Date };
+
+/**
+ * What `PUT .../publication` does to an entry (`publicationSchema`): a date
+ * in the future schedules a draft, anything else publishes now. A published
+ * entry is withdrawn before it is scheduled again, so scheduling never takes
+ * a live page down by surprise.
+ */
+export function publicationChange(
+  before: { status: PublishStatus; publishedAt: Date | null },
+  requested: string | undefined,
+  now = new Date(),
+): PublicationChange {
+  const date = requested ? new Date(requested) : undefined;
+  if (date && date.getTime() > now.getTime()) {
+    if (before.status === "published") {
+      throw invalidField("publishedAt", "Withdraw the published entry before scheduling it.");
+    }
+    return { status: "draft", scheduledAt: date };
+  }
+  return {
+    status: "published",
+    publishedAt: publicationDate(before.publishedAt, date, now),
+    scheduledAt: null,
+  };
+}
+
+type StateTable = typeof news | typeof constructionUpdates;
+
+/** The list filter for console states: a scheduled entry is a draft with a date. */
+export function stateFilter(table: StateTable, states: readonly ContentState[]): SQL | undefined {
+  if (!states.length) return undefined;
+  return or(
+    ...states.map((state) =>
+      state === "published"
+        ? eq(table.status, "published")
+        : and(
+            eq(table.status, "draft"),
+            state === "scheduled" ? isNotNull(table.scheduledAt) : isNull(table.scheduledAt),
+          ),
+    ),
+  );
 }

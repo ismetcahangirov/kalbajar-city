@@ -17,6 +17,19 @@ import { accessControl, roles } from "./permissions";
 
 const resetLinkLifetime = 60 * 60;
 
+/**
+ * Better Auth's endpoints that change a role or end an account. They cannot
+ * hold the last-owner rule, which needs a lock across the check and the write,
+ * so these changes go through `/api/v1/admin/users` (`@/lib/admin/users`) only.
+ */
+const closedPaths = [
+  "/admin/set-role",
+  "/admin/update-user",
+  "/admin/ban-user",
+  "/admin/unban-user",
+  "/admin/remove-user",
+];
+
 function env(name: "BETTER_AUTH_SECRET" | "BETTER_AUTH_URL"): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} is not set (see .env.example)`);
@@ -53,6 +66,7 @@ function createAuth() {
     baseURL: env("BETTER_AUTH_URL"),
     basePath: authBasePath,
     secret: env("BETTER_AUTH_SECRET"),
+    disabledPaths: closedPaths,
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {

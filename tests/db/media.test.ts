@@ -688,6 +688,11 @@ describe("searching the library (#25)", () => {
     expect(withoutAlt).not.toContain(named.id);
     expect(await list(`missingAlt=false&${q(tag)}`)).not.toContain(missing.id);
 
+    // An editor asks for the files it links, by id.
+    expect(new Set(await list(`ids=${named.id},${video.id}`))).toEqual(
+      new Set([named.id, video.id]),
+    );
+
     const oldestFirst = await list(`sort=createdAt&${q(tag)}`);
     expect(oldestFirst.indexOf(named.id)).toBeLessThan(oldestFirst.indexOf(missing.id));
     const newestFirst = await list(q(tag));

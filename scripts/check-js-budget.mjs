@@ -27,6 +27,10 @@ import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { gzipSync } from "node:zlib";
 
+// Console-only code must never reach a public route: the rich-text editor
+// (TipTap on ProseMirror, #25) is the heaviest of it. A public route chunk
+// that carries it fails the check whatever its size.
+
 const KB = 1024;
 /** CLAUDE.md §5. Change them there and here together. */
 export const budgets = { shared: 160 * KB, route: 40 * KB };
@@ -73,6 +77,19 @@ function gzipSize(chunk) {
   return size;
 }
 
+/** Marks code only the console may load; ProseMirror names its DOM classes so. */
+const consoleOnly = /ProseMirror/;
+
+const leakCache = new Map();
+function leaks(chunk) {
+  let found = leakCache.get(chunk);
+  if (found === undefined) {
+    found = consoleOnly.test(readFileSync(join(next, chunk), "utf8"));
+    leakCache.set(chunk, found);
+  }
+  return found;
+}
+
 const sum = (chunks) => [...chunks].reduce((total, chunk) => total + gzipSize(chunk), 0);
 const kb = (bytes) => `${(bytes / KB).toFixed(1)} KB`;
 
@@ -110,6 +127,7 @@ export function measure() {
         route,
         total: sum(chunks),
         own: sum([...chunks].filter((chunk) => !shared.has(chunk))),
+        consoleOnly: [...chunks].filter(leaks),
       }))
       .sort((a, b) => a.route.localeCompare(b.route)),
   };
@@ -128,7 +146,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     failures.push(`shared chunks: ${kb(shared)} > ${kb(budgets.shared)}`);
   console.log("");
   console.log(`${"Route".padEnd(36)}${"own".padStart(10)}${"total".padStart(10)}`);
-  for (const { route, own, total } of routes) {
+  for (const { route, own, total, consoleOnly: leaked } of routes) {
+    for (const chunk of leaked) failures.push(`${route}: console-only code (editor) in ${chunk}`);
     const over = own > budgets.route;
     console.log(
       `${route.padEnd(36)}${kb(own).padStart(10)}${kb(total).padStart(10)}${over ? "  OVER" : ""}`,

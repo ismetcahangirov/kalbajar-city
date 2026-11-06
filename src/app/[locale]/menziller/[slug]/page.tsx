@@ -8,7 +8,8 @@ import type { ReactNode } from "react";
 import { AreaTable } from "@/components/apartments/area-table";
 import { CurtainLines } from "@/components/apartments/curtain-lines";
 import { PlanViewer } from "@/components/apartments/plan-viewer";
-import { ShareActions } from "@/components/apartments/share-actions";
+import { PrintButton } from "@/components/apartments/print-button";
+import { ShareButton } from "@/components/content/share-button";
 import { PageMessages } from "@/components/i18n/page-messages";
 import { Localized } from "@/components/home/localized";
 import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
@@ -149,8 +150,11 @@ export default async function ApartmentPage({ params }: PageProps<"/[locale]/men
                     />
                   }
                 />
-                <PageMessages namespaces={["ApartmentPage"]}>
-                  <ShareActions title={name} />
+                <PageMessages namespaces={["ApartmentPage", "Share"]}>
+                  <div className="flex items-center" data-print-hidden="">
+                    <ShareButton title={name} appearance="round" />
+                    <PrintButton />
+                  </div>
                 </PageMessages>
               </div>
               <p className="text-label-xs text-(--t-small) uppercase">

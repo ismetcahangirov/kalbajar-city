@@ -5,6 +5,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultImage, type DefaultSlot } from "@/content/defaults";
 import { getDb } from "@/db";
+import { settings as seedSettings } from "@/db/seed/data";
 import type { Executor } from "@/db/client";
 import {
   constructionUpdateMedia,
@@ -19,14 +20,11 @@ import { localize, type Localized, type Translatable } from "@/i18n/content";
 import type { Unit } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import { publicTags } from "@/lib/cache/tags";
-import {
-  homeSectionContentSchemas,
-  type HomeSectionContentByKey,
-  type HomeSectionKey,
-} from "@/shared/home-sections";
+import { homeSectionMedia } from "@/shared/home-sections";
 import { settingsSchemas, type ComplexFactKey, type SettingsValue } from "@/shared/settings";
 
-import { groupLayouts, type LayoutGroup } from "./layouts";
+import { resolveHomeSections } from "./home-sections";
+import { featuredGroups, groupLayouts, type LayoutGroup } from "./layouts";
 import { toPublicImage, toPublicVideo, type PublicImage, type PublicVideo } from "./media";
 import { withPosters } from "./rich-text";
 
@@ -43,24 +41,32 @@ export type HomeSection =
       subtitle: Localized | null;
       /** The console's poster, else the film's poster frame, else the bundled default. */
       poster: PublicImage;
-      /** The render in the hero's right third; the bundled default until the console has a picker. */
+      /** The render in the hero's right third: the console's, else the bundled default. */
       panel: PublicImage;
       video: PublicVideo | null;
       /** Spec chips at the hero's foot; null until layouts exist. */
       chips: { apartments: number; roomsMin: number; roomsMax: number; areaMin: number } | null;
     }
-  | { kind: "stats"; items: HomeStat[] }
+  | { kind: "stats"; items: HomeStat[]; background: PublicImage }
   | {
       kind: "about";
       eyebrow: Localized | null;
       title: Localized;
       body: Localized;
       image: PublicImage;
+      background: PublicImage;
     }
-  | { kind: "layouts"; title: Localized; body: Localized | null; groups: LayoutGroup[] }
+  | {
+      kind: "layouts";
+      title: Localized;
+      body: Localized | null;
+      groups: LayoutGroup[];
+      background: PublicImage;
+    }
   | {
       kind: "amenities";
       title: Localized;
+      window: PublicImage;
       items: Array<{ icon: Amenity; title: Localized; body: Localized | null }>;
     }
   | {
@@ -74,6 +80,11 @@ export type HomeSection =
       body: Localized | null;
       map: PublicImage | null;
       distances: Array<{ place: Localized; minutes: number }>;
+      intro: PublicImage;
+      moverLeft: PublicImage;
+      moverRight: PublicImage;
+      /** At least one; the travel-time cards use them in turn. */
+      cards: PublicImage[];
     }
   | {
       kind: "construction";
@@ -82,7 +93,7 @@ export type HomeSection =
     }
   | { kind: "process"; title: Localized; steps: Array<{ title: Localized; body: Localized }> }
   | { kind: "faq"; title: Localized; items: Array<{ question: Localized; answer: Localized }> }
-  | { kind: "cta"; title: Localized; body: Localized | null };
+  | { kind: "cta"; title: Localized; body: Localized | null; portrait: PublicImage };
 
 const factUnits: Partial<Record<ComplexFactKey, Unit>> = {
   totalArea: "m2",
@@ -112,11 +123,23 @@ const defaultScenes = [
   "home.cardZoom.4",
 ] as const satisfies readonly DefaultSlot[];
 
+/** The travel-time cards shown while the console has chosen none (spec §8). */
+const defaultCards = [
+  "home.location.card.1",
+  "home.location.card.2",
+  "home.location.card.3",
+  "home.location.card.4",
+  "home.location.card.5",
+  "home.location.card.6",
+] as const satisfies readonly DefaultSlot[];
+
 /**
- * Everything the home page shows, localised, in the console's order. A
- * section the console hides, or one with nothing to show yet (no published
- * construction update), is left out. An image slot the console leaves empty
- * shows its bundled default (`src/content/defaults`).
+ * Everything the home page shows, localised, in the console's order, the hero
+ * always first. A section the console hides, or one with nothing to show yet
+ * (no published construction update, no layouts), is left out. An image slot
+ * the console leaves empty shows its bundled default (`src/content/defaults`),
+ * and a section or the complex's facts with nothing saved show the seed's
+ * text, so a database without settings still renders the whole page.
  */
 export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   "use cache";
@@ -125,11 +148,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
 
   const db = getDb();
   const [sectionRows, complexRow, layouts, faqRows, [latestUpdate]] = await Promise.all([
-    db
-      .select()
-      .from(homeSections)
-      .where(eq(homeSections.visible, true))
-      .orderBy(asc(homeSections.sortOrder)),
+    db.select().from(homeSections),
     db.select().from(settings).where(eq(settings.key, "complex")),
     db.select().from(layoutTypes).orderBy(asc(layoutTypes.rooms), asc(layoutTypes.areaTotal)),
     loadPublishedFaq(db),
@@ -141,8 +160,9 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
       .limit(1),
   ]);
 
-  const complex = settingsSchemas.complex.parse(complexRow[0]?.value);
-  const sections = sectionRows.map((row) => parse(row.key, row.content));
+  const savedComplex = settingsSchemas.complex.safeParse(complexRow[0]?.value);
+  const complex = savedComplex.success ? savedComplex.data : seedSettings.complex;
+  const sections = resolveHomeSections(sectionRows).filter((section) => section.visible);
 
   const updateMedia = latestUpdate
     ? await db
@@ -156,13 +176,8 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   const mediaIds = new Set<string>();
   const want = (id: string | null | undefined) => id && mediaIds.add(id);
   for (const section of sections) {
-    if (section.key === "hero") {
-      want(section.content.posterMediaId);
-      want(section.content.videoMediaId);
-    }
-    if (section.key === "about") want(section.content.mediaId);
-    if (section.key === "card_zoom") section.content.items.forEach((item) => want(item.mediaId));
-    if (section.key === "location") want(section.content.mapMediaId);
+    const { images, videos } = homeSectionMedia(section);
+    [...images, ...videos].forEach(want);
   }
   layouts.forEach((layout) => want(layout.planMediaId));
   updateMedia.forEach((row) => want(row.mediaId));
@@ -203,7 +218,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
             image(c.posterMediaId) ??
             video(c.videoMediaId)?.poster ??
             defaultImage("home.hero.poster", locale),
-          panel: defaultImage("home.hero.panel", locale),
+          panel: image(c.panelMediaId) ?? defaultImage("home.hero.panel", locale),
           video: video(c.videoMediaId),
           chips: layouts.length
             ? {
@@ -216,15 +231,20 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
         };
       }
       case "stats":
-        return {
-          kind: "stats",
-          items: section.content.items.map((item) => ({
-            fact: item.fact,
-            value: Number(complex[item.fact]),
-            unit: factUnits[item.fact] ?? null,
-            label: text(item.label),
-          })),
-        };
+        return section.content.items.length
+          ? {
+              kind: "stats",
+              items: section.content.items.map((item) => ({
+                fact: item.fact,
+                value: Number(complex[item.fact]),
+                unit: factUnits[item.fact] ?? null,
+                label: text(item.label),
+              })),
+              background:
+                image(section.content.backgroundMediaId) ??
+                defaultImage("home.stats.background", locale),
+            }
+          : null;
       case "about": {
         const c = section.content;
         return {
@@ -233,19 +253,32 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           title: text(c.title),
           body: text(c.body),
           image: image(c.mediaId) ?? defaultImage("home.about.image", locale),
+          background: image(c.backgroundMediaId) ?? defaultImage("home.about.background", locale),
         };
       }
-      case "layouts":
-        return {
-          kind: "layouts",
-          title: text(section.content.title),
-          body: maybe(section.content.body),
-          groups: groupLayouts(layouts, (id) => image(id)),
-        };
+      case "layouts": {
+        const c = section.content;
+        const groups = featuredGroups(
+          groupLayouts(layouts, (id) => image(id)),
+          c.featuredRooms,
+        );
+        return groups.length
+          ? {
+              kind: "layouts",
+              title: text(c.title),
+              body: maybe(c.body),
+              groups,
+              background:
+                image(c.backgroundMediaId) ?? defaultImage("home.layouts.background", locale),
+            }
+          : null;
+      }
       case "amenities":
         return {
           kind: "amenities",
           title: text(section.content.title),
+          window:
+            image(section.content.windowMediaId) ?? defaultImage("home.amenities.window", locale),
           items: complex.amenities.map((item) => ({
             icon: item.icon,
             title: text(item.title),
@@ -273,12 +306,18 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
         const body = maybe(c.body);
         const map = image(c.mapMediaId);
         if (!body && !map && !c.distances.length) return null;
+        const cards = (c.cardMediaIds ?? []).flatMap((id) => image(id) ?? []);
         return {
           kind: "location",
           title: text(c.title),
           body,
           map,
           distances: c.distances.map((d) => ({ place: text(d.place), minutes: d.minutes })),
+          intro: image(c.introMediaId) ?? defaultImage("home.location.intro", locale),
+          moverLeft: image(c.moverLeftMediaId) ?? defaultImage("home.location.moverLeft", locale),
+          moverRight:
+            image(c.moverRightMediaId) ?? defaultImage("home.location.moverRight", locale),
+          cards: cards.length ? cards : defaultCards.map((slot) => defaultImage(slot, locale)),
         };
       }
       case "construction":
@@ -323,18 +362,11 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
           kind: "cta",
           title: text(section.content.title),
           body: maybe(section.content.body),
+          portrait:
+            image(section.content.portraitMediaId) ?? defaultImage("home.cta.portrait", locale),
         };
     }
   });
 
   return resolved.filter((section): section is HomeSection => section !== null);
-}
-
-type ParsedSection = {
-  [K in HomeSectionKey]: { key: K; content: HomeSectionContentByKey[K] };
-}[HomeSectionKey];
-
-/** Validates a row's content against its key's schema; bad console data fails loudly. */
-function parse(key: HomeSectionKey, content: unknown): ParsedSection {
-  return { key, content: homeSectionContentSchemas[key].parse(content) } as ParsedSection;
 }
