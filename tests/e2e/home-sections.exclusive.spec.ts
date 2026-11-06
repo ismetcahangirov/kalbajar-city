@@ -3,9 +3,10 @@ import AxeBuilder from "@axe-core/playwright";
 import sharp from "sharp";
 
 import type { AdminHomeSection, HomeSectionKey } from "@/shared/home-sections";
+import type { AdminConstructionUpdate } from "@/shared/content";
 import type { AdminMedia, UploadTicket } from "@/shared/media";
 
-import { ensureAccount, signIn, waitForShell } from "./console";
+import { ensureAccount, signIn, uploadImage, waitForShell } from "./console";
 import { waitForHydration } from "./hydration";
 import { horizontalOverflow } from "./public-routes";
 
@@ -425,6 +426,59 @@ test.describe.serial("the home page's arrangement", () => {
         .toContain(`/media/${item.id}/`);
     } finally {
       await page.request.put(`${api}/hero`, { data: hero });
+      expect((await page.request.delete(`/api/v1/admin/media/${item.id}`)).status()).toBe(204);
+    }
+  });
+
+  test("an image chosen for the construction teaser shows while the latest update has none", async ({
+    page,
+    baseURL,
+  }) => {
+    test.setTimeout(120_000);
+    await signInEditor(page, baseURL!);
+    const before = (await (await page.request.get(api)).json()) as AdminHomeSection[];
+    const construction = before.find((section) => section.key === "construction")!.content;
+    await putOrder(page.request, arrangement(defaultOrder));
+
+    // A month after any real one, so it is the latest update, and it has no photo.
+    const created = await page.request.post("/api/v1/admin/construction-updates", {
+      data: { month: "2099-12", title: { az: "Sınaq yeniliyi" }, progressPercent: 50 },
+    });
+    expect(created.status()).toBe(201);
+    const update = (await created.json()) as AdminConstructionUpdate;
+    const item = await uploadImage(page.request, "e2e-construction.jpg", "Tikinti sahəsi");
+
+    try {
+      const published = await page.request.put(
+        `/api/v1/admin/construction-updates/${update.id}/publication`,
+        { data: {} },
+      );
+      expect(published.status()).toBe(200);
+
+      await page.goto(screen);
+      await waitForShell(page);
+      const section = page.locator('details[data-section="construction"]');
+      await section.locator("summary").click();
+      const background = section.getByRole("group", { name: "Arxa fon şəkli" });
+      await expect(background).toContainText("standart şəkil");
+      await background.getByRole("button", { name: "Şəkil seç" }).click();
+      await page
+        .getByRole("dialog")
+        .locator("li button", { hasText: "e2e-construction.jpg" })
+        .click();
+      const saved = page.waitForResponse(
+        (response) => response.url().endsWith(`${api}/construction`) && response.status() === 200,
+      );
+      await section.getByRole("button", { name: "Yadda saxla" }).click();
+      await saved;
+
+      await page.goto("/");
+      await expect(
+        page.locator(`section:has(#tikinti) img[src*="/media/${item.id}/"]`),
+      ).toHaveCount(1);
+    } finally {
+      await page.request.put(`${api}/construction`, { data: construction });
+      await page.request.delete(`/api/v1/admin/construction-updates/${update.id}`);
       expect((await page.request.delete(`/api/v1/admin/media/${item.id}`)).status()).toBe(204);
     }
   });

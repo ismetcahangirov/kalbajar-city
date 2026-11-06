@@ -22,6 +22,8 @@ import {
   amenitiesToForm,
   cardZoomFormSchema,
   cardZoomToForm,
+  constructionFormSchema,
+  constructionToForm,
   ctaFormSchema,
   ctaToForm,
   heroFormSchema,
@@ -37,6 +39,7 @@ import {
   type AboutForm as AboutValues,
   type AmenitiesForm as AmenitiesValues,
   type CardZoomForm as CardZoomValues,
+  type ConstructionForm as ConstructionValues,
   type CtaForm as CtaValues,
   type FeaturedRoom,
   type HeroForm as HeroValues,
@@ -387,13 +390,13 @@ export function CardZoomForm({ content, readOnly, canUpload }: Props<"card_zoom"
   );
 }
 
-/** A section that only has a title here: the construction teaser and the FAQ. */
+/** The FAQ section only has a title here. */
 function TitleOnlyForm({
   sectionKey,
   content,
   readOnly,
 }: {
-  sectionKey: "construction" | "faq";
+  sectionKey: "faq";
   content: HomeSectionContentByKey["faq"];
   readOnly: boolean;
 }) {
@@ -410,11 +413,27 @@ function TitleOnlyForm({
   );
 }
 
-export function ConstructionForm({ content, readOnly }: Props<"construction">) {
+export function ConstructionForm({ content, readOnly, canUpload }: Props<"construction">) {
+  const save = useSave();
+  const form = useAdminForm(constructionFormSchema, {
+    defaultValues: constructionToForm(content),
+  });
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">{t("home.construction.hint")}</p>
-      <TitleOnlyForm sectionKey="construction" content={content} readOnly={readOnly} />
+      <SettingsForm
+        form={form}
+        readOnly={readOnly}
+        onSave={async (value) => constructionToForm(await save("construction", value))}
+      >
+        <TranslatableField<ConstructionValues> name="title" label={t("home.field.title")} />
+        <Picture<ConstructionValues>
+          name="backgroundMediaId"
+          label={t("home.field.background")}
+          readOnly={readOnly}
+          canUpload={canUpload}
+        />
+      </SettingsForm>
     </div>
   );
 }

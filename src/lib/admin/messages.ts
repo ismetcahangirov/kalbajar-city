@@ -1263,7 +1263,7 @@ const messages = {
   "home.link.location": "Yerləşmə ayarları",
   "home.link.faq": "Suallar və cavablar",
   "home.construction.hint":
-    "Faiz, ay və şəkil son dərc olunmuş tikinti yeniləməsindən gəlir; yeniləmə yoxdursa, bölmə görünmür.",
+    "Faiz, ay və şəkil son dərc olunmuş tikinti yeniləməsindən gəlir; yeniləmə yoxdursa, bölmə görünmür. Arxa fon şəkli yalnız həmin yeniləmədə şəkil olmayanda görünür.",
   "home.faq.hint": "Dərc olunmuş sual yoxdursa, bölmə görünmür.",
   "home.location.hint":
     "Mətn, xəritə, məsafələr və şəkillər “Yerləşmə” ayarlarındadır, çünki “Yerləşmə” səhifəsi də onları oxuyur.",

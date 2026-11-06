@@ -333,6 +333,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
                 image:
                   image(updateMedia[0]?.mediaId) ??
                   video(updateMedia[0]?.mediaId)?.poster ??
+                  image(section.content.backgroundMediaId) ??
                   defaultImage("home.construction.background", locale),
               },
             }

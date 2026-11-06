@@ -166,6 +166,15 @@ describe("homeSectionMedia", () => {
     ).toEqual({ images: [id(1), id(2)], videos: [id(3)] });
   });
 
+  it("names the construction teaser's background", () => {
+    expect(
+      homeSectionMedia({
+        key: "construction",
+        content: { title: { az: "x" }, backgroundMediaId: id(1) },
+      }),
+    ).toEqual({ images: [id(1)], videos: [] });
+  });
+
   it("names every image of the location section", () => {
     const { images } = homeSectionMedia({
       key: "location",
