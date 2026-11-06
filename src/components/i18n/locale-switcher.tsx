@@ -53,8 +53,9 @@ function Links({ className, search }: { className?: string; search: string }) {
               )}
             >
               {locale}
-              {/* The visible code starts the accessible name (WCAG 2.5.3, label in name). */}
-              <span className="sr-only"> {t(locale)}</span>
+              {/* The visible code starts the accessible name (WCAG 2.5.3, label in name).
+                  Never painted, so "Русский" must not make an az page fetch the Cyrillic file. */}
+              <span className="sr-only font-system"> {t(locale)}</span>
             </a>
           </li>
         ))}

@@ -1,6 +1,11 @@
-@import "tailwindcss";
+/* Only the public site's sources: every class found elsewhere (the console,
+   the docs, the tests) would be in the stylesheet each public page blocks on. */
+@import "tailwindcss" source("..");
+@source not "./admin";
+@source not "../components/admin";
 @import "../styles/tokens.css";
 @import "../styles/font-fallback.css";
+@import "../styles/font-ranges.css";
 @import "../styles/shell.css";
 @import "../styles/motion.css";
 @import "../styles/scenes.css";

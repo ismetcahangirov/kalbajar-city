@@ -61,8 +61,11 @@
   /* Ink at 55 %: the console's dialog and sheet overlays (current). */
   --color-scrim: rgb(18 16 14 / 0.55);
 
-  /* Type. --font-alethia is set by next/font on <html>. */
-  --font-sans: var(--font-alethia), ui-sans-serif, system-ui, sans-serif;
+  /* Type. --font-alethia is set by next/font on <html>; the two before it are
+     in font-ranges.css and only hold the characters it does not. */
+  --font-sans:
+    "Alethia Cyrillic", "Alethia Extended", var(--font-alethia), ui-sans-serif, system-ui,
+    sans-serif;
   --font-italic: var(--font-alethia-italic), var(--font-sans);
   --font-system:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

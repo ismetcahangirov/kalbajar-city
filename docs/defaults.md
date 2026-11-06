@@ -41,41 +41,41 @@ size Instagram serves (1080 px wide for most posts and reel covers). They may
 show the complex. Generated images are atmosphere only: no building, apartment,
 view from one or amenity. They always carry the "Illustrative" chip.
 
-| Slot                           | Files (widths, px)                                             | Source                                                 | Date       |
-| ------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------ | ---------- |
-| `home.hero.poster`             | `public/defaults/home.hero.poster/` 480, 960, 1080             | Instagram, https://www.instagram.com/reel/DcIYfGcjyma/ | 2026-11-04 |
-| `home.hero.panel`              | `public/defaults/home.hero.panel/` 480, 960, 1080              | Instagram, https://www.instagram.com/reel/DdliV-rkwSb/ | 2026-11-04 |
-| `home.about.image`             | `public/defaults/home.about.image/` 480, 960, 1149             | Instagram, https://www.instagram.com/p/De198LdCuqf/    | 2026-11-04 |
-| `home.about.background`        | `public/defaults/home.about.background/` 480, 960, 1080        | Instagram, https://www.instagram.com/reel/DclNox7iWYF/ | 2026-11-04 |
-| `home.stats.background`        | `public/defaults/home.stats.background/` 480, 960, 1536        | Generated, G4                                          | 2026-11-04 |
-| `home.layouts.background`      | `public/defaults/home.layouts.background/` 480, 960, 1536      | Generated, G5                                          | 2026-11-04 |
-| `home.cardZoom.1`              | `public/defaults/home.cardZoom.1/` 480, 648                    | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.cardZoom.2`              | `public/defaults/home.cardZoom.2/` 480, 960, 1080              | Instagram, https://www.instagram.com/p/DdntuKTCoka/    | 2026-11-04 |
-| `home.cardZoom.3`              | `public/defaults/home.cardZoom.3/` 480, 960, 1080              | Instagram, https://www.instagram.com/reel/DeJ1qC3FZwu/ | 2026-11-04 |
-| `home.cardZoom.4`              | `public/defaults/home.cardZoom.4/` 480, 960, 1080              | Instagram, https://www.instagram.com/reel/DdG02VBCAQx/ | 2026-11-04 |
-| `home.amenities.window`        | `public/defaults/home.amenities.window/` 480, 960, 1536        | Generated, G6                                          | 2026-11-04 |
-| `home.location.intro`          | `public/defaults/home.location.intro/` 480, 960, 1600, 2304    | Instagram, https://www.instagram.com/reel/DXPHoGyjZW6/ | 2026-11-04 |
-| `home.location.moverLeft`      | `public/defaults/home.location.moverLeft/` 480, 960, 1024      | Generated, G7                                          | 2026-11-04 |
-| `home.location.moverRight`     | `public/defaults/home.location.moverRight/` 480, 960, 1024     | Generated, G8                                          | 2026-11-04 |
-| `home.location.card.1`         | `public/defaults/home.location.card.1/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.location.card.2`         | `public/defaults/home.location.card.2/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.location.card.3`         | `public/defaults/home.location.card.3/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.location.card.4`         | `public/defaults/home.location.card.4/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.location.card.5`         | `public/defaults/home.location.card.5/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.location.card.6`         | `public/defaults/home.location.card.6/` 480, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `home.construction.background` | `public/defaults/home.construction.background/` 480, 960, 1080 | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
-| `home.cta.portrait`            | `public/defaults/home.cta.portrait/` 480, 960, 1080            | Instagram, https://www.instagram.com/p/DcvypZAjSmg/    | 2026-11-04 |
-| `page.menziller`               | `public/defaults/page.menziller/` 480, 960, 1080               | Instagram, https://www.instagram.com/p/DdCAmP8jYsl/    | 2026-11-04 |
-| `page.haqqimizda`              | `public/defaults/page.haqqimizda/` 480, 960, 1080              | Instagram, https://www.instagram.com/reel/DcSoHUvj301/ | 2026-11-04 |
-| `page.kompleks`                | `public/defaults/page.kompleks/` 480, 648                      | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
-| `page.yerlesme`                | `public/defaults/page.yerlesme/` 480, 960, 1600                | Instagram, https://www.instagram.com/reel/DXPHoGyjZW6/ | 2026-11-04 |
-| `page.qalereya`                | `public/defaults/page.qalereya/` 480, 960, 1080                | Instagram, https://www.instagram.com/p/DdJCNfnjU8y/    | 2026-11-04 |
-| `page.tikinti`                 | `public/defaults/page.tikinti/` 480, 960, 1080                 | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
-| `page.xeberler`                | `public/defaults/page.xeberler/` 480, 960, 1080                | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
-| `page.elaqe`                   | `public/defaults/page.elaqe/` 480, 960, 1080                   | Instagram, https://www.instagram.com/p/Dc08-GPDYNt/    | 2026-11-04 |
-| `decor.leafShadow.1`           | `public/defaults/decor.leafShadow.1/` 480, 960                 | Generated, G1                                          | 2026-11-04 |
-| `decor.leafShadow.2`           | `public/defaults/decor.leafShadow.2/` 480, 960                 | Generated, G2                                          | 2026-11-04 |
-| `decor.plaster`                | `public/defaults/decor.plaster/` 480, 960                      | Generated, G3                                          | 2026-11-04 |
+| Slot                           | Files (widths, px)                                                  | Source                                                 | Date       |
+| ------------------------------ | ------------------------------------------------------------------- | ------------------------------------------------------ | ---------- |
+| `home.hero.poster`             | `public/defaults/home.hero.poster/` 320, 480, 768, 960, 1080        | Instagram, https://www.instagram.com/reel/DcIYfGcjyma/ | 2026-11-04 |
+| `home.hero.panel`              | `public/defaults/home.hero.panel/` 480, 768, 960, 1080              | Instagram, https://www.instagram.com/reel/DdliV-rkwSb/ | 2026-11-04 |
+| `home.about.image`             | `public/defaults/home.about.image/` 480, 768, 960, 1149             | Instagram, https://www.instagram.com/p/De198LdCuqf/    | 2026-11-04 |
+| `home.about.background`        | `public/defaults/home.about.background/` 480, 768, 960, 1080        | Instagram, https://www.instagram.com/reel/DclNox7iWYF/ | 2026-11-04 |
+| `home.stats.background`        | `public/defaults/home.stats.background/` 480, 768, 960, 1536        | Generated, G4                                          | 2026-11-04 |
+| `home.layouts.background`      | `public/defaults/home.layouts.background/` 480, 768, 960, 1536      | Generated, G5                                          | 2026-11-04 |
+| `home.cardZoom.1`              | `public/defaults/home.cardZoom.1/` 480, 648                         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.cardZoom.2`              | `public/defaults/home.cardZoom.2/` 480, 768, 960, 1080              | Instagram, https://www.instagram.com/p/DdntuKTCoka/    | 2026-11-04 |
+| `home.cardZoom.3`              | `public/defaults/home.cardZoom.3/` 480, 768, 960, 1080              | Instagram, https://www.instagram.com/reel/DeJ1qC3FZwu/ | 2026-11-04 |
+| `home.cardZoom.4`              | `public/defaults/home.cardZoom.4/` 480, 768, 960, 1080              | Instagram, https://www.instagram.com/reel/DdG02VBCAQx/ | 2026-11-04 |
+| `home.amenities.window`        | `public/defaults/home.amenities.window/` 480, 768, 960, 1536        | Generated, G6                                          | 2026-11-04 |
+| `home.location.intro`          | `public/defaults/home.location.intro/` 480, 768, 960, 1600, 2304    | Instagram, https://www.instagram.com/reel/DXPHoGyjZW6/ | 2026-11-04 |
+| `home.location.moverLeft`      | `public/defaults/home.location.moverLeft/` 480, 768, 960, 1024      | Generated, G7                                          | 2026-11-04 |
+| `home.location.moverRight`     | `public/defaults/home.location.moverRight/` 480, 768, 960, 1024     | Generated, G8                                          | 2026-11-04 |
+| `home.location.card.1`         | `public/defaults/home.location.card.1/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.location.card.2`         | `public/defaults/home.location.card.2/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.location.card.3`         | `public/defaults/home.location.card.3/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.location.card.4`         | `public/defaults/home.location.card.4/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.location.card.5`         | `public/defaults/home.location.card.5/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.location.card.6`         | `public/defaults/home.location.card.6/` 480, 768, 960, 1080         | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `home.construction.background` | `public/defaults/home.construction.background/` 480, 768, 960, 1080 | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
+| `home.cta.portrait`            | `public/defaults/home.cta.portrait/` 480, 768, 960, 1080            | Instagram, https://www.instagram.com/p/DcvypZAjSmg/    | 2026-11-04 |
+| `page.menziller`               | `public/defaults/page.menziller/` 480, 768, 960, 1080               | Instagram, https://www.instagram.com/p/DdCAmP8jYsl/    | 2026-11-04 |
+| `page.haqqimizda`              | `public/defaults/page.haqqimizda/` 480, 768, 960, 1080              | Instagram, https://www.instagram.com/reel/DcSoHUvj301/ | 2026-11-04 |
+| `page.kompleks`                | `public/defaults/page.kompleks/` 480, 648                           | Instagram, https://www.instagram.com/p/DctO4F5DY2k/    | 2026-11-04 |
+| `page.yerlesme`                | `public/defaults/page.yerlesme/` 480, 768, 960, 1600                | Instagram, https://www.instagram.com/reel/DXPHoGyjZW6/ | 2026-11-04 |
+| `page.qalereya`                | `public/defaults/page.qalereya/` 480, 768, 960, 1080                | Instagram, https://www.instagram.com/p/DdJCNfnjU8y/    | 2026-11-04 |
+| `page.tikinti`                 | `public/defaults/page.tikinti/` 480, 768, 960, 1080                 | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
+| `page.xeberler`                | `public/defaults/page.xeberler/` 480, 768, 960, 1080                | Instagram, https://www.instagram.com/p/DeMTljLDXZ8/    | 2026-11-04 |
+| `page.elaqe`                   | `public/defaults/page.elaqe/` 480, 768, 960, 1080                   | Instagram, https://www.instagram.com/p/Dc08-GPDYNt/    | 2026-11-04 |
+| `decor.leafShadow.1`           | `public/defaults/decor.leafShadow.1/` 480, 768, 960                 | Generated, G1                                          | 2026-11-04 |
+| `decor.leafShadow.2`           | `public/defaults/decor.leafShadow.2/` 480, 768, 960                 | Generated, G2                                          | 2026-11-04 |
+| `decor.plaster`                | `public/defaults/decor.plaster/` 480, 768, 960                      | Generated, G3                                          | 2026-11-04 |
 
 ## Generation prompts
 

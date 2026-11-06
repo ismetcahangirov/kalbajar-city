@@ -4,6 +4,9 @@ import { locales } from "@/i18n/routing";
 
 import { listOf, paginationSchema, sortSchema } from "./api";
 import { phoneInputSchema } from "./phone";
+import { utmKeys, viewingUtcOffset } from "./lead-fields";
+
+export { utmKeys, viewingUtcOffset };
 
 export const leadTypes = ["inquiry", "viewing", "callback"] as const;
 
@@ -20,14 +23,6 @@ function optional<T extends z.ZodType>(schema: T) {
 }
 
 const utmValue = optional(z.string().trim().max(200));
-
-export const utmKeys = ["source", "medium", "campaign", "term", "content"] as const;
-
-/**
- * A viewing slot is picked in Baku time, wherever the visitor is: the complex
- * is in Azerbaijan, which keeps UTC+4 all year.
- */
-export const viewingUtcOffset = "+04:00";
 
 /** How far ahead a viewing may be booked. */
 const viewingHorizonMs = 366 * 24 * 60 * 60 * 1000;

@@ -1,3 +1,4 @@
+import { getLocale } from "next-intl/server";
 import { Suspense } from "react";
 
 import az from "@/i18n/messages/az.json";
@@ -14,11 +15,17 @@ const copy: SuggestionCopy = {
   ru: ru.LocaleSuggestion,
 };
 
-export function LocaleSuggestion() {
+/** The page's own language is never suggested, so its copy is not sent. */
+function omitCurrent(all: SuggestionCopy, current: string): Partial<SuggestionCopy> {
+  return Object.fromEntries(Object.entries(all).filter(([locale]) => locale !== current));
+}
+
+export async function LocaleSuggestion() {
+  const locale = await getLocale();
   // Client-only and optional, so it never holds back the page.
   return (
     <Suspense fallback={null}>
-      <LocaleSuggestionBanner copy={copy} />
+      <LocaleSuggestionBanner copy={omitCurrent(copy, locale)} />
     </Suspense>
   );
 }

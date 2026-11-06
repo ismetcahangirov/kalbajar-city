@@ -168,6 +168,8 @@ describe("uploading", () => {
     expect(item.variants.map((v) => `${v.format} ${v.width}x${v.height}`)).toEqual([
       "avif 480x320",
       "webp 480x320",
+      "avif 768x512",
+      "webp 768x512",
       "avif 960x640",
       "webp 960x640",
       "avif 1200x800",

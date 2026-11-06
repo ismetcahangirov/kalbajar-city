@@ -166,7 +166,7 @@ video's poster frame).
 - `media/<id>/<width>.<avif|webp>` and `media/<id>/video.mp4`: what pages load
 
 `POST /api/v1/admin/media` checks the bytes (never the declared type), rotates
-by EXIF, strips metadata, and writes AVIF and WebP at 480, 960, 1600 and
+by EXIF, strips metadata, and writes AVIF and WebP at 480, 768, 960, 1600 and
 2400 px wide (never upscaled), a blur placeholder and the dominant colour.
 Videos must be H.264 MP4; the box tree is parsed in TypeScript, as the server
 has no ffmpeg. Pages render images with `<Picture>` (`src/components/ui`),

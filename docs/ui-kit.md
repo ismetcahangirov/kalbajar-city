@@ -178,8 +178,14 @@ a pair under its minimum fails the build.
 
 ## Typography
 
-**Alethia Next** (Pepper Type), self-hosted WOFF2, subset to Latin, Latin
-Extended and Cyrillic, is the only face on public pages. The reference's ITC
+**Alethia Next** (Pepper Type), self-hosted WOFF2, is the only face on public
+pages. Each upright weight is three files (`scripts/fonts-subset.py`, from the
+originals in `assets/fonts/alethia-next`): `Core` (ASCII, the Azerbaijani
+letters, the punctuation in use), preloaded on every page; `Cyrillic` and
+`Extended` (every other character), each fetched through `unicode-range` only
+by a page that shows one of its characters. No glyph is lost. Text never
+painted (`sr-only`) in another script sets `font-system`, or it would fetch a
+file for nothing. The reference's ITC
 Garamond Light and Halvar Breitschrift are commercial and not ours to ship;
 every reference text style is mapped onto Alethia Next (owner decision). Four
 styles ship:

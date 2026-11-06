@@ -105,7 +105,7 @@ test("an editor's 6000 px JPEG reaches a 390 px phone as a variant under 200 KB"
   const item = (await createdResponse.json()) as AdminMedia;
   expect(item).toMatchObject({ width: 6000, height: 4000, illustrative: true });
   expect(item.variants.map((variant) => variant.width)).toEqual([
-    480, 480, 960, 960, 1600, 1600, 2400, 2400,
+    480, 480, 768, 768, 960, 960, 1600, 1600, 2400, 2400,
   ]);
 
   const { db, close } = connect(databaseUrl());

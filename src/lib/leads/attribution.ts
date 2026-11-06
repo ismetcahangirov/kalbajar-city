@@ -1,4 +1,4 @@
-import { utmKeys } from "@/shared/leads";
+import { utmKeys } from "@/shared/lead-fields";
 
 /** Where a visitor came from, as the lead forms send it. Browser only. */
 export type Attribution = {

@@ -23,7 +23,7 @@ import { formatNumber } from "@/i18n/format";
 import { getPathname, Link, useRouter } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { cx } from "@/lib/cx";
-import { publicApartmentStatuses } from "@/shared/apartments";
+import { publicApartmentStatuses } from "@/shared/catalogue-rules";
 import {
   activeGroups,
   catalogueKeys as keys,

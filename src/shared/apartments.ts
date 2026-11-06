@@ -19,14 +19,14 @@ import {
   type ApartmentStatus,
   type RoomArea,
 } from "./inventory";
+import {
+  publicApartmentStatuses,
+  withPriceVisibility,
+  type PublicApartmentStatus,
+} from "./catalogue-rules";
 
-/**
- * The public site never lists `not_for_sale`: those apartments are kept back
- * by the developer and are not on offer.
- */
-export const publicApartmentStatuses = ["available", "reserved", "sold"] as const;
-
-export type PublicApartmentStatus = (typeof publicApartmentStatuses)[number];
+export { publicApartmentStatuses, withPriceVisibility };
+export type { PublicApartmentStatus };
 
 const roomsFilter = listOf(z.coerce.number().int().min(1).max(10));
 const blockCode = z.string().regex(/^[A-Za-z0-9-]{1,8}$/, "Unknown block code");
@@ -66,23 +66,6 @@ export const apartmentListQuerySchema = paginationSchema
   .superRefine(ordered("priceMin", "priceMax"));
 
 export type ApartmentListQuery = z.output<typeof apartmentListQuerySchema>;
-
-/**
- * While prices are hidden (#7), a price filter or a price sort is ignored:
- * filtering would reveal which apartments cost less than a figure, and
- * sorting would reveal their order. The catalogue then sorts naturally.
- */
-export function withPriceVisibility(
-  query: ApartmentListQuery,
-  pricesVisible: boolean,
-): ApartmentListQuery {
-  if (pricesVisible) return query;
-  const rest = { ...query };
-  delete rest.priceMin;
-  delete rest.priceMax;
-  if (rest.sort.field === "price") rest.sort = { field: "number", direction: "asc" };
-  return rest;
-}
 
 type SortKey<F extends string> = F | `-${F}`;
 

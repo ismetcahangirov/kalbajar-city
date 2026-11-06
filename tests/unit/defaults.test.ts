@@ -35,7 +35,11 @@ describe("default images", () => {
   it("are made at the widths the media library would make for the crop", () => {
     for (const slot of defaultSlots) {
       const { widths } = defaults[slot];
-      expect(widths, slot).toEqual(planVariantWidths(widths.at(-1)!));
+      const { smallWidth } = defaultEntries[slot];
+      expect(widths, slot).toEqual([
+        ...(smallWidth ? [smallWidth] : []),
+        ...planVariantWidths(widths.at(-1)!),
+      ]);
     }
   });
 

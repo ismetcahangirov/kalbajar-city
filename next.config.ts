@@ -19,11 +19,20 @@ const contentSecurityPolicy = buildContentSecurityPolicy({
   analytics: true,
 });
 
-const securityHeaders = [
+/** Every response. */
+const transportHeaders = [
   // Two years. Preloading is the domain owner's call, so it is not requested.
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
-  { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
+];
+
+/**
+ * These mean something only on a document. Scripts, styles, fonts and images
+ * are exempt: a page's first load is some twenty of them, and each would carry
+ * about 700 bytes of headers that no browser reads (#30).
+ */
+const documentHeaders = [
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
@@ -73,9 +82,10 @@ const nextConfig: NextConfig = {
   async headers() {
     const noindex = [{ key: "X-Robots-Tag", value: "noindex, nofollow" }];
     return [
-      { source: "/:path*", headers: securityHeaders },
+      { source: "/:path*", headers: transportHeaders },
+      { source: "/((?!_next/static/|defaults/).*)", headers: documentHeaders },
       {
-        source: "/((?!admin$|admin/).*)",
+        source: "/((?!admin$|admin/|_next/static/|defaults/).*)",
         headers: [{ key: "Content-Security-Policy", value: contentSecurityPolicy }],
       },
       { source: "/admin/:path*", headers: noindex },

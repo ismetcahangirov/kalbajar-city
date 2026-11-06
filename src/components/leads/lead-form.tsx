@@ -16,13 +16,9 @@ import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
 import { cx } from "@/lib/cx";
 import { captureAttribution } from "@/lib/leads/attribution";
-import {
-  leadSubmissionSchema,
-  viewingUtcOffset,
-  type LeadSubmission,
-  type LeadType,
-} from "@/shared/leads";
-import { normalizePhone } from "@/shared/phone";
+import { viewingUtcOffset } from "@/shared/lead-fields";
+import type { LeadSubmission, LeadType } from "@/shared/leads";
+import { normalizePhone } from "@/shared/phone-format";
 import { useSubmitLeadMutation } from "@/store/endpoints/leads";
 import { apiErrorOf } from "@/store/errors";
 import { StoreProvider } from "@/store/provider";
@@ -56,6 +52,13 @@ type Values = { name: string; phone: string; email: string; preferredAt: string;
 const empty: Values = { name: "", phone: "", email: "", preferredAt: "", message: "" };
 
 type Notice = "invalid" | "network" | "rateLimited" | "server";
+
+/**
+ * The API's schema brings zod, about 33 KB, which nobody who only reads the
+ * page needs (CLAUDE.md §5). It loads when the visitor reaches a field, and
+ * sending waits for it if it has not arrived yet.
+ */
+const loadSchema = () => import("@/shared/leads").then((module) => module.leadSubmissionSchema);
 
 /** `2026-11-10T11:00` from a datetime-local input, as an ISO time in Baku. */
 function bakuIso(local: string): string | undefined {
@@ -110,6 +113,7 @@ function LeadFormBody({
   const [submitLead, { isLoading }] = useSubmitLeadMutation();
 
   const startedAt = useRef(0);
+  const checking = useRef(false);
   const website = useRef<HTMLInputElement>(null);
   const successRef = useRef<HTMLParagraphElement>(null);
 
@@ -170,7 +174,7 @@ function LeadFormBody({
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isLoading) return;
+    if (isLoading || checking.current) return;
 
     const attribution = captureAttribution();
     const submission = {
@@ -193,7 +197,16 @@ function LeadFormBody({
 
     // The API's own schema; context it rejects (a stray referrer) is the
     // server's to answer, so only the visitor's fields block sending here.
-    const parsed = leadSubmissionSchema.safeParse(submission);
+    checking.current = true;
+    let schema: Awaited<ReturnType<typeof loadSchema>>;
+    try {
+      schema = await loadSchema();
+    } catch {
+      return setNotice({ kind: "network", text: t("error.network") });
+    } finally {
+      checking.current = false;
+    }
+    const parsed = schema.safeParse(submission);
     const invalid = parsed.success
       ? []
       : fields.filter((field) => parsed.error.issues.some((issue) => issue.path[0] === field));
@@ -298,6 +311,7 @@ function LeadFormBody({
           noValidate
           aria-labelledby={labelledBy}
           onSubmit={onSubmit}
+          onFocus={() => void loadSchema().catch(() => undefined)}
           className="@container flex flex-col gap-u2"
         >
           {apartment && <p className="text-body">{t("apartment", { label: apartment.label })}</p>}
@@ -435,6 +449,7 @@ function LeadFormBody({
           noValidate
           aria-labelledby={labelledBy}
           onSubmit={onSubmit}
+          onFocus={() => void loadSchema().catch(() => undefined)}
           className="@container flex flex-col gap-6"
         >
           {apartment && (

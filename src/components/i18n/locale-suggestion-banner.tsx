@@ -28,7 +28,7 @@ function preferredLocale(): Locale | undefined {
  * It never redirects, so crawlers and shared links keep the URL's locale.
  * Dismissal is remembered in this browser.
  */
-export function LocaleSuggestionBanner({ copy }: { copy: SuggestionCopy }) {
+export function LocaleSuggestionBanner({ copy }: { copy: Partial<SuggestionCopy> }) {
   const current = useLocale();
   const hrefFor = useLocaleHref();
   const [suggested, setSuggested] = useState<Locale>();
@@ -50,6 +50,7 @@ export function LocaleSuggestionBanner({ copy }: { copy: SuggestionCopy }) {
 
   if (!suggested) return null;
   const text = copy[suggested];
+  if (!text) return null;
 
   function dismiss() {
     try {

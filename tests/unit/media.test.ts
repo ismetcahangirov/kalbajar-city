@@ -27,10 +27,10 @@ import {
 
 describe("planVariantWidths", () => {
   it("makes every standard width below the original and never upscales", () => {
-    expect(planVariantWidths(6000)).toEqual([480, 960, 1600, 2400]);
-    expect(planVariantWidths(2400)).toEqual([480, 960, 1600, 2400]);
-    expect(planVariantWidths(2000)).toEqual([480, 960, 1600, 2000]);
-    expect(planVariantWidths(960)).toEqual([480, 960]);
+    expect(planVariantWidths(6000)).toEqual([480, 768, 960, 1600, 2400]);
+    expect(planVariantWidths(2400)).toEqual([480, 768, 960, 1600, 2400]);
+    expect(planVariantWidths(2000)).toEqual([480, 768, 960, 1600, 2000]);
+    expect(planVariantWidths(960)).toEqual([480, 768, 960]);
     expect(planVariantWidths(300)).toEqual([300]);
   });
 });
@@ -99,6 +99,8 @@ describe("the image pipeline", () => {
     expect(result.outputs.map((output) => [output.format, output.width, output.height])).toEqual([
       ["avif", 480, 288],
       ["webp", 480, 288],
+      ["avif", 768, 461],
+      ["webp", 768, 461],
       ["avif", 960, 576],
       ["webp", 960, 576],
       ["avif", 1000, 600],

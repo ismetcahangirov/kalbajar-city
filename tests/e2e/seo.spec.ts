@@ -243,8 +243,12 @@ test("the sitemap index and each locale's sitemap parse and list only indexable 
     expect(paths[locale]).toContain(`/xeberler/${article!.slug}`);
     expect(paths[locale]).toContain("/kompleks");
   }
-  expect(paths.en).toEqual(paths.az);
-  expect(paths.ru).toEqual(paths.az);
+  // Other specs publish their own articles while this reads the three sitemaps
+  // one after another, so those can differ between two reads. This test's own
+  // article is checked in each above.
+  const stable = (list: string[] = []) => list.filter((path) => !path.startsWith("/xeberler/e2e-"));
+  expect(stable(paths.en)).toEqual(stable(paths.az));
+  expect(stable(paths.ru)).toEqual(stable(paths.az));
 
   // No listed page is noindex: every page but the apartments, and a few apartments.
   const apartments = paths.az!.filter((path) => path.startsWith("/menziller/"));
