@@ -38,3 +38,16 @@ export function adminDateTime(value: string | Date): string {
   const date = `${pad(baku.getUTCDate())}.${pad(baku.getUTCMonth() + 1)}.${baku.getUTCFullYear()}`;
   return `${date}, ${pad(baku.getUTCHours())}:${pad(baku.getUTCMinutes())}`;
 }
+
+/** `2026-11-10T11:00`, a datetime-local value, for a moment in Baku time. */
+export function bakuInputValue(value: string | Date): string {
+  const baku = new Date(new Date(value).getTime() + bakuOffset);
+  return baku.toISOString().slice(0, 16);
+}
+
+/** The ISO moment a datetime-local value means in Baku time, or null when it does not read. */
+export function bakuInputToIso(value: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}:00+04:00`);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}

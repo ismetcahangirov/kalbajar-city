@@ -93,7 +93,8 @@ export function LayoutForm({
   const sum = breakdownSum(roomValues);
   const busy = creating || updating || removing;
   const readOnly = !abilities.update;
-  useUnsavedChangesGuard(form.formState.isDirty && !form.formState.isSubmitSuccessful);
+  // Every successful save resets the form; a failed one leaves it dirty.
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   const onSubmit = form.handleSubmit(async (values) => {
     setAlert(null);
@@ -104,6 +105,7 @@ export function LayoutForm({
         toast.success(t("layouts.saved"));
       } else {
         const created = await create(values).unwrap();
+        form.reset(form.getValues());
         toast.success(t("layouts.created"));
         router.push(`${base}/${created.id}`);
       }

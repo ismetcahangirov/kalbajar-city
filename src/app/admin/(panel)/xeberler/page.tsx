@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 
 import { ContentNav } from "@/components/admin/content/content-nav";
-import { ModuleComing } from "@/components/admin/shell/module-coming";
+import { NewsList } from "@/components/admin/content/news-list";
+import { PageHeader } from "@/components/admin/shell/page-header";
 import { t } from "@/lib/admin/messages";
 import { adminModules } from "@/lib/admin/navigation";
+import { can } from "@/lib/auth/permissions";
 import { requireUser } from "@/lib/auth/session";
 
 export const metadata: Metadata = { title: t("nav.news") };
 
 export const instant = false;
 
-// The news editor arrives later in #25; the gallery and FAQ are already in the content nav.
+/** The articles: drafts, scheduled and published (#25). */
 export default async function NewsPage() {
-  await requireUser(adminModules.news.permission);
+  const user = await requireUser(adminModules.news.permission);
   return (
     <>
-      <ModuleComing title={t("nav.news")} description={t("module.news")} />
+      <PageHeader title={t("news.title")} description={t("news.lead")} />
       <ContentNav current="news" />
+      <NewsList canCreate={can(user.role, { content: ["create"] })} />
     </>
   );
 }

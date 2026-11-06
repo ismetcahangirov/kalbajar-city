@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, sql, type SQL } from "drizzle-orm";
 import type { z } from "zod";
 
 import type { Executor } from "@/db/client";
@@ -18,6 +18,7 @@ import type {
   newsUpdateSchema,
   publicationSchema,
 } from "@/shared/content";
+import { contentState } from "@/shared/content";
 import {
   hasRichContent,
   richTextMediaIds,
@@ -25,7 +26,7 @@ import {
   type TranslatableRichText,
 } from "@/shared/rich-text";
 
-import { assertMedia, publicationDate, resolveSlug } from "./content";
+import { assertMedia, publicationChange, resolveSlug, stateFilter } from "./content";
 
 type Row = typeof news.$inferSelect;
 
@@ -45,7 +46,9 @@ function toAdmin(row: Row): AdminNews {
     body: row.body,
     coverMediaId: row.coverMediaId,
     status: row.status,
+    state: contentState(row),
     publishedAt: row.publishedAt?.toISOString() ?? null,
+    scheduledAt: row.scheduledAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -88,9 +91,7 @@ export async function listNews(
   db: Executor,
   query: z.output<typeof contentListQuerySchema>,
 ): Promise<Page<AdminNews>> {
-  const where: SQL | undefined = query.status.length
-    ? inArray(news.status, query.status)
-    : undefined;
+  const where: SQL | undefined = stateFilter(news, query.status);
   const [rows, [totals]] = await Promise.all([
     db
       .select()
@@ -163,8 +164,8 @@ export async function updateNews(
     const before = await locked(tx, id);
     if (input.coverMediaId) await assertMedia(tx, [input.coverMediaId], ["image"], "coverMediaId");
     if (input.body) {
-      // A published article cannot be emptied: it would publish a blank page.
-      if (before.status === "published" && !hasRichContent(input.body.az)) {
+      // A published or scheduled article cannot be emptied: it would publish a blank page.
+      if (contentState(before) !== "draft" && !hasRichContent(input.body.az)) {
         throw invalidField("body.az", "A published article needs its Azerbaijani text.");
       }
       const embedded = embeddedMedia(input.body);
@@ -200,7 +201,11 @@ export async function updateNews(
   return result;
 }
 
-/** Publishes (`publish: true`) or withdraws an article. An empty article is not published. */
+/**
+ * Publishes (`publish: true`), schedules (a future `publishedAt`), or
+ * withdraws an article or cancels its schedule (`publish: false`). An empty
+ * article is neither published nor scheduled.
+ */
 export async function setNewsPublished(
   db: Executor,
   {
@@ -216,21 +221,15 @@ export async function setNewsPublished(
     if (publish && !hasRichContent(before.body.az)) {
       throw invalidField("body.az", "Write the article's Azerbaijani text before publishing it.");
     }
+    const change = publish ? publicationChange(before, input?.publishedAt) : null;
     const [after] = await tx
       .update(news)
-      .set(
-        publish
-          ? {
-              status: "published",
-              publishedAt: publicationDate(before.publishedAt, input?.publishedAt),
-            }
-          : { status: "draft" },
-      )
+      .set(change ?? { status: "draft", scheduledAt: null })
       .where(eq(news.id, id))
       .returning();
     await audit(tx, {
       actorId: user.id,
-      action: `${entityType}.${publish ? "publish" : "unpublish"}`,
+      action: `${entityType}.${change ? (change.status === "draft" ? "schedule" : "publish") : "unpublish"}`,
       entityType,
       entityId: id,
       before,
