@@ -238,8 +238,9 @@ jobs:
   # seeded database, as a first visit (the preloader included). Desktop must
   # score 93+; CLS must stay under 0.05 on both form factors. The mobile
   # score is measured and reported against the same 93 but does not fail the
-  # job yet: it is at ~84, held back by the bytes the home page requests
-  # before its LCP under simulated slow 4G, which is tracked in #30.
+  # job yet: home is at 0.92 (the run of #93), still just under; the other
+  # three routes already score 0.93 or more. Once home meets the budget, the
+  # job turns the mobile score into an error (#30).
   lighthouse:
     name: Lighthouse
     runs-on: ubuntu-latest

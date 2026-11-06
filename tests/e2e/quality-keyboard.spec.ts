@@ -17,9 +17,20 @@ import { localized, publicRoutes, withArticle } from "./public-routes";
  * on the way. Then the main journey, home → catalogue → apartment →
  * inquiry, is made without a pointer.
  *
- * The menu's focus trap, the catalogue filters, the plan selector, the
- * lightbox and the forms each have their own keyboard tests next to their
- * features (shell, catalogue-filters, complex, content and leads specs).
+ * What each control delegated elsewhere is driven by in its own spec, with
+ * the keys alone: the menu's focus trap (shell.spec.ts, x, the desktop filters (catalogue-filters.spec.ts, "Segmented
+ * toggles with Space and RangeHairline moves with the arrows"), the complex
+ * selector (complex.spec.ts, "a block, a floor and an apartment are chosen
+ * without a pointer" and "the list fallback reaches an apartment"), the plan
+ * viewer (catalogue.spec.ts, "shows as sold on the next request, and its plan
+ * opens with the keyboard"), the lightbox (content.spec.ts, "works with the
+ * keyboard alone, announces the position and returns focus") and the /elaqe
+ * form (leads.spec.ts, "the form is completable with the keyboard alone and
+ * announces its errors"). The audit found two controls no spec drove without
+ * a pointer, the catalogue's sort and its phone filter drawer; they are at
+ * the end of this file. The apartment page's plan tabs (ui/tabs.tsx) are not
+ * covered: they only exist for an apartment whose floor has a plan, which the
+ * seed has none of.
  */
 
 type Stop = {
@@ -265,5 +276,56 @@ test.describe("the inquiry journey", () => {
     } finally {
       await close();
     }
+  });
+});
+
+/** Presses Tab until `target` has focus, as a keyboard user would. */
+async function tabTo(page: Page, target: Locator, limit = 200) {
+  for (let i = 0; i < limit; i++) {
+    if (await target.evaluate((element) => element === document.activeElement)) return;
+    await page.keyboard.press("Tab");
+  }
+  throw new Error("Tab never reached the element");
+}
+
+// The two catalogue controls no other spec drives without a pointer (see the
+// audit note at the top of the file).
+test.describe("the catalogue's own controls", () => {
+  test("the sort is reached with Tab and changed with the arrow keys", async ({ page }) => {
+    await page.goto("/menziller");
+    await waitForHydration(page);
+    const sort = page.getByLabel(az.Catalogue.filters.sort);
+    await tabTo(page, sort);
+    await page.keyboard.press("ArrowDown");
+    await expect(page).toHaveURL(/\/menziller\?sira=[a-z-]+$/);
+    await waitForHydration(page);
+    await expect(page.getByLabel(az.Catalogue.filters.sort)).not.toHaveValue("");
+  });
+
+  test("the phone filter drawer opens with Enter, keeps Tab inside and closes on Escape", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "the drawer is the layout below lg; the sidebar has its own test");
+    await page.goto("/menziller");
+    await waitForHydration(page);
+    const open = page.getByRole("button", { name: /^Filtr/ });
+    await tabTo(page, open);
+    await page.keyboard.press("Enter");
+    const drawer = page.getByRole("dialog", { name: az.Catalogue.filters.heading });
+    await expect(drawer).toBeVisible();
+    await expect(drawer.getByRole("button", { name: az.Catalogue.filters.close })).toBeFocused();
+
+    // More presses than the drawer has stops, both ways: focus never leaves it.
+    for (const key of ["Tab", "Shift+Tab"]) {
+      for (let i = 0; i < 40; i++) {
+        await page.keyboard.press(key);
+        expect(await drawer.evaluate((node) => node.contains(document.activeElement))).toBe(true);
+      }
+    }
+
+    await page.keyboard.press("Escape");
+    await expect(drawer).toBeHidden();
+    await expect(open).toBeFocused();
   });
 });
