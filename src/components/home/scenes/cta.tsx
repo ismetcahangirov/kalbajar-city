@@ -1,14 +1,12 @@
 import { DeferredLeadForm } from "@/components/leads/deferred-lead-form";
 import { GridLines } from "@/components/motion/grid-lines";
 import { Scrub } from "@/components/motion/scrub";
-import { defaultImage } from "@/content/defaults";
-import type { Locale } from "@/i18n/routing";
 import type { HomeSection } from "@/lib/public/home";
 
 import { Localized } from "../localized";
 import { langOf, Photo } from "./photo";
 
-type CtaProps = Extract<HomeSection, { kind: "cta" }> & { locale: Locale };
+type CtaProps = Extract<HomeSection, { kind: "cta" }>;
 
 /**
  * S10 (pyzhevsky-home.md §3) on sand: the portrait centred in the left half
@@ -18,7 +16,7 @@ type CtaProps = Extract<HomeSection, { kind: "cta" }> & { locale: Locale };
  * the form's height meanwhile. On phones the portrait is left out and the
  * form takes the full width.
  */
-export function Cta({ title, body, locale }: CtaProps) {
+export function Cta({ title, body, portrait }: CtaProps) {
   return (
     <section
       data-theme="sand"
@@ -34,7 +32,7 @@ export function Cta({ title, body, locale }: CtaProps) {
             to={{ translate: "0 -16.67%" }}
             className="h-[120%]"
           >
-            <Photo image={defaultImage("home.cta.portrait", locale)} sizes="21vw" />
+            <Photo image={portrait} sizes="21vw" />
           </Scrub>
         </div>
       </div>

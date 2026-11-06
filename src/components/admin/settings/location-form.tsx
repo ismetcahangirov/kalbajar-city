@@ -16,6 +16,7 @@ import { useUpdateLocationSectionMutation } from "@/store/endpoints/admin-settin
 
 import { ListEditor } from "./list-editor";
 import { MediaField } from "./media-field";
+import { MediaListField } from "./media-list-field";
 import { PlaceholderFlag } from "./placeholders";
 import { SettingsForm } from "./settings-form";
 
@@ -39,6 +40,13 @@ export function LocationForm({
   const distances = useFieldArray({ control: form.control, name: "distances" });
   const values = useWatch({ control: form.control, name: "distances" });
   const map = useWatch({ control: form.control, name: "mapMediaId" });
+  const intro = useWatch({ control: form.control, name: "introMediaId" });
+  const moverLeft = useWatch({ control: form.control, name: "moverLeftMediaId" });
+  const moverRight = useWatch({ control: form.control, name: "moverRightMediaId" });
+  const pick =
+    (name: "mapMediaId" | "introMediaId" | "moverLeftMediaId" | "moverRightMediaId") =>
+    (id: string | null) =>
+      form.setValue(name, id, { shouldDirty: true, shouldValidate: true });
 
   const distanceLabel = (index: number) => {
     const place = (values?.[index]?.place as { az?: string } | undefined)?.az?.trim();
@@ -63,9 +71,43 @@ export function LocationForm({
         value={map ?? null}
         disabled={readOnly}
         canUpload={canUpload}
-        onChange={(id) =>
-          form.setValue("mapMediaId", id, { shouldDirty: true, shouldValidate: true })
-        }
+        onChange={pick("mapMediaId")}
+      />
+      <MediaField
+        label={t("settings.location.intro")}
+        value={intro ?? null}
+        disabled={readOnly}
+        canUpload={canUpload}
+        hasDefault
+        onChange={pick("introMediaId")}
+      />
+      <MediaField
+        label={t("settings.location.moverLeft")}
+        value={moverLeft ?? null}
+        disabled={readOnly}
+        canUpload={canUpload}
+        hasDefault
+        onChange={pick("moverLeftMediaId")}
+      />
+      <MediaField
+        label={t("settings.location.moverRight")}
+        value={moverRight ?? null}
+        disabled={readOnly}
+        canUpload={canUpload}
+        hasDefault
+        onChange={pick("moverRightMediaId")}
+      />
+      <MediaListField<FormValues>
+        name="cardMediaIds"
+        control={form.control}
+        legend={t("settings.location.cards")}
+        description={t("settings.location.cardsHint")}
+        itemLabel={(index) => t("settings.location.card", { index: index + 1 })}
+        addLabel={t("settings.location.addCard")}
+        emptyText={t("settings.location.noCards")}
+        max={6}
+        disabled={readOnly}
+        canUpload={canUpload}
       />
       <div className="flex flex-col gap-2">
         <PlaceholderFlag path="homeLocation.directions" />

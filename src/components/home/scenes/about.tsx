@@ -2,14 +2,12 @@ import { GridLines } from "@/components/motion/grid-lines";
 import { Reveal } from "@/components/motion/reveal";
 import { Scene, SceneLayer } from "@/components/motion/scene";
 import { Scrub } from "@/components/motion/scrub";
-import { defaultImage } from "@/content/defaults";
-import type { Locale } from "@/i18n/routing";
 import type { HomeSection } from "@/lib/public/home";
 
 import { Localized } from "../localized";
 import { fullBleed, langOf, Photo } from "./photo";
 
-type AboutProps = Extract<HomeSection, { kind: "about" }> & { locale: Locale };
+type AboutProps = Extract<HomeSection, { kind: "about" }>;
 
 /**
  * S1a and S1c (pyzhevsky-home.md §3). First the full-bleed `about` image
@@ -21,7 +19,7 @@ type AboutProps = Extract<HomeSection, { kind: "about" }> & { locale: Locale };
  * Stacked, on phones and with reduced motion, it is the image, the title,
  * the background and the card one after another.
  */
-export function About({ eyebrow, title, body, image, locale }: AboutProps) {
+export function About({ eyebrow, title, body, image, background }: AboutProps) {
   return (
     <>
       <Scene theme="dark" length={3} underNext aria-labelledby="haqqinda">
@@ -64,7 +62,7 @@ export function About({ eyebrow, title, body, image, locale }: AboutProps) {
             to={{ translate: "0 calc(100svh - 100%)" }}
             className="h-[150svh]"
           >
-            <Photo image={defaultImage("home.about.background", locale)} sizes={fullBleed} />
+            <Photo image={background} sizes={fullBleed} />
           </Scrub>
         </SceneLayer>
         <div className="relative px-layout py-u4 desk:grid desk:grid-cols-12 pinned:py-[50svh]">

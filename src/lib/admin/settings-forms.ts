@@ -198,6 +198,14 @@ export const locationFormSchema = z.object({
   mapMediaId: z.uuid().nullable(),
   directions: optionalTranslatableSchema,
   distances: z.array(z.object({ place: translatableSchema, minutes: intInput(1, 10_000) })).max(20),
+  introMediaId: z.uuid().nullable().default(null),
+  moverLeftMediaId: z.uuid().nullable().default(null),
+  moverRightMediaId: z.uuid().nullable().default(null),
+  cardMediaIds: z
+    .array(z.object({ mediaId: z.uuid() }))
+    .max(6)
+    .default([])
+    .transform((cards) => cards.map((card) => card.mediaId)),
 });
 
 export type LocationForm = z.input<typeof locationFormSchema>;
@@ -212,5 +220,9 @@ export function locationToForm(value: HomeSectionContentByKey["location"]): Loca
       place: textToForm(distance.place),
       minutes: String(distance.minutes),
     })),
+    introMediaId: value.introMediaId ?? null,
+    moverLeftMediaId: value.moverLeftMediaId ?? null,
+    moverRightMediaId: value.moverRightMediaId ?? null,
+    cardMediaIds: (value.cardMediaIds ?? []).map((mediaId) => ({ mediaId })),
   };
 }
