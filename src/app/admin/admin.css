@@ -121,6 +121,8 @@
     [data-slot="select-trigger"],
     [data-slot="select-item"],
     [data-slot="input"],
+    /* FormControl replaces an input's data-slot with its own. */
+    input[data-slot="form-control"],
     [data-slot="tabs-trigger"],
     [data-slot="dropdown-menu-item"],
     [data-slot="dropdown-menu-checkbox-item"] {
@@ -128,7 +130,9 @@
     }
 
     [data-slot="button"][data-size^="icon"],
-    [data-slot="sidebar-trigger"] {
+    [data-slot="sidebar-trigger"],
+    [data-slot="tabs-trigger"],
+    [data-slot="breadcrumb-link"] {
       min-width: var(--spacing-target);
     }
 

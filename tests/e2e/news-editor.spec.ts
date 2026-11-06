@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import type { AdminNews } from "@/shared/content";
 import { paragraphs } from "@/shared/rich-text";
@@ -10,14 +10,37 @@ import { ensureAccount, signIn, uploadImage, waitForShell } from "./console";
 /** CRON_SECRET of the E2E server (playwright.config.ts). */
 const cronSecret = "e2e-cron-secret";
 
-// Articles are published and removed again; the viewport does not matter.
-test.skip(({ isMobile }) => isMobile, "publishing does not depend on the viewport");
+// The first test runs on the phone too (the issue's definition of done). The
+// others are viewport-independent and run on the desktop project only.
+/** Fails when the page scrolls sideways or a control in `scope` is under 44 px. */
+async function expectPhoneFit(page: Page, scope: string): Promise<void> {
+  const report = await page.evaluate((selector) => {
+    const root = document.querySelector(selector);
+    const small = [
+      ...(root?.querySelectorAll("button, a, input:not([type=file]), [role=tab], [role=textbox]") ??
+        []),
+    ]
+      .map((element) => ({ element, box: element.getBoundingClientRect() }))
+      .filter(({ box }) => box.width > 0 && box.height > 0 && (box.width < 44 || box.height < 44))
+      .map(({ element, box }) => `${element.outerHTML.slice(0, 90)} ${box.width}x${box.height}`);
+    return {
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      small,
+    };
+  }, scope);
+  expect(report.overflow).toBeLessThanOrEqual(0);
+  expect(report.small).toEqual([]);
+}
+
+const desktopOnly = "the rest of the file does not depend on the viewport";
 
 test("an editor writes an article in three languages with a cover and publishes it", async ({
   page,
   baseURL,
+  isMobile,
 }) => {
-  const email = "e2e-news@test.kalbajarcity.com";
+  // One account per project, so the two projects never share a session.
+  const email = `e2e-news${isMobile ? "-phone" : ""}@test.kalbajarcity.com`;
   await ensureAccount("editor", email, "E2E News Editor");
   await signIn(page, email, baseURL!);
   const run = randomUUID().slice(0, 6);
@@ -40,6 +63,7 @@ test("an editor writes an article in three languages with a cover and publishes 
     await page.getByRole("link", { name: "Yeni xəbər" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Yeni xəbər");
 
+    if (isMobile) await expectPhoneFit(page, "main");
     const title = page.getByRole("group", { name: "Başlıq", exact: true });
     const body = page.getByRole("group", { name: "Mətn", exact: true });
     for (const [locale, name] of [
@@ -72,6 +96,7 @@ test("an editor writes an article in three languages with a cover and publishes 
     await coverField.getByRole("button", { name: "Şəkil seç" }).click();
     const picker = page.getByRole("dialog", { name: "Üz şəkli" });
     await picker.getByRole("searchbox").fill(`e2e-news-cover-${run}`);
+    if (isMobile) await expectPhoneFit(page, '[role="dialog"]');
     await picker.getByRole("button", { name: `Seç: e2e-news-cover-${run}.jpg` }).click();
     await expect(picker).toBeHidden();
     await expect(coverField).toContainText(`e2e-news-cover-${run}.jpg`);
@@ -112,7 +137,9 @@ test("an editor writes an article in three languages with a cover and publishes 
 test("a scheduled article appears on the cached list once the cron trigger runs", async ({
   page,
   baseURL,
+  isMobile,
 }) => {
+  test.skip(isMobile, desktopOnly);
   const email = "e2e-news-schedule@test.kalbajarcity.com";
   await ensureAccount("editor", email, "E2E News Editor");
   await signIn(page, email, baseURL!);
@@ -157,7 +184,9 @@ test("a scheduled article appears on the cached list once the cron trigger runs"
 test("edits made after a save are unsaved: publishing waits and leaving asks", async ({
   page,
   baseURL,
+  isMobile,
 }) => {
+  test.skip(isMobile, desktopOnly);
   const email = "e2e-news-dirty@test.kalbajarcity.com";
   await ensureAccount("editor", email, "E2E News Editor");
   await signIn(page, email, baseURL!);
@@ -229,7 +258,9 @@ test("edits made after a save are unsaved: publishing waits and leaving asks", a
 test("a scheduled article whose time has long passed shows as overdue", async ({
   page,
   baseURL,
+  isMobile,
 }) => {
+  test.skip(isMobile, desktopOnly);
   const email = "e2e-news-overdue@test.kalbajarcity.com";
   await ensureAccount("editor", email, "E2E News Editor");
   await signIn(page, email, baseURL!);
