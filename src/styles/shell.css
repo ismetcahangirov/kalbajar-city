@@ -537,9 +537,12 @@
   /* The curtain covers the first screen and the page cannot scroll yet, so
      nothing below the hero can show. On a phone, where bandwidth is short and
      no frame takes its height from its image, those images wait for the
-     curtain to go and leave the way to the hero image and the page's script. */
+     curtain to go and leave the way to the hero's panel image (the LCP) and
+     the page's script. The poster in the hero tile waits too: the intro keeps
+     the tile clipped until the curtain has faded (A2), which leaves it two
+     `--duration-normal` steps to arrive before it is seen. */
   @media (width < 41.75rem) {
-    html[data-preloader="on"] main img:not([data-home-hero] img) {
+    html[data-preloader="on"] main img:not([data-hero-panel] img) {
       display: none;
       animation: shell-preloader-release 1ms 8s both;
     }

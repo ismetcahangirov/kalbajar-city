@@ -66,6 +66,16 @@ const nextConfig: NextConfig = {
     globalNotFound: true,
     // forbidden() answers 403 on console pages a role may not open.
     authInterrupts: true,
+    // Fewer, larger client chunks (#30). Home's first view loaded eleven
+    // scripts, several of them under 5 KB; on a slow phone each one waits for
+    // a free connection behind the fonts and the hero image, which is what
+    // kept home's mobile LCP over budget. Merging the small app chunks brings
+    // it to eight. React and the Next runtime stay separate chunks: merged,
+    // they evaluate as one longer task, which raised Total Blocking Time on
+    // every page. No route ships more code (`pnpm budget:js`).
+    turbopackChunking: {
+      minChunkSize: 150000,
+    },
   },
   images: {
     formats: ["image/avif", "image/webp"],

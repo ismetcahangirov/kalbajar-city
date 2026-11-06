@@ -235,12 +235,9 @@ jobs:
 
   # Lighthouse on home, the catalogue, an apartment and an article, median of
   # three runs each (CLAUDE.md §5, #30), against the production build and a
-  # seeded database, as a first visit (the preloader included). Desktop must
-  # score 93+; CLS must stay under 0.05 on both form factors. The mobile
-  # score is measured and reported against the same 93 but does not fail the
-  # job yet: home is at 0.92 (the run of #93), still just under; the other
-  # three routes already score 0.93 or more. Once home meets the budget, the
-  # job turns the mobile score into an error (#30).
+  # seeded database, as a first visit (the preloader included). Both form
+  # factors must score 93+ and keep CLS under 0.05. Home on mobile has the
+  # least margin (0.94 in the run of #102); the other routes score 1.00.
   lighthouse:
     name: Lighthouse
     runs-on: ubuntu-latest
@@ -296,7 +293,7 @@ jobs:
           --collect.url=http://localhost:3011/menziller
           --collect.url=http://localhost:3011/menziller/blok-c-menzil-102
           --collect.url=http://localhost:3011/xeberler/lighthouse-meqale
-      - name: Mobile, CLS enforced, score reported
+      - name: Mobile, enforced
         if: success() || failure()
         run: >-
           pnpm exec lhci autorun --config=tests/lighthouse/lighthouserc.mobile.json

@@ -221,9 +221,10 @@ written yet. Items 1 to 5 are the checks that belong in it too.
 ### 5.1 PageSpeed, mobile
 
 - **What:** run PageSpeed Insights on production for home and an apartment,
-  mobile. LCP is below 2.5 s on both. CLS below 0.05. Home's Lighthouse
-  Performance in CI is still under 93 on mobile (0.92 at #93), so record the
-  live numbers here, not only CI's.
+  mobile. LCP is below 2.5 s on both. CLS below 0.05. CI has enforced
+  Lighthouse 93+ on mobile since #102, but home passes with little margin
+  (0.94) and CI measures a local server, so record the live numbers here,
+  not only CI's.
 - **Who:** maintainer
 - **Evidence:**
 

@@ -262,12 +262,13 @@ budget when the shell gets lighter; never raise it to fit a change.
 
 Lighthouse runs in CI (the `Lighthouse` job, `tests/lighthouse/`) on home,
 the catalogue, an apartment and an article, median of three, as a first
-visit against the production build. Desktop must score 93+ and CLS stay
-under 0.05 on both form factors. The mobile score is reported against the
-same 93 but does not fail CI yet: home is just below budget (0.92, simulated
-LCP about 3.3 s), and that job turns it into an error once it is met with
-margin (#30). Every kilobyte requested before home's LCP costs about 7.5 ms,
-so weigh any new byte on the first view.
+visit against the production build. Both form factors must score 93+ and
+keep CLS under 0.05. Home is the tightest on mobile (0.94, simulated LCP
+about 3.06 s, #102). Every kilobyte requested before home's LCP costs about
+7.5 ms. An extra request can cost far more: under simulated slow 4G a page
+gets six connections, the fonts, stylesheet and hero image take them first,
+and each script queues behind them (two 1 KB chunks cost home 75 ms). Weigh
+any new byte or chunk on the first view.
 
 Quality gates in E2E (#30), all part of `CI complete`: every public route ×
 `az`/`en`/`ru` × 320–1920 px without horizontal scroll
