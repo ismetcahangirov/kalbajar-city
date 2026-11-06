@@ -22,6 +22,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // On a laptop Playwright would start half the logical cores as workers (8
+  // here), each with its own Chromium, all hitting one production server and
+  // one database while other builds may be running. Under that load
+  // sign-outs, catalogue queries and the lightbox timed out and passed alone
+  // (issue comment, 2026-11-02, #30). Four workers keep the suite quick and
+  // within what one machine serves. CI keeps the runner default.
+  workers: process.env.CI ? undefined : 4,
   // Assertions wait up to 10 s, not 5: under a full parallel run (and on a
   // laptop building other worktrees) a sign-out redirect or a catalogue
   // query has taken longer than 5 s, failing tests that pass alone (#30).
