@@ -293,6 +293,26 @@ test.describe("page transition", () => {
       await expect(curtain).not.toHaveAttribute("data-played");
       await expect(curtain).toBeHidden();
     });
+
+    // On a slow device the address changes while the new page is still
+    // rendering; focus still reaches its heading once it is there.
+    test("moves focus to a heading that renders late", async ({ page, isMobile }) => {
+      test.skip(isMobile, "the slow-down is measured on desktop");
+      await page.goto("/haqqimizda");
+      await waitForHydration(page);
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+      await cdp.send("Network.enable");
+      await cdp.send("Network.emulateNetworkConditions", {
+        offline: false,
+        latency: 400,
+        downloadThroughput: 200_000,
+        uploadThroughput: 200_000,
+      });
+      await page.getByRole("banner").getByRole("link", { name: az.Shell.chooseApartment }).click();
+      await expect(page).toHaveURL(/\/menziller$/);
+      await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+    });
   });
 
   test("leaves back and forward to the browser", async ({ page, isMobile }) => {
