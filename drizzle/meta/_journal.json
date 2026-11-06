@@ -50,6 +50,13 @@
       "when": 1793875903803,
       "tag": "0006_content_scheduling",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793956611718,
+      "tag": "0007_invitations",
+      "breakpoints": true
     }
   ]
 }

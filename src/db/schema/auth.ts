@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -7,6 +8,8 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 // Better Auth's tables (#9). Ids are Better Auth's text ids, not uuids. This
@@ -112,3 +115,31 @@ export const loginThrottles = pgTable("login_throttles", {
   lastFailureAt: timestamp("last_failure_at", { withTimezone: true }).notNull().defaultNow(),
   lockedUntil: timestamp("locked_until", { withTimezone: true }),
 });
+
+/**
+ * An invitation to the console (#27). Only the SHA-256 of the e-mailed token is
+ * stored. It is pending until accepted, revoked or past `expiresAt`; sending it
+ * again replaces the token and the deadline, so an address has one row pending.
+ */
+export const invitations = pgTable(
+  "invitations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Lower case, like `users.email`. */
+    email: text("email").notNull(),
+    role: userRole("role").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt,
+    updatedAt,
+  },
+  (t) => [
+    uniqueIndex("invitations_pending_email_idx")
+      .on(t.email)
+      .where(sql`${t.acceptedAt} is null and ${t.revokedAt} is null`),
+    index("invitations_invited_by_idx").on(t.invitedBy),
+  ],
+);

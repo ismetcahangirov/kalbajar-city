@@ -179,33 +179,6 @@ describe("user management through Better Auth's admin endpoints", () => {
     }
   });
 
-  it("lets an admin change a sales account but not the owner's", async () => {
-    const target = await createUser("sales");
-    const set = await call("/admin/set-role", {
-      cookie: people.admin.cookie,
-      body: { userId: target.id, role: "editor" },
-    });
-    expect(set.status).toBe(200);
-    expect(await lastAudit(target.id, "user.set_role")).toMatchObject({
-      actorId: people.admin.id,
-      before: { role: "sales" },
-      after: { role: "editor" },
-    });
-
-    const ban = await call("/admin/ban-user", {
-      cookie: people.admin.cookie,
-      body: { userId: people.owner.id },
-    });
-    expect(ban.status).toBe(403);
-    expect(await ban.json()).toMatchObject({ code: "OWNER_PROTECTED" });
-
-    const promote = await call("/admin/set-role", {
-      cookie: people.admin.cookie,
-      body: { userId: target.id, role: "owner" },
-    });
-    expect(promote.status).toBe(403);
-  });
-
   it("lets nobody impersonate another account", async () => {
     const response = await call("/admin/impersonate-user", {
       cookie: people.owner.cookie,
@@ -214,21 +187,61 @@ describe("user management through Better Auth's admin endpoints", () => {
     expect(response.status).toBe(403);
   });
 
-  it("signs a deactivated account out and keeps it out", async () => {
-    const target = await createUser("editor");
-    const ban = await call("/admin/ban-user", {
-      cookie: people.owner.cookie,
-      body: { userId: target.id },
+  it("lets an admin set a sales account's password but not the owner's", async () => {
+    const target = await createUser("sales");
+    const set = await call("/admin/set-user-password", {
+      cookie: people.admin.cookie,
+      body: { userId: target.id, newPassword: "another long passphrase" },
     });
-    expect(ban.status).toBe(200);
-    expect(await lastAudit(target.id, "user.deactivate")).toMatchObject({
-      actorId: people.owner.id,
-      before: { banned: false },
-      after: { banned: true },
+    expect(set.status).toBe(200);
+    const owner = await call("/admin/set-user-password", {
+      cookie: people.admin.cookie,
+      body: { userId: people.owner.id, newPassword: "another long passphrase" },
     });
-    page.cookie = target.cookie;
-    await expect(requireUser()).rejects.toThrow("redirect:/admin/giris");
-    expect((await signIn(target.email)).status).toBe(403);
+    expect(owner.status).toBe(403);
+    expect(await owner.json()).toMatchObject({ code: "OWNER_PROTECTED" });
+  });
+
+  // The last-owner rule lives behind /api/v1/admin/users (tests/db/users.test.ts);
+  // an endpoint that changes a role or ends an account would go round it.
+  for (const [path, extra] of [
+    ["/admin/set-role", { role: "editor" }],
+    ["/admin/update-user", { data: { role: "editor", banned: true } }],
+    ["/admin/ban-user", {}],
+    ["/admin/unban-user", {}],
+    ["/admin/remove-user", {}],
+  ] as const) {
+    it(`closes ${path} even to an owner acting on another owner`, async () => {
+      const target = await createUser("owner");
+      const response = await call(path, {
+        cookie: people.owner.cookie,
+        body: { userId: target.id, ...extra },
+      });
+      expect(response.status).toBe(404);
+      const [row] = await db.select().from(users).where(eq(users.id, target.id));
+      expect(row).toMatchObject({ role: "owner", banned: false });
+    });
+  }
+
+  it("does not let an account change its own role or ban itself through its profile", async () => {
+    const target = await createUser("owner");
+    await call("/update-user", {
+      cookie: target.cookie,
+      body: { role: "editor", banned: true, name: "Renamed" },
+    });
+    const [row] = await db.select().from(users).where(eq(users.id, target.id));
+    expect(row).toMatchObject({ role: "owner", banned: false });
+  });
+
+  it("offers no way to delete one's own account", async () => {
+    const target = await createUser("owner");
+    const response = await call("/delete-user", {
+      cookie: target.cookie,
+      body: { password },
+    });
+    expect(response.status).toBeGreaterThanOrEqual(400);
+    const [row] = await db.select().from(users).where(eq(users.id, target.id));
+    expect(row).toBeDefined();
   });
 });
 

@@ -6,10 +6,15 @@ export const adminPaths = {
   home: "/admin",
   login: "/admin/giris",
   resetPassword: "/admin/sifre-berpa",
+  invitation: "/admin/devet",
 } as const;
 
 /** Console pages a signed-out visitor may open. */
-export const publicAdminPaths: readonly string[] = [adminPaths.login, adminPaths.resetPassword];
+export const publicAdminPaths: readonly string[] = [
+  adminPaths.login,
+  adminPaths.resetPassword,
+  adminPaths.invitation,
+];
 
 export const adminApiPath = "/api/v1/admin";
 
