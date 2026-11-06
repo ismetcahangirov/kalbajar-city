@@ -38,7 +38,7 @@ test("a rare Latin letter comes from the extended file, not the fallback", async
   expect(loaded.join()).toContain("Alethia Extended");
 });
 
-test("on a phone, images below the hero wait for the preloader, and nothing moves when they appear", async ({
+test("on a phone, every image but the hero's panel waits for the preloader, and nothing moves when they appear", async ({
   page,
   context,
   isMobile,
@@ -53,11 +53,14 @@ test("on a phone, images below the hero wait for the preloader, and nothing move
   const html = page.locator("html");
   await expect(html).toHaveAttribute("data-preloader", "on");
 
-  // The hero is requested as usual; what is below it is not, and cannot show.
+  // The hero's panel, the LCP image, is requested as usual. The poster in the
+  // hero tile and what is below the hero are not, and cannot show yet.
   await expect
     .poll(() => images.some((url) => url.includes("/defaults/home.hero.panel/")))
     .toBe(true);
-  expect(images.filter((url) => /\/defaults\/home\.(about|stats)\./.test(url))).toEqual([]);
+  expect(
+    images.filter((url) => /\/defaults\/home\.(hero\.poster|about|stats)\./.test(url)),
+  ).toEqual([]);
   const heightUnder = await page.evaluate(() => document.documentElement.scrollHeight);
 
   await expect(html).toHaveAttribute("data-preloader", "done", { timeout: 10_000 });
@@ -68,6 +71,10 @@ test("on a phone, images below the hero wait for the preloader, and nothing move
       ).length,
   );
   expect(hidden).toBe(0);
+  // The poster is in the first screen, so it is fetched as soon as it may show.
+  await expect
+    .poll(() => images.some((url) => url.includes("/defaults/home.hero.poster/")))
+    .toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(heightUnder);
 });
 
