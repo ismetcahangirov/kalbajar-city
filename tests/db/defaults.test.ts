@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, inject, it, vi } from "vitest";
 
 import { defaultImage } from "@/content/defaults";
 import { connect } from "@/db/client";
-import { constructionUpdates, homeSections, settings } from "@/db/schema";
+import { constructionUpdates, homeSections, media, settings } from "@/db/schema";
 import * as seed from "@/db/seed/data";
 
 // Outside Next, "use cache" is inert; the cache calls do nothing here.
@@ -57,6 +57,38 @@ describe("empty image slots", () => {
     expect(byKind.construction).toMatchObject({
       update: { image: defaultImage("home.construction.background", "en") },
     });
+  });
+
+  it("show the construction background the console chose, until the update has an image", async () => {
+    const [image] = await db
+      .insert(media)
+      .values({
+        key: "defaults-test/construction.jpg",
+        kind: "image",
+        mimeType: "image/jpeg",
+        size: 10,
+        width: 1200,
+        height: 800,
+        alt: { az: "Tikinti sahəsi" },
+        variants: [],
+      })
+      .returning();
+    try {
+      await db
+        .update(homeSections)
+        .set({ content: { ...seed.homeSections.construction, backgroundMediaId: image!.id } })
+        .where(eq(homeSections.key, "construction"));
+      const section = (await getHomePage("en")).find((s) => s.kind === "construction");
+      expect(section).toMatchObject({
+        update: { image: { src: expect.stringContaining("defaults-test/construction.jpg") } },
+      });
+    } finally {
+      await db
+        .update(homeSections)
+        .set({ content: seed.homeSections.construction })
+        .where(eq(homeSections.key, "construction"));
+      await db.delete(media).where(eq(media.id, image!.id));
+    }
   });
 
   it("keep the card-zoom section, with the default scenes, when the console has none", async () => {

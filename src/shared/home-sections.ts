@@ -80,7 +80,11 @@ export const homeSectionContentSchemas = {
     /** The travel-time cards' images, used in turn; the bundled six while it is empty. */
     cardMediaIds: z.array(mediaId).max(6).nullish(),
   }),
-  construction: z.object({ title: text }),
+  construction: z.object({
+    title: text,
+    /** Shown while the latest published update has no image; the bundled one while it is empty. */
+    backgroundMediaId: mediaId.nullish(),
+  }),
   process: z.object({
     title: text,
     steps: z.array(z.object({ title: text, body: text })).min(1),
@@ -146,6 +150,8 @@ export function homeSectionMedia({ key, content }: { key: HomeSectionKey; conten
         videos: [],
       };
     }
+    case "construction":
+      return { images: ids(section.content.backgroundMediaId), videos: [] };
     case "cta":
       return { images: ids(section.content.portraitMediaId), videos: [] };
     default:

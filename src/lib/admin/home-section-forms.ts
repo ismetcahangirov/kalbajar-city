@@ -142,6 +142,20 @@ export function titleToForm(value: { title: HomeSectionContentByKey["faq"]["titl
   return { title: textToForm(value.title) };
 }
 
+export const constructionFormSchema = z.object({
+  title: translatableSchema,
+  backgroundMediaId: media,
+});
+export type ConstructionForm = z.input<typeof constructionFormSchema>;
+export function constructionToForm(
+  value: HomeSectionContentByKey["construction"],
+): ConstructionForm {
+  return {
+    title: textToForm(value.title),
+    backgroundMediaId: value.backgroundMediaId ?? null,
+  };
+}
+
 export const processFormSchema = z.object({
   title: translatableSchema,
   steps: z
