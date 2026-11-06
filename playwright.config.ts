@@ -11,6 +11,9 @@ const baseURL = `http://localhost:${port}`;
 /** Where the E2E server sends lead e-mails; tests/e2e/leads.spec.ts reads them from Mailpit. */
 const leadsInbox = "sales@e2e.kalbajarcity.test";
 
+/** The E2E server's cron secret; tests/e2e/news-editor.spec.ts triggers scheduled publishing with it. */
+const cronSecret = "e2e-cron-secret";
+
 /** Specs that change site-wide values; see the `exclusive` project. */
 const exclusive = /\.exclusive\.spec\.ts$/;
 
@@ -81,6 +84,7 @@ export default defineConfig({
       BETTER_AUTH_URL: baseURL,
       NEXT_PUBLIC_SITE_URL: baseURL,
       LEADS_INBOX: leadsInbox,
+      CRON_SECRET: cronSecret,
     },
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

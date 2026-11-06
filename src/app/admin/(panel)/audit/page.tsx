@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
-import { ModuleComing } from "@/components/admin/shell/module-coming";
+import { AuditLog } from "@/components/admin/audit/audit-log";
+import { PageHeader } from "@/components/admin/shell/page-header";
+import { getDb } from "@/db";
+import { auditFilterOptions } from "@/lib/admin/audit-log";
 import { t } from "@/lib/admin/messages";
 import { adminModules } from "@/lib/admin/navigation";
 import { requireUser } from "@/lib/auth/session";
@@ -9,8 +13,15 @@ export const metadata: Metadata = { title: t("nav.audit") };
 
 export const instant = false;
 
-// The module arrives with its own issue; until then the menu link opens this.
+/** The audit log viewer (#27). Read-only, by design: rows are only ever inserted. */
 export default async function AuditPage() {
   await requireUser(adminModules.audit.permission);
-  return <ModuleComing title={t("nav.audit")} description={t("module.audit")} />;
+  await connection();
+  const options = await auditFilterOptions(getDb());
+  return (
+    <>
+      <PageHeader title={t("nav.audit")} description={t("module.audit")} />
+      <AuditLog {...options} />
+    </>
+  );
 }

@@ -4,7 +4,6 @@ import { GridLines } from "@/components/motion/grid-lines";
 import { Scene, SceneLayer } from "@/components/motion/scene";
 import { Scrub } from "@/components/motion/scrub";
 import { SplitWord } from "@/components/motion/split-word";
-import { defaultImage } from "@/content/defaults";
 import type { Locale } from "@/i18n/routing";
 import type { HomeSection } from "@/lib/public/home";
 
@@ -25,7 +24,7 @@ const windowClip = { closed: "inset(31.4% 25vw)", open: "inset(0% 0vw)" };
  * landscape is too light under small text. Stacked (phones, reduced
  * motion), the window is simply open.
  */
-export async function Amenities({ title, items, locale }: AmenitiesProps) {
+export async function Amenities({ title, items, window, locale }: AmenitiesProps) {
   const t = await getTranslations("Home.words");
   const labels = items.slice(0, 4);
 
@@ -76,7 +75,7 @@ export async function Amenities({ title, items, locale }: AmenitiesProps) {
               to={{ scale: "1.15" }}
               className="size-full"
             >
-              <Photo image={defaultImage("home.amenities.window", locale)} sizes={fullBleed} />
+              <Photo image={window} sizes={fullBleed} />
             </Scrub>
           </Scrub>
           {labels.length > 0 && (

@@ -99,7 +99,8 @@ function FullForm({
   const [alert, setAlert] = useState<string | null>(null);
   const form = useAdminForm(apartmentFormSchema, { defaultValues: valuesOf(apartment) });
   const busy = creating || updating || removing;
-  useUnsavedChangesGuard(form.formState.isDirty && !form.formState.isSubmitSuccessful);
+  // Every successful save resets the form; a failed one leaves it dirty.
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   // Floors grouped by block, in the structure's order.
   const floorGroups = [...new Set(floors.map((floor) => floor.block))].map((block) => ({
@@ -130,6 +131,7 @@ function FullForm({
         toast.success(t("apartments.saved"));
       } else {
         const created = await create(body).unwrap();
+        form.reset(form.getValues());
         toast.success(t("apartments.created"));
         router.push(`${base}/${created.id}`);
       }
@@ -241,7 +243,7 @@ function StatusForm({ apartment }: { apartment: AdminApartment }) {
   const [update, { isLoading }] = useUpdateApartmentMutation();
   const [alert, setAlert] = useState<string | null>(null);
   const form = useAdminForm(statusSchema, { defaultValues: { status: apartment.status } });
-  useUnsavedChangesGuard(form.formState.isDirty && !form.formState.isSubmitSuccessful);
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   const onSubmit = form.handleSubmit(async ({ status }) => {
     setAlert(null);

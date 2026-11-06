@@ -22,9 +22,16 @@ import { media } from "./media";
 
 const sortOrder = () => integer("sort_order").notNull().default(0);
 
-/** A published row needs a publication date; a draft may have one scheduled. */
+/** A published row needs a publication date. */
 const publishedHasDate = (name: string, status: AnyPgColumn, publishedAt: AnyPgColumn) =>
   check(name, sql`${status} <> 'published' or ${publishedAt} is not null`);
+
+/**
+ * Only a draft waits for a scheduled publication; publishing clears it
+ * (`/api/v1/internal/scheduled-publications`, #25).
+ */
+const scheduledIsDraft = (name: string, status: AnyPgColumn, scheduledAt: AnyPgColumn) =>
+  check(name, sql`${status} = 'draft' or ${scheduledAt} is null`);
 
 export const galleryCategories = pgTable("gallery_categories", {
   id: id(),
@@ -63,11 +70,14 @@ export const news = pgTable(
     coverMediaId: uuid("cover_media_id").references(() => media.id, { onDelete: "restrict" }),
     status: publishStatus("status").notNull().default("draft"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    /** When a draft publishes itself; null when it is not scheduled. */
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [
     index("news_published_idx").on(t.status, t.publishedAt),
     publishedHasDate("news_published_has_date", t.status, t.publishedAt),
+    scheduledIsDraft("news_scheduled_is_draft", t.status, t.scheduledAt),
   ],
 );
 
@@ -84,9 +94,12 @@ export const constructionUpdates = pgTable(
     progressPercent: smallint("progress_percent").notNull(),
     status: publishStatus("status").notNull().default("draft"),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    /** When a draft publishes itself; null when it is not scheduled. */
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [
+    scheduledIsDraft("construction_updates_scheduled_is_draft", t.status, t.scheduledAt),
     check("construction_updates_progress_range", sql`${t.progressPercent} between 0 and 100`),
     check("construction_updates_first_of_month", sql`extract(day from ${t.month}) = 1`),
     publishedHasDate("construction_updates_published_has_date", t.status, t.publishedAt),

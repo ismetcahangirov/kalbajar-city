@@ -34,3 +34,18 @@ export function groupLayouts(
   }
   return [...groups.values()].sort((a, b) => a.rooms - b.rooms);
 }
+
+/**
+ * The groups the console features, in its order. A chosen room count with no
+ * layout left is skipped; with none of them left, or none chosen, every group
+ * shows, so the section never ends up empty because a layout was deleted.
+ */
+export function featuredGroups(
+  groups: readonly LayoutGroup[],
+  rooms: readonly number[] | null | undefined,
+): LayoutGroup[] {
+  const featured = (rooms ?? []).flatMap(
+    (count) => groups.find((group) => group.rooms === count) ?? [],
+  );
+  return featured.length ? featured : [...groups];
+}
