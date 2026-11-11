@@ -82,29 +82,38 @@ docker run --rm --env-file .env kalbajar-city node scripts/db-migrate.mjs
 
 Every variable the application reads is in `.env.example`. Per environment:
 
-| Variable               | Production                                                            | Staging                                               | Read at  |
-| ---------------------- | --------------------------------------------------------------------- | ----------------------------------------------------- | -------- |
-| `NEXT_PUBLIC_SITE_URL` | `https://kalbajarcity.com`                                            | `https://<STAGING_HOST>`                              | Both     |
-| `SITE_NOINDEX`         | unset                                                                 | `true`                                                | Run time |
-| `DATABASE_URL`         | `postgres://kalbajar:<DB_PASSWORD_PROD>@<PROD_DB_HOST>:5432/kalbajar` | the staging database                                  | Run time |
-| `BETTER_AUTH_URL`      | `https://kalbajarcity.com`                                            | `https://<STAGING_HOST>`                              | Run time |
-| `BETTER_AUTH_SECRET`   | `openssl rand -base64 32`, own value                                  | its own value, never production's                     | Run time |
-| `S3_ENDPOINT`          | `<S3_ENDPOINT>`                                                       | the same store                                        | Run time |
-| `S3_REGION`            | `<S3_REGION>`                                                         | the same                                              | Run time |
-| `S3_BUCKET`            | `<S3_BUCKET_PROD>`                                                    | `<S3_BUCKET_STAGING>`                                 | Run time |
-| `S3_ACCESS_KEY_ID`     | a key scoped to the production bucket                                 | a key scoped to staging's bucket                      | Run time |
-| `S3_SECRET_ACCESS_KEY` | its secret                                                            | its secret                                            | Run time |
-| `S3_PUBLIC_URL`        | `<S3_PUBLIC_URL_PROD>` (bucket or CDN)                                | `<S3_PUBLIC_URL_STAGING>`                             | Run time |
-| `SMTP_HOST`            | `<SMTP_HOST>`                                                         | the same, or a test inbox                             | Run time |
-| `SMTP_PORT`            | `<SMTP_PORT>` (587 with STARTTLS)                                     | the same                                              | Run time |
-| `SMTP_USER`            | `<SMTP_USER>`                                                         | the same                                              | Run time |
-| `SMTP_PASSWORD`        | `<SMTP_PASSWORD>`                                                     | the same                                              | Run time |
-| `SMTP_FROM`            | `Kalbajar City <no-reply@kalbajarcity.com>`                           | `Kalbajar City (staging) <no-reply@kalbajarcity.com>` | Run time |
-| `LEADS_INBOX`          | `<SALES_INBOX>` (owner names it, launch.md 3.2)                       | the maintainer's address                              | Run time |
-| `CRON_SECRET`          | `openssl rand -base64 32`, own value                                  | its own value                                         | Run time |
+| Variable                   | Production                                                            | Staging                                               | Read at  |
+| -------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------- | -------- |
+| `NEXT_PUBLIC_SITE_URL`     | `https://kalbajarcity.com`                                            | `https://<STAGING_HOST>`                              | Both     |
+| `SITE_NOINDEX`             | unset                                                                 | `true`                                                | Run time |
+| `DATABASE_URL`             | `postgres://kalbajar:<DB_PASSWORD_PROD>@<PROD_DB_HOST>:5432/kalbajar` | the staging database                                  | Run time |
+| `BETTER_AUTH_URL`          | `https://kalbajarcity.com`                                            | `https://<STAGING_HOST>`                              | Run time |
+| `BETTER_AUTH_SECRET`       | `openssl rand -base64 32`, own value                                  | its own value, never production's                     | Run time |
+| `S3_ENDPOINT`              | `<S3_ENDPOINT>`                                                       | the same store                                        | Run time |
+| `S3_REGION`                | `<S3_REGION>`                                                         | the same                                              | Run time |
+| `S3_BUCKET`                | `<S3_BUCKET_PROD>`                                                    | `<S3_BUCKET_STAGING>`                                 | Run time |
+| `S3_ACCESS_KEY_ID`         | a key scoped to the production bucket                                 | a key scoped to staging's bucket                      | Run time |
+| `S3_SECRET_ACCESS_KEY`     | its secret                                                            | its secret                                            | Run time |
+| `S3_PUBLIC_URL`            | `<S3_PUBLIC_URL_PROD>` (bucket or CDN)                                | `<S3_PUBLIC_URL_STAGING>`                             | Run time |
+| `SMTP_HOST`                | `<SMTP_HOST>`                                                         | the same, or a test inbox                             | Run time |
+| `SMTP_PORT`                | `<SMTP_PORT>` (587 with STARTTLS)                                     | the same                                              | Run time |
+| `SMTP_USER`                | `<SMTP_USER>`                                                         | the same                                              | Run time |
+| `SMTP_PASSWORD`            | `<SMTP_PASSWORD>`                                                     | the same                                              | Run time |
+| `SMTP_FROM`                | `Kalbajar City <no-reply@kalbajarcity.com>`                           | `Kalbajar City (staging) <no-reply@kalbajarcity.com>` | Run time |
+| `LEADS_INBOX`              | `<SALES_INBOX>` (owner names it, launch.md 3.2)                       | the maintainer's address                              | Run time |
+| `CRON_SECRET`              | `openssl rand -base64 32`, own value                                  | its own value                                         | Run time |
+| `TRUSTED_CLIENT_IP_HEADER` | `cf-connecting-ip`                                                    | `cf-connecting-ip`                                    | Run time |
 
 Never copy production's `BETTER_AUTH_SECRET`, `CRON_SECRET` or S3 keys into
 staging. A staging leak must not open production.
+
+`TRUSTED_CLIENT_IP_HEADER` is the only header the lead rate limit, the audit
+log and the sign-in rate limit read the client's IP from. Both environments
+sit behind Cloudflare, which sets `CF-Connecting-IP` itself; the first
+`X-Forwarded-For` entry is whatever the client sent and is never read while
+the variable is set. Cloudflare must be the only way to the origin (§9:
+the firewall allows ports 80 and 443 from Cloudflare's IP ranges only), or a
+client that reaches the server directly can forge `CF-Connecting-IP` too.
 
 ## 4. Coolify setup
 
@@ -336,17 +345,20 @@ DNS for `kalbajarcity.com` moves to Cloudflare (the owner gives access, #7).
   `<script>`, which breaks the CSP and the hydration of the page
 - **Caching:** the default level. Cloudflare does not cache HTML by default;
   do not add a "cache everything" rule, or console changes stop showing
-- Restrict ports 80 and 443 on the Hetzner firewall to
-  [Cloudflare's IP ranges](https://www.cloudflare.com/ips/) once DNS is
-  switched, so nobody reaches the origin around Cloudflare
+- **Cloudflare must be the only way in.** Restrict ports 80 and 443 on the
+  Hetzner firewall to [Cloudflare's IP ranges](https://www.cloudflare.com/ips/)
+  (IPv4 and IPv6) once DNS is switched, so nobody reaches the origin around
+  Cloudflare. This is not only hardening: the application trusts
+  `CF-Connecting-IP` for the client's IP, and a request that reaches the
+  origin directly can set that header to anything. Revisit the list when
+  Cloudflare publishes changes to its ranges
 
-**Client IP (launch.md 1.1).** The lead rate limit and the audit log read the
-first `X-Forwarded-For` entry. Cloudflare _appends_ to an `X-Forwarded-For`
-the client sent, so behind Cloudflare that first entry can be spoofed. Run
-the check in launch.md 1.1 on production. If the recorded IP is the spoofed
-one, the fix is in the application (read `CF-Connecting-IP`, which
-Cloudflare sets itself), as a separate pull request; it is not part of this
-runbook's setup.
+**Client IP (launch.md 1.1).** With `TRUSTED_CLIENT_IP_HEADER=cf-connecting-ip`
+(§3) the lead rate limit, the audit log and the sign-in rate limit read only
+`CF-Connecting-IP`, which Cloudflare sets itself. `X-Forwarded-For`, which
+Cloudflare _appends_ to rather than replaces, is ignored. A request without
+the header counts as one shared unknown client: limited together, recorded
+with no IP. Run the check in launch.md 1.1 on production.
 
 ## 10. Mail: SMTP, SPF, DKIM
 

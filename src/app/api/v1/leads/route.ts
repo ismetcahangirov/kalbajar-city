@@ -5,7 +5,7 @@ import { after } from "next/server";
 import { getDb } from "@/db";
 import { apiError } from "@/lib/api/errors";
 import { handler } from "@/lib/api/handler";
-import { clientIp } from "@/lib/audit";
+import { clientKey } from "@/lib/http/client-ip";
 import { createLead } from "@/lib/leads/create";
 import { notifyLead } from "@/lib/leads/notify";
 import { leadRateLimit, spamReason } from "@/lib/leads/spam";
@@ -34,8 +34,9 @@ const submit = handler(
  * towards the client's rate limit, valid or not, before the body is read.
  */
 export async function POST(request: Request): Promise<Response> {
-  // Without a proxy header (tests, a misconfigured proxy) callers share one key.
-  const limit = leadRateLimit.hit(clientIp(request.headers) ?? "unknown");
+  // A client whose IP is unknown (no trusted header) shares one key with every
+  // other such client: limited together, never exempt.
+  const limit = leadRateLimit.hit(clientKey(request.headers));
   if (!limit.ok) {
     const response = apiError(429, "RATE_LIMITED", "Too many submissions. Try again later.");
     response.headers.set("Retry-After", String(limit.retryAfter));

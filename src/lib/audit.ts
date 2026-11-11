@@ -1,5 +1,6 @@
 import type { Executor } from "@/db/client";
 import { auditLog } from "@/db/schema";
+import { clientIp } from "@/lib/http/client-ip";
 
 type Row = Record<string, unknown>;
 
@@ -53,12 +54,6 @@ export function diff(
   );
   const pick = (row: Row) => Object.fromEntries(keys.map((key) => [key, plain(row[key])]));
   return { before: pick(before), after: pick(after) };
-}
-
-/** The client's address as the reverse proxy reports it. */
-export function clientIp(headers: Headers | null | undefined): string | null {
-  const forwarded = headers?.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || headers?.get("x-real-ip")?.trim() || null;
 }
 
 /**
