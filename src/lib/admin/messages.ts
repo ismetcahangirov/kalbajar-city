@@ -942,7 +942,7 @@ const messages = {
     "Telefonlar, e-poçt, ünvan və iş saatları: əlaqə səhifəsi və axtarış sistemləri üçün məlumatlar bunları göstərir.",
   "settings.contacts.phones": "Telefonlar",
   "settings.contacts.phonesHint":
-    "Birinci nömrə əsas xəttdir: zəng düymələri onu yığır. İstənilən yazılışla yazın: 012 434 32 32, +994 50 553 55 55.",
+    "Birinci nömrə əsas xəttdir: zəng düymələri onu yığır. İstənilən yazılışla yazın: 012 123 45 67, +994 50 123 45 67.",
   "settings.contacts.mainPhone": "Əsas telefon",
   "settings.contacts.phone": "Telefon {index}",
   "settings.contacts.phoneNumber": "Nömrə",
@@ -1007,11 +1007,22 @@ const messages = {
   "settings.prices.hide": "Gizlət",
 
   "settings.analytics.lead":
-    "Ölçmə identifikatorları. Sayt hələ heç bir izləmə skripti yükləmir; bunlar onun üçün saxlanılır.",
+    "Ölçmə identifikatorları və saytın Google Search Console və Bing Webmaster Tools-da təsdiqi. Boş qalan xana sayta heç nə əlavə etmir.",
   "settings.analytics.ga": "Google Analytics ölçmə ID-si",
   "settings.analytics.gaHint": "G- ilə başlayır.",
   "settings.analytics.pixel": "Meta Pixel ID-si",
   "settings.analytics.pixelHint": "Yalnız rəqəmlər.",
+  "settings.analytics.verification": "Axtarış sistemlərində təsdiq",
+  "settings.analytics.google": "Google Search Console təsdiq kodu",
+  "settings.analytics.googleHint":
+    "Search Console-da “HTML teqi” üsulunu seçin və göstərilən meta teqi və ya yalnız content dəyərini bura yapışdırın.",
+  "settings.analytics.googleVerificationFormat":
+    "Bu, Google təsdiq kodu deyil: yalnız hərf, rəqəm, “-” və “_” olur.",
+  "settings.analytics.bing": "Bing Webmaster təsdiq kodu (msvalidate.01)",
+  "settings.analytics.bingHint":
+    "Bing Webmaster Tools-da “HTML Meta Tag” üsulunu seçin və meta teqi və ya yalnız content dəyərini bura yapışdırın.",
+  "settings.analytics.bingVerificationFormat":
+    "Bu, Bing təsdiq kodu deyil: 32 simvoldur, yalnız 0–9 və A–F.",
 
   "settings.location.lead":
     "Ana səhifənin “Yerləşmə” bölməsi; “Yerləşmə” səhifəsi də məsafələri, yol təsvirini və xəritə şəklini buradan götürür.",
@@ -1298,6 +1309,7 @@ const messages = {
   "faq.placeholder.roomsMax": "Ən çox otaq sayı",
   "faq.placeholder.areaMin": "Ən kiçik planın sahəsi, m² ilə",
   "faq.placeholder.areaMax": "Ən böyük planın sahəsi, m² ilə",
+  "faq.placeholder.phone": "Əsas telefon nömrəsi (Əlaqə ayarlarındakı birinci nömrə)",
   "faq.error.placeholder":
     "Naməlum dəyişən: {names}. Yalnız siyahıdakı dəyişənlərdən istifadə edin.",
   "faq.empty": "Hələ sual yoxdur.",

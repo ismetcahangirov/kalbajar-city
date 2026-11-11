@@ -92,6 +92,8 @@ export type ComplexInput = {
   description: string | null;
   /** Free text from `settings.contacts.address`; null until the owner sets it (#7). */
   address: string | null;
+  /** The main line, E.164: the same number the site's call buttons dial. */
+  telephone: string | null;
   coordinates: { lat: number; lng: number } | null;
   apartments: number | null;
   amenities: string[];
@@ -108,6 +110,7 @@ export function apartmentComplexNode(input: ComplexInput): JsonLdNode {
     address: input.address
       ? { "@type": "PostalAddress", streetAddress: input.address, addressCountry: "AZ" }
       : null,
+    telephone: input.telephone,
     geo: input.coordinates
       ? {
           "@type": "GeoCoordinates",

@@ -1,14 +1,18 @@
 import { localize, type Localized, type Translatable } from "@/i18n/content";
-import { formatArea, formatNumber } from "@/i18n/format";
+import { formatArea, formatNumber, formatPhone } from "@/i18n/format";
 import type { Locale } from "@/i18n/routing";
 import { faqPlaceholderPattern, type FaqPlaceholder } from "@/shared/faq";
 
 import { layoutFacts, type ComplexFacts } from "./facts";
 
-/** What the FAQ's placeholders are filled from: the complex's settings and the layout types. */
+/**
+ * What the FAQ's placeholders are filled from: the complex's settings, the
+ * layout types and the main phone line (`sitePhones`, E.164).
+ */
 export type FaqFacts = {
   complex: ComplexFacts | null;
   layouts: Array<{ rooms: number; areaTotal: string }>;
+  phone: string | null;
 };
 
 /**
@@ -17,7 +21,7 @@ export type FaqFacts = {
  * zero, no layouts) has no value, so nothing wrong or empty is printed.
  */
 export function faqFactValues(
-  { complex, layouts }: FaqFacts,
+  { complex, layouts, phone }: FaqFacts,
   locale: Locale,
 ): Partial<Record<FaqPlaceholder, string>> {
   const values: Partial<Record<FaqPlaceholder, string>> = {};
@@ -40,6 +44,7 @@ export function faqFactValues(
     area("areaMin", summary.areaMin);
     area("areaMax", summary.areaMax);
   }
+  if (phone) values.phone = formatPhone(phone);
   return values;
 }
 

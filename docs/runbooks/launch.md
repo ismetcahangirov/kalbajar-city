@@ -176,10 +176,15 @@ runbook, [`deploy.md`](deploy.md); this list keeps the evidence.
 
 ### 4.1 Search Console and Bing
 
-- **What:** verify the Domain property for `kalbajarcity.com` in Google Search
-  Console (DNS TXT record) and import it into Bing Webmaster Tools. Submit
-  `https://kalbajarcity.com/sitemap.xml` in both, and request indexing of `/`.
-  Steps in `local-search-checklist.md`.
+- **What:** verify `kalbajarcity.com` in Google Search Console, with a DNS TXT
+  record (Domain property) or by pasting the HTML tag into
+  `/admin/ayarlar/analitika`, and in Bing Webmaster Tools (import from Search
+  Console, or paste the `msvalidate.01` tag into the same console page).
+  Submit the sitemap index `https://kalbajarcity.com/sitemap.xml` in both and
+  request indexing of `/`. Steps in `local-search-checklist.md` → Search
+  Console and Bing Webmaster Tools.
+- **Check:** both properties show as verified; Search Console → Sitemaps reads
+  **Success** with the az, en and ru sitemaps discovered.
 - **Who:** owner (accounts), maintainer (DNS record)
 - **Evidence:**
 

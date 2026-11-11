@@ -3,7 +3,7 @@ import "server-only";
 import { asc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { contacts as fallbackContacts } from "@/config/contacts";
+import { contacts as fallbackContacts, sitePhones } from "@/config/contacts";
 import { privacy } from "@/config/privacy";
 import { defaultImage } from "@/content/defaults";
 import { getDb } from "@/db";
@@ -14,7 +14,12 @@ import type { Locale } from "@/i18n/routing";
 import { publicTags } from "@/lib/cache/tags";
 import { layoutFacts, type ComplexFacts, type LayoutFacts } from "@/lib/facts";
 import { homeSectionContentSchemas, type HomeSectionContentByKey } from "@/shared/home-sections";
-import { settingsSchemas, type SettingsKey, type SettingsValue } from "@/shared/settings";
+import {
+  settingsSchemas,
+  siteVerificationFormats,
+  type SettingsKey,
+  type SettingsValue,
+} from "@/shared/settings";
 
 import type { Amenity } from "./home";
 import { toPublicImage, type PublicImage } from "./media";
@@ -65,7 +70,12 @@ export type AboutPage = {
   facts: ComplexFacts | null;
   /** The layout types' room counts and area range; null while none is listed. */
   layouts: LayoutFacts | null;
-  /** The address in the page's locale, from the contacts settings; null while unset. */
+  /**
+   * The address in the page's locale, from the contacts settings; null while
+   * unset or still a seeded stand-in. The facts block is written to be quoted
+   * by search and AI answers, and `llms.txt` repeats it, so it states only
+   * what the structured data states (#29).
+   */
   address: string | null;
   developer: SettingsValue<"developer">;
 };
@@ -103,10 +113,10 @@ export async function getSiteContacts(locale: Locale): Promise<SiteContacts> {
   const flagged = new Set(placeholders?.paths ?? []);
   const maybe = (field: Translatable | null | undefined) =>
     field ? localize(field, locale) : null;
-  const phones = contacts?.phones.length ? contacts.phones : [...fallbackContacts.phones];
+  const phones = sitePhones(contacts);
   return {
     phones,
-    mainPhone: phones[0] ?? fallbackContacts.phones[0],
+    mainPhone: phones[0],
     whatsapp: contacts ? contacts.whatsapp : fallbackContacts.whatsapp,
     email: contacts?.email ?? null,
     address: maybe(contacts?.address),
@@ -149,10 +159,11 @@ export async function getAboutPage(locale: Locale): Promise<AboutPage> {
   cacheLife("days");
 
   const db = getDb();
-  const [complex, developer, contacts, about, layouts] = await Promise.all([
+  const [complex, developer, contacts, placeholders, about, layouts] = await Promise.all([
     readSetting(db, "complex"),
     readSetting(db, "developer"),
     readSetting(db, "contacts"),
+    readSetting(db, "placeholders"),
     readSection(db, "about"),
     db
       .select({ rooms: layoutTypes.rooms, areaTotal: layoutTypes.areaTotal })
@@ -180,7 +191,10 @@ export async function getAboutPage(locale: Locale): Promise<AboutPage> {
     })),
     facts: complex ? (facts as ComplexFacts) : null,
     layouts: layoutFacts(layouts),
-    address: contacts?.address ? text(contacts.address).value : null,
+    address:
+      contacts?.address && !placeholders?.paths.includes("contacts.address")
+        ? text(contacts.address).value
+        : null,
     developer: developer ?? fallbackDeveloper,
   };
 }
@@ -247,6 +261,28 @@ export async function getAnalyticsIds(): Promise<AnalyticsIds> {
     return value && idFormats[key].test(value) ? value : null;
   };
   return { googleAnalyticsId: valid("googleAnalyticsId"), metaPixelId: valid("metaPixelId") };
+}
+
+/** The search engines' site-verification tokens, as the Metadata API's `verification` takes them. */
+export type SiteVerification = { google: string | null; bing: string | null };
+
+/**
+ * The verification tokens the console saved (`settings.analytics`, #28, #29).
+ * A token not in its search engine's format is ignored rather than put into
+ * every page's `<head>`.
+ */
+export async function getSiteVerification(): Promise<SiteVerification> {
+  "use cache";
+  cacheTag(publicTags.settings);
+  cacheLife("days");
+
+  const analytics = await readSetting(getDb(), "analytics");
+  const valid = (token: string | null | undefined, format: RegExp) =>
+    token && format.test(token) ? token : null;
+  return {
+    google: valid(analytics?.googleSiteVerification, siteVerificationFormats.google),
+    bing: valid(analytics?.bingSiteVerification, siteVerificationFormats.bing),
+  };
 }
 
 /** A settings value, or null when the row is missing or no longer matches its schema. */

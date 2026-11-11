@@ -28,6 +28,8 @@ export const faqPlaceholders = [
   "roomsMax",
   "areaMin",
   "areaMax",
+  /** The main line the call buttons dial, so an answer never quotes an old number (#29). */
+  "phone",
 ] as const;
 
 export type FaqPlaceholder = (typeof faqPlaceholders)[number];

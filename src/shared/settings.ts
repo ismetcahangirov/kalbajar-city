@@ -36,6 +36,27 @@ export const amenityIcons = [
 const count = z.int().nonnegative();
 
 /**
+ * What the search engines' verification tokens look like: Google's
+ * `google-site-verification` is URL-safe base64 (43 characters today), Bing's
+ * `msvalidate.01` is 32 hexadecimal digits. Anything else is not put into a
+ * page's `<head>`.
+ */
+export const siteVerificationFormats = {
+  google: /^[A-Za-z0-9_-]{10,100}$/,
+  bing: /^[A-Fa-f0-9]{32}$/,
+} as const;
+
+/**
+ * The token from what an editor pasted: the token itself, or the whole meta
+ * tag the search engine shows (`<meta name="msvalidate.01" content="…" />`).
+ * Blank is null.
+ */
+export function verificationToken(typed: string): string | null {
+  const content = /\bcontent\s*=\s*["']([^"']*)["']/i.exec(typed)?.[1] ?? typed;
+  return content.trim() || null;
+}
+
+/**
  * Each settings row is a key with a JSON value whose shape is fixed here. The
  * console edits them (#27); the seed writes the values known today.
  */
@@ -88,6 +109,13 @@ export const settingsSchemas = {
   analytics: z.object({
     googleAnalyticsId: z.string().min(1).nullable(),
     metaPixelId: z.string().min(1).nullable(),
+    /**
+     * Site ownership for Google Search Console and Bing Webmaster Tools
+     * (#28, #29): the `content` of their verification meta tags. Optional, so
+     * rows saved before these fields existed still parse.
+     */
+    googleSiteVerification: z.string().regex(siteVerificationFormats.google).nullish(),
+    bingSiteVerification: z.string().regex(siteVerificationFormats.bing).nullish(),
   }),
   /** The leads module (#26). */
   leads: z.object({

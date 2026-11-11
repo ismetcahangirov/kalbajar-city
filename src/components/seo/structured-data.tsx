@@ -15,6 +15,7 @@ import {
 } from "@/lib/seo/json-ld";
 import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
 import type { PageHref } from "@/lib/seo/metadata";
+import { getNap } from "@/lib/seo/nap";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
 /**
@@ -28,9 +29,10 @@ export async function StructuredData({
   locale: Locale;
   nodes?: Array<JsonLdNode | null>;
 }) {
-  const [contacts, developer] = await Promise.all([
+  const [contacts, developer, nap] = await Promise.all([
     getSiteContacts(locale).then(confirmedContacts),
     getDeveloper(),
+    getNap(locale),
   ]);
   const { socials } = contacts;
   const organization = organizationNode({
@@ -44,7 +46,7 @@ export async function StructuredData({
       socials.youtube,
       socials.tiktok,
     ],
-    phones: contacts.phones,
+    phones: nap.phones,
     email: contacts.email,
     logo: developer.logo,
   });
@@ -73,22 +75,25 @@ export async function breadcrumbs(
 }
 
 /**
- * The complex as `ApartmentComplex`. Its address and coordinates appear only
- * once the owner has set or confirmed them (#7), never as stand-ins.
+ * The complex as `ApartmentComplex`, with the name, address and phone every
+ * other output uses (`getNap`). Its address and coordinates appear only once
+ * the owner has set or confirmed them (#7), never as stand-ins.
  */
 export async function complexNode(locale: Locale): Promise<JsonLdNode> {
-  const [about, contacts, t] = await Promise.all([
+  const [about, contacts, nap, t] = await Promise.all([
     getAboutPage(locale),
     getSiteContacts(locale).then(confirmedContacts),
+    getNap(locale),
     getTranslations({ locale, namespace: "Metadata" }),
   ]);
   const origin = siteOrigin();
   return apartmentComplexNode({
     origin,
     url: absoluteUrl(getPathname({ href: "/", locale }), origin),
-    name: t("title"),
+    name: nap.name,
     description: t("description"),
-    address: contacts.address?.value ?? null,
+    address: nap.address,
+    telephone: nap.telephone,
     coordinates: contacts.coordinates,
     apartments: about.facts?.apartments ?? null,
     amenities: about.amenities.map((amenity) => amenity.title.value),

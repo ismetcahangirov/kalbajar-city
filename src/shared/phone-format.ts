@@ -11,7 +11,7 @@ const azDigits = 9;
 /**
  * A phone number as a visitor types it, in E.164, or `null` when it is not
  * one. Azerbaijani numbers are accepted in every local notation
- * (`050 123 45 67`, `0501234567`, `50 123 45 67`, `(012) 434 32 32`) and
+ * (`050 123 45 67`, `0501234567`, `50 123 45 67`, `(012) 123 45 67`) and
  * internationally (`+994…`, `00994…`, even with the trunk 0 kept:
  * `+994 050…`); any other country needs its `+` or `00` code.
  */

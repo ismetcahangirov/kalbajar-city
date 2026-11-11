@@ -11,6 +11,7 @@ import { publicTags } from "@/lib/cache/tags";
 import { factSentences } from "@/lib/facts";
 import { llmsTxt, type LlmsDocument, type LlmsLink } from "@/lib/llms";
 import { confirmedContacts } from "@/lib/seo/confirmed-contacts";
+import { getNap } from "@/lib/seo/nap";
 import { absoluteUrl, siteOrigin } from "@/lib/seo/url";
 
 import { loadPublicFaq } from "./home";
@@ -57,9 +58,10 @@ async function getFaq(locale: Locale): Promise<Array<{ question: string; answer:
  * `connection()`, so the origin is the server's.
  */
 export async function buildLlmsTxt(locale: LlmsLocale, origin: string): Promise<string> {
-  const [about, contacts, questions] = await Promise.all([
+  const [about, contacts, nap, questions] = await Promise.all([
     getAboutPage(locale),
     getSiteContacts(locale).then(confirmedContacts),
+    getNap(locale),
     getFaq(locale),
   ]);
   const [meta, t, nav, shell, aboutT, factsT, switcher] = await Promise.all([
@@ -89,10 +91,10 @@ export async function buildLlmsTxt(locale: LlmsLocale, origin: string): Promise<
   const add = (label: string, value: string | null | undefined) => {
     if (value) lines.push({ label, value });
   };
-  for (const phone of contacts.phones) add(t("phone"), formatPhone(phone));
+  for (const phone of nap.phones) add(t("phone"), formatPhone(phone));
   add(t("whatsapp"), contacts.whatsapp && formatPhone(contacts.whatsapp));
   add(t("email"), contacts.email);
-  add(t("address"), contacts.address?.value);
+  add(t("address"), nap.address);
   add(t("hours"), contacts.hours?.value);
   add(t("developer"), about.developer.name);
   add(t("developerWebsite"), about.developer.website);
@@ -118,7 +120,7 @@ export async function buildLlmsTxt(locale: LlmsLocale, origin: string): Promise<
     }));
 
   const doc: LlmsDocument = {
-    title: shell("brand"),
+    title: nap.name,
     summary: `${meta("description")}. ${shell("place")}.`,
     intro: aboutT("lead"),
     facts: { heading: t("facts"), sentences },
