@@ -19,8 +19,9 @@ Run the list top to bottom on the production URL once the site is deployed
 [`local-search-checklist.md`](../local-search-checklist.md) (Google Business
 Profile and Search Console steps in full), `CLAUDE.md` §5 (budgets).
 
-The deployment runbook, `docs/runbooks/deploy.md`, is named in #13 and is not
-written yet. Items 1 to 5 are the checks that belong in it too.
+The steps behind section 1 (Coolify, environment, migrations, backups and the
+restore drill, Cloudflare, mail, staging, alerts) are in the deployment
+runbook, [`deploy.md`](deploy.md); this list keeps the evidence.
 
 ---
 
@@ -62,8 +63,8 @@ written yet. Items 1 to 5 are the checks that belong in it too.
 ### 1.4 Backups and a restore drill
 
 - **What:** nightly `pg_dump`, 14 copies kept. Restore one into staging and
-  check that the site works on it (#13's definition of done). Write the steps
-  into `deploy.md`.
+  check that the site works on it (#13's definition of done). Steps:
+  `deploy.md` sections 7 and 8.
 - **Who:** maintainer
 - **Evidence:**
 

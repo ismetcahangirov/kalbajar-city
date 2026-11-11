@@ -48,6 +48,7 @@ Local ports are offset so the project runs next to others:
 | `pnpm dev`                     | Development server                                                  |
 | `pnpm build`                   | Production build, then copies static assets into `.next/standalone` |
 | `pnpm start`                   | Runs the standalone build                                           |
+| `pnpm build:scripts`           | Bundles the production scripts into `build/scripts` (Docker image)  |
 | `pnpm lint`                    | ESLint, zero warnings allowed                                       |
 | `pnpm format` / `format:check` | Prettier                                                            |
 | `pnpm typecheck`               | Route types, then `tsc --noEmit`                                    |
@@ -131,11 +132,23 @@ so a missing cron shows instead of going unnoticed.
 
 ## Deployment
 
-Production setup is tracked in #13. What must be true before launch, and the
-evidence for each item, is the launch checklist:
+Production setup is tracked in #13. How the site is built, deployed, backed
+up and restored (Docker image, Coolify, migrations before deploy, nightly
+`pg_dump`, Cloudflare, mail, staging, alerts) is the deployment runbook:
+[`docs/runbooks/deploy.md`](docs/runbooks/deploy.md). What must be true
+before launch, and the evidence for each item, is the launch checklist:
 [`docs/runbooks/launch.md`](docs/runbooks/launch.md). The environment
 variables are in `.env.example`; the proxy, cron and object-storage steps are
 described under Leads, Content and Media above.
+
+```bash
+docker build --build-arg NEXT_PUBLIC_SITE_URL=https://kalbajarcity.com -t kalbajar-city .
+docker run --rm --env-file .env kalbajar-city node scripts/db-migrate.mjs   # before each deploy
+docker run --rm --env-file .env -p 3000:3000 kalbajar-city
+```
+
+Staging sets `SITE_NOINDEX=true`: robots.txt disallows everything and every
+public page is `noindex, nofollow`.
 
 ## Database
 

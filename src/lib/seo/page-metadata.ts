@@ -8,6 +8,7 @@ import { getSeoOverride } from "@/lib/public/seo";
 import { getSiteContacts } from "@/lib/public/site";
 
 import { confirmedContacts } from "./confirmed-contacts";
+import { siteIndexable } from "./indexing";
 import { buildPageMetadata, geoMeta, overrideKey, type PageSeo } from "./metadata";
 import { siteOrigin } from "./url";
 
@@ -32,6 +33,6 @@ export async function pageMetadata(page: PageSeo): Promise<Metadata> {
   };
   return buildPageMetadata(
     { ...page, other },
-    { origin: siteOrigin(), siteName: t("title"), override },
+    { origin: siteOrigin(), siteName: t("title"), override, siteNoindex: !siteIndexable() },
   );
 }

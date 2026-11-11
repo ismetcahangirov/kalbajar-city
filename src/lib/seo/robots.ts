@@ -36,3 +36,8 @@ export function robotsRules(): MetadataRoute.Robots["rules"] {
     { userAgent: "*", ...rule },
   ];
 }
+
+/** Staging (`SITE_NOINDEX`, `./indexing`): every crawler is kept out of everything. */
+export function blockAllRules(): MetadataRoute.Robots["rules"] {
+  return [{ userAgent: "*", disallow: "/" }];
+}

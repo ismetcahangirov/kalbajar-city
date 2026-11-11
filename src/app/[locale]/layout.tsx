@@ -19,6 +19,7 @@ import { SkipLink } from "@/components/shell/skip-link";
 import { pickMessages, shellMessages } from "@/i18n/client-messages";
 import { routing, type Locale } from "@/i18n/routing";
 import { getSiteContacts, getSiteVerification } from "@/lib/public/site";
+import { siteIndexable, siteNoindexRobots } from "@/lib/seo/indexing";
 import { verificationMetadata } from "@/lib/seo/metadata";
 import { siteOrigin } from "@/lib/seo/url";
 
@@ -42,6 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: { default: t("title"), template: t("titleTemplate") },
     description: t("description"),
     verification: verificationMetadata(verification),
+    ...(!siteIndexable() && { robots: { ...siteNoindexRobots } }),
   };
 }
 
