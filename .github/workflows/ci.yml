@@ -238,6 +238,11 @@ jobs:
   # seeded database, as a first visit (the preloader included). Both form
   # factors must score 93+ and keep CLS under 0.05. Home on mobile has the
   # least margin (0.94 in the run of #102); the other routes score 1.00.
+  # Mobile LCP (< 2.5 s on home and an apartment) is measured over HTTPS and
+  # HTTP/2, as production serves the site behind Cloudflare: over the plain
+  # HTTP/1.1 of `pnpm start`, Lighthouse's simulation models six cold TCP
+  # connections instead of one, which costs home about 0.6 s that no visitor
+  # pays (tests/lighthouse/h2-proxy.mjs).
   lighthouse:
     name: Lighthouse
     runs-on: ubuntu-latest
@@ -301,6 +306,22 @@ jobs:
           --collect.url=http://localhost:3011/menziller
           --collect.url=http://localhost:3011/menziller/blok-c-menzil-102
           --collect.url=http://localhost:3011/xeberler/lighthouse-meqale
+      # A throwaway self-signed certificate, trusted by nothing but this run's
+      # Chrome (--ignore-certificate-errors in the config).
+      - name: Start the HTTP/2 proxy
+        if: success() || failure()
+        run: |
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj /CN=localhost \
+            -keyout "$RUNNER_TEMP/lh-key.pem" -out "$RUNNER_TEMP/lh-cert.pem" 2> /dev/null
+          nohup node tests/lighthouse/h2-proxy.mjs "$RUNNER_TEMP/lh-key.pem" "$RUNNER_TEMP/lh-cert.pem" 3443 3011 > proxy.log 2>&1 &
+          for i in $(seq 1 30); do curl -skf --http2 https://localhost:3443/api/health > /dev/null && exit 0; sleep 1; done
+          cat proxy.log; exit 1
+      - name: Mobile LCP over HTTP/2, enforced
+        if: success() || failure()
+        run: >-
+          pnpm exec lhci autorun --config=tests/lighthouse/lighthouserc.mobile-h2.json
+          --collect.url=https://localhost:3443/
+          --collect.url=https://localhost:3443/menziller/blok-c-menzil-102
       - uses: actions/upload-artifact@v7
         if: always()
         with:

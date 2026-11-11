@@ -232,7 +232,11 @@ runbook, [`deploy.md`](deploy.md); this list keeps the evidence.
   mobile. LCP is below 2.5 s on both. CLS below 0.05. CI has enforced
   Lighthouse 93+ on mobile since #102, but home passes with little margin
   (0.94) and CI measures a local server, so record the live numbers here,
-  not only CI's.
+  not only CI's. CI also enforces mobile LCP under 2.5 s on both pages, measured
+  over HTTPS and HTTP/2 as Cloudflare serves them (about 2.4 s on home; over
+  plain HTTP/1.1 the same build simulates about 3.0 s, see
+  `tests/lighthouse/h2-proxy.mjs`). PageSpeed on production confirms or
+  refutes that model.
 - **Who:** maintainer
 - **Evidence:**
 
