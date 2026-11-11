@@ -14,6 +14,7 @@ import {
 const facts: FaqFacts = {
   complex: seed.settings.complex,
   layouts: seed.layouts.map(({ rooms, areaTotal }) => ({ rooms, areaTotal })),
+  phone: seed.settings.contacts.phones[0]!,
 };
 
 /** What the public site prints for the seeded FAQ in a locale, as plain text. */
@@ -36,6 +37,7 @@ describe("FAQ placeholders", () => {
       roomsMax: "4",
       areaMin: "62,09 m²",
       areaMax: "186,9 m²",
+      phone: "+994 12 434 32 32",
     });
     expect(Object.keys(faqFactValues(facts, "en")).sort()).toEqual([...faqPlaceholders].sort());
     expect(faqFactValues(facts, "en").totalArea).toBe("22,634 m²");
@@ -54,6 +56,10 @@ describe("FAQ placeholders", () => {
       "There are 10 layouts with 1 to 4 rooms, from 62.09 m² to 186.9 m².",
       "Yes, the complex has an underground car park with 160 spaces.",
     ]);
+    // The viewing answer quotes the main line the call buttons dial, not a typed number (#29).
+    expect(answers("en").at(-1)).toBe(
+      "Choose a time for a viewing in the form on this site, or call +994 12 434 32 32.",
+    );
     expect(answers("ru")[1]).toBe(
       "Планировок — 10: от 1- до 4-комнатных, площадью от 62,09 м² до 186,9 м².",
     );
@@ -81,6 +87,7 @@ describe("FAQ placeholders", () => {
     const unknown: FaqFacts = {
       complex: { ...facts.complex!, parkingSpaces: 0, totalArea: "0" },
       layouts: [],
+      phone: null,
     };
     const shown = publicFaqItems(seed.faq, "en", unknown).map((item) => item.question.value);
     expect(shown).not.toContain("Is there parking?");
@@ -88,7 +95,9 @@ describe("FAQ placeholders", () => {
     expect(shown).toContain("How many apartments are there?");
     expect(shown).toContain("Who is the developer?");
     // Without the complex's settings, only the questions quoting no fact remain.
-    expect(publicFaqItems(seed.faq, "az", { complex: null, layouts: [] })).toHaveLength(3);
+    expect(
+      publicFaqItems(seed.faq, "az", { complex: null, layouts: [], phone: null }),
+    ).toHaveLength(2);
   });
 
   it("leaves out a question with a placeholder the site does not know, in its question too", () => {

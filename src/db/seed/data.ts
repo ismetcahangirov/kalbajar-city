@@ -351,9 +351,9 @@ export const faq = [
       "Как посмотреть квартиру?",
     ),
     answer: t(
-      "Saytdakı formadan baxış üçün vaxt seçin və ya +994 12 434 32 32 nömrəsinə zəng edin.",
-      "Choose a time for a viewing in the form on this site, or call +994 12 434 32 32.",
-      "Выберите время просмотра в форме на сайте или позвоните по номеру +994 12 434 32 32.",
+      "Saytdakı formadan baxış üçün vaxt seçin və ya {phone} nömrəsinə zəng edin.",
+      "Choose a time for a viewing in the form on this site, or call {phone}.",
+      "Выберите время просмотра в форме на сайте или позвоните по номеру {phone}.",
     ),
   },
 ];

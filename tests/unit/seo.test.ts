@@ -221,13 +221,14 @@ describe("JSON-LD builders", () => {
     expect(node.logo).toBe(logo);
   });
 
-  it("adds address and geo to the complex only once they are set", () => {
+  it("adds address, phone and geo to the complex only once they are set", () => {
     const base = {
       origin,
       url: origin,
       name: "Kalbajar City",
       description: null,
       address: null,
+      telephone: null,
       coordinates: null,
       apartments: 143,
       amenities: [],
@@ -235,12 +236,15 @@ describe("JSON-LD builders", () => {
     const without = apartmentComplexNode(base);
     expect(without).not.toHaveProperty("address");
     expect(without).not.toHaveProperty("geo");
+    expect(without).not.toHaveProperty("telephone");
     expect(without).not.toHaveProperty("amenityFeature");
     const withPlace = apartmentComplexNode({
       ...base,
       address: "Kəlbəcər şəhəri",
+      telephone: "+994124343232",
       coordinates: { lat: 40.1, lng: 46.04 },
     });
+    expect(withPlace.telephone).toBe("+994124343232");
     expect(withPlace.address).toEqual({
       "@type": "PostalAddress",
       streetAddress: "Kəlbəcər şəhəri",

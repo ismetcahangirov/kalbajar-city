@@ -14,6 +14,17 @@ export const contacts = {
 } as const;
 
 /**
+ * The phones the site shows, main line first: the console's
+ * (`settings.contacts`), or the ones above while no valid row is saved. The
+ * shell, the contact page, the structured data, `llms.txt` and the FAQ's
+ * `{phone}` all read them through this, so they always name the same number.
+ */
+export function sitePhones(saved: { phones: string[] } | null | undefined): [string, ...string[]] {
+  const [main, ...rest] = saved?.phones.length ? saved.phones : contacts.phones;
+  return [main!, ...rest];
+}
+
+/**
  * The wa.me link for a number in E.164. With `text`, WhatsApp opens the chat
  * with that message typed in, ready to send (`Shell.whatsappMessage`).
  */

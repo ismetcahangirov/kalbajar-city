@@ -3,6 +3,7 @@ import "server-only";
 import { asc, desc, eq, inArray } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
+import { sitePhones } from "@/config/contacts";
 import { defaultImage, type DefaultSlot } from "@/content/defaults";
 import { getDb } from "@/db";
 import { settings as seedSettings } from "@/db/seed/data";
@@ -122,18 +123,25 @@ async function readComplex(db: Executor): Promise<SettingsValue<"complex">> {
   return saved.success ? saved.data : seedSettings.complex;
 }
 
+/** The main line the call buttons dial, for the FAQ's `{phone}`. */
+async function readMainPhone(db: Executor): Promise<string> {
+  const [row] = await db.select().from(settings).where(eq(settings.key, "contacts"));
+  return sitePhones(settingsSchemas.contacts.safeParse(row?.value).data)[0];
+}
+
 /**
  * The published FAQ in one locale, its placeholders filled from the same facts
  * the home page shows, for readers other than the home page (`llms.txt`).
  * The home page and its `FAQPage` structured data list the same items.
  */
 export async function loadPublicFaq(db: Executor, locale: Locale) {
-  const [rows, complex, layouts] = await Promise.all([
+  const [rows, complex, layouts, phone] = await Promise.all([
     loadPublishedFaq(db),
     readComplex(db),
     db.select({ rooms: layoutTypes.rooms, areaTotal: layoutTypes.areaTotal }).from(layoutTypes),
+    readMainPhone(db),
   ]);
-  return publicFaqItems(rows, locale, { complex, layouts });
+  return publicFaqItems(rows, locale, { complex, layouts, phone });
 }
 
 /** The card-zoom scenes shown while the console has chosen none (spec §8). */
@@ -168,11 +176,12 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
   cacheLife("days");
 
   const db = getDb();
-  const [sectionRows, complex, layouts, faqRows, [latestUpdate]] = await Promise.all([
+  const [sectionRows, complex, layouts, faqRows, phone, [latestUpdate]] = await Promise.all([
     db.select().from(homeSections),
     readComplex(db),
     db.select().from(layoutTypes).orderBy(asc(layoutTypes.rooms), asc(layoutTypes.areaTotal)),
     loadPublishedFaq(db),
+    readMainPhone(db),
     db
       .select()
       .from(constructionUpdates)
@@ -368,7 +377,7 @@ export async function getHomePage(locale: Locale): Promise<HomeSection[]> {
         };
       case "faq": {
         // Placeholders filled from the facts above; a question quoting an unknown fact is left out.
-        const items = publicFaqItems(faqRows, locale, { complex, layouts });
+        const items = publicFaqItems(faqRows, locale, { complex, layouts, phone });
         return items.length ? { kind: "faq", title: text(section.content.title), items } : null;
       }
       case "cta":
