@@ -15,7 +15,10 @@ import { SettingsForm } from "./settings-form";
 
 type Analytics = SettingsValue<"analytics">;
 
-/** The measurement IDs; the site loads no tracking script yet, whatever is set here. */
+/**
+ * The measurement IDs, and the search engines' site-verification tokens that
+ * every public page then carries in its `<head>` (#28, #29).
+ */
 export function AnalyticsForm({ initial, readOnly }: { initial: Analytics; readOnly: boolean }) {
   const [save] = useUpdateSettingMutation();
   const form = useAdminForm(analyticsFormSchema, { defaultValues: analyticsToForm(initial) });
@@ -45,6 +48,23 @@ export function AnalyticsForm({ initial, readOnly }: { initial: Analytics; readO
         autoComplete="off"
         spellCheck={false}
       />
+      <fieldset className="flex min-w-0 flex-col gap-6">
+        <legend className="text-sm mb-2 font-medium">{t("settings.analytics.verification")}</legend>
+        <TextField<FormValues>
+          name="googleSiteVerification"
+          label={t("settings.analytics.google")}
+          description={t("settings.analytics.googleHint")}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <TextField<FormValues>
+          name="bingSiteVerification"
+          label={t("settings.analytics.bing")}
+          description={t("settings.analytics.bingHint")}
+          autoComplete="off"
+          spellCheck={false}
+        />
+      </fieldset>
     </SettingsForm>
   );
 }

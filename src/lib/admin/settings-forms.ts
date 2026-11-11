@@ -1,10 +1,16 @@
 import { z } from "zod";
 
 import type { Translatable } from "@/i18n/content";
+import type { MessageKey } from "@/lib/admin/messages";
 import type { HomeSectionContentByKey } from "@/shared/home-sections";
 import { areaInputSchema, intInput, optionalTranslatableSchema } from "@/shared/inventory";
 import { phoneInputSchema } from "@/shared/phone";
-import { amenityIcons, type SettingsValue } from "@/shared/settings";
+import {
+  amenityIcons,
+  siteVerificationFormats,
+  verificationToken,
+  type SettingsValue,
+} from "@/shared/settings";
 import { translatableSchema } from "@/shared/translatable";
 
 /*
@@ -178,9 +184,25 @@ export const pricesFormSchema = z.object({ visible: z.boolean() });
 
 export type PricesForm = z.input<typeof pricesFormSchema>;
 
+/** A verification token, or the whole meta tag pasted from the search engine. */
+function verification(format: RegExp, message: MessageKey) {
+  return z.preprocess(
+    (value) => (typeof value === "string" ? verificationToken(value) : value),
+    z.string().regex(format, message).nullable(),
+  );
+}
+
 export const analyticsFormSchema = z.object({
   googleAnalyticsId: optional(z.string().max(64)),
   metaPixelId: optional(z.string().max(64)),
+  googleSiteVerification: verification(
+    siteVerificationFormats.google,
+    "settings.analytics.googleVerificationFormat",
+  ),
+  bingSiteVerification: verification(
+    siteVerificationFormats.bing,
+    "settings.analytics.bingVerificationFormat",
+  ),
 });
 
 export type AnalyticsForm = z.input<typeof analyticsFormSchema>;
@@ -189,6 +211,8 @@ export function analyticsToForm(value: SettingsValue<"analytics">): AnalyticsFor
   return {
     googleAnalyticsId: value.googleAnalyticsId ?? "",
     metaPixelId: value.metaPixelId ?? "",
+    googleSiteVerification: value.googleSiteVerification ?? "",
+    bingSiteVerification: value.bingSiteVerification ?? "",
   };
 }
 

@@ -164,3 +164,19 @@ export function buildPageMetadata(page: PageSeo, context: SeoContext): Metadata 
     ...(page.other && { other: page.other }),
   };
 }
+
+/**
+ * The search engines' ownership meta tags (#28, #29): Google's through the
+ * Metadata API's `google` field, Bing's `msvalidate.01` through `other`.
+ * Nothing at all while neither token is set.
+ */
+export function verificationMetadata(tokens: {
+  google: string | null;
+  bing: string | null;
+}): Metadata["verification"] {
+  if (!tokens.google && !tokens.bing) return undefined;
+  return {
+    ...(tokens.google && { google: tokens.google }),
+    ...(tokens.bing && { other: { "msvalidate.01": tokens.bing } }),
+  };
+}
