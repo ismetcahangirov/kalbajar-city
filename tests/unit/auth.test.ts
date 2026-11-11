@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
-import { clientIp, diff } from "@/lib/audit";
+import { diff } from "@/lib/audit";
 import { safeAdminRedirect } from "@/lib/auth/paths";
 import { can, canManageUser, type Permission, type UserRole } from "@/lib/auth/permissions";
 import { guardAdmin } from "@/lib/auth/guard";
@@ -136,14 +136,6 @@ describe("audit diff", () => {
     const plain = { id: "1", banExpires: "2026-11-02T00:00:00.000Z" };
     expect(diff(null, row)).toEqual({ before: null, after: plain });
     expect(diff(row, null)).toEqual({ before: plain, after: null });
-  });
-
-  it("reads the client IP from the proxy headers", () => {
-    expect(clientIp(new Headers({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }))).toBe(
-      "203.0.113.7",
-    );
-    expect(clientIp(new Headers({ "x-real-ip": "203.0.113.8" }))).toBe("203.0.113.8");
-    expect(clientIp(new Headers())).toBeNull();
   });
 });
 

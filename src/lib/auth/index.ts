@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { accounts, rateLimits, sessions, users, verifications } from "@/db/schema";
 import { t } from "@/lib/admin/messages";
+import { trustedClientIpHeader } from "@/lib/http/client-ip";
 import { escapeHtml, sendMail } from "@/lib/mail";
 
 import { createHooks } from "./hooks";
@@ -60,6 +61,7 @@ async function sendResetEmail(user: { email: string; name: string }, url: string
 function createAuth() {
   const db = getDb();
   const hooks = createHooks(getDb);
+  const ipHeader = trustedClientIpHeader();
 
   return betterAuth({
     appName: "Kalbajar City",
@@ -117,6 +119,13 @@ function createAuth() {
         "/reset-password": { window: 60, max: 5 },
       },
     },
+    // The client IP for the rate limit above and the sessions' IP, by the same
+    // rule as the lead rate limit and the audit log (`@/lib/http/client-ip`):
+    // only the trusted header, a single valid IP. Without one, Better Auth
+    // counts the request in one bucket per path shared by every such client.
+    // Unset (development, CI), Better Auth reads a single-value
+    // `X-Forwarded-For`, as before.
+    ...(ipHeader ? { advanced: { ipAddress: { ipAddressHeaders: [ipHeader] } } } : {}),
     hooks,
     databaseHooks: {
       session: {

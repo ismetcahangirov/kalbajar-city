@@ -94,9 +94,11 @@ The inquiry, viewing and call-back forms are one component,
   caught by either is answered `201` like a real one and not stored
 - Rate limit: five submissions per client IP in ten minutes, then `429` with
   `Retry-After`. It is counted in memory (`src/lib/rate-limit.ts`), which holds
-  because production runs one standalone Node process. The client IP is the
-  first `X-Forwarded-For` entry, so the reverse proxy must overwrite that
-  header rather than append to one the client sent
+  because production runs one standalone Node process. The client IP comes
+  from `src/lib/http/client-ip.ts`: only the header `TRUSTED_CLIENT_IP_HEADER`
+  names (`cf-connecting-ip` behind Cloudflare) when it is set, the first
+  `X-Forwarded-For` entry otherwise. Clients whose IP is unknown share one
+  limit
 - Each stored lead is e-mailed after the answer to `LEADS_INBOX` (or the
   contacts e-mail in settings) with a link to it in the console. A failed
   e-mail never loses the lead: the attempt is recorded on its timeline as a

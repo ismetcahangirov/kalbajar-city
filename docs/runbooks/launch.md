@@ -27,14 +27,16 @@ runbook, [`deploy.md`](deploy.md); this list keeps the evidence.
 
 ## 1. Deployment (#13)
 
-### 1.1 The proxy overwrites `X-Forwarded-For`
+### 1.1 The client IP comes from Cloudflare, not `X-Forwarded-For`
 
-- **What:** the lead rate limit and the audit log trust the first
-  `X-Forwarded-For` entry. The reverse proxy (Coolify's, behind Cloudflare)
-  must replace the header, not append to one the client sent. From outside,
+- **What:** `TRUSTED_CLIENT_IP_HEADER=cf-connecting-ip` is set (deploy.md §3),
+  so the lead rate limit, the audit log and the sign-in rate limit read only
+  Cloudflare's `CF-Connecting-IP`. The Hetzner firewall allows ports 80 and
+  443 from Cloudflare's IP ranges only (deploy.md §9): `curl` the server's IP
+  directly and confirm it does not answer. From outside, through the domain,
   send a request with `X-Forwarded-For: 203.0.113.9` and confirm, with the
-  console's audit log or a test lead, that the recorded IP is not that value.
-  Run one app instance: the lead rate limit is in memory.
+  console's audit log or a test lead, that the recorded IP is your real one,
+  not that value. Run one app instance: the lead rate limit is in memory.
 - **Who:** maintainer
 - **Evidence:**
 

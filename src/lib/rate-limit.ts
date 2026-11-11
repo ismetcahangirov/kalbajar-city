@@ -3,9 +3,10 @@
  * Node process, so one map sees every request; more than one process (or
  * instance) would each count on their own and need a shared store instead.
  *
- * The key is usually the client's IP from `clientIp()`, which trusts the
- * first `X-Forwarded-For` entry: the reverse proxy in front of the app must
- * overwrite that header, never append a client-supplied one (see #13).
+ * The key is usually `clientKey()` from `@/lib/http/client-ip`: the client's
+ * IP from the header `TRUSTED_CLIENT_IP_HEADER` names (Cloudflare's
+ * `cf-connecting-ip` in production), or one key shared by every client whose
+ * IP is unknown.
  */
 
 export type RateLimitResult =
