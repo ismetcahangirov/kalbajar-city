@@ -78,7 +78,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   },
   "packageManager": "pnpm@11.11.0",
   "engines": {
