@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getPathname } from "@/i18n/navigation";
 import { defaultLocale, locales, type Locale } from "@/i18n/routing";
 
+import { siteNoindexRobots } from "./indexing";
 import { absoluteUrl } from "./url";
 
 /** A public page's address, as `Link` and `getPathname` take it. */
@@ -46,6 +47,8 @@ export type SeoContext = {
   origin: string;
   siteName: string;
   override: SeoOverride | null;
+  /** The whole deployment is hidden from search engines (`SITE_NOINDEX`, staging). */
+  siteNoindex?: boolean;
 };
 
 /** Open Graph locale codes. */
@@ -122,7 +125,7 @@ export function buildPageMetadata(page: PageSeo, context: SeoContext): Metadata 
   const { origin, siteName, override } = context;
   const paths = localizedPaths(page.href);
   const canonical = absoluteUrl(paths[page.locale], origin);
-  const indexable = page.indexable !== false && !override?.noindex;
+  const indexable = !context.siteNoindex && page.indexable !== false && !override?.noindex;
 
   const title = override?.title ?? page.title;
   const description = override?.description ?? page.description ?? undefined;
@@ -142,7 +145,11 @@ export function buildPageMetadata(page: PageSeo, context: SeoContext): Metadata 
     alternates: indexable
       ? { canonical, languages: languageAlternates(page.href, origin) }
       : { canonical },
-    robots: indexable ? undefined : { index: false, follow: true },
+    robots: context.siteNoindex
+      ? { ...siteNoindexRobots }
+      : indexable
+        ? undefined
+        : { index: false, follow: true },
     openGraph: {
       type: page.article ? "article" : "website",
       siteName,

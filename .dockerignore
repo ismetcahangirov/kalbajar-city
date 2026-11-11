@@ -1,0 +1,36 @@
+# What the image build (Dockerfile) does not need. Secrets never enter the
+# build context: the environment is given to the container at run time.
+.env
+.env.*
+!.env.example
+
+.git
+.github
+.claude
+node_modules
+.next
+build
+out
+coverage
+
+# Tests, reports and docs are not part of the server.
+tests
+playwright-report
+test-results
+blob-report
+lighthouse-report
+.lighthouseci
+playwright.config.ts
+vitest.config.mts
+vitest.db.config.mts
+docs
+
+# Source material for public/ and src/fonts (scripts/fonts-subset.py,
+# scripts/defaults-encode.mts); the build reads the generated files.
+assets
+
+*.log
+.DS_Store
+Dockerfile
+.dockerignore
+docker-compose.yml
