@@ -6,11 +6,17 @@ Google, Meta and Microsoft accounts.
 
 ## What the site already does
 
-- **One source of truth.** The name, phones, e-mail, address, office hours and
-  coordinates come from the console settings (`/admin/ayarlar`). The contact
-  page, the structured data (`ApartmentComplex`, `Organization`), the
-  about page's facts block and `llms.txt` all read them from there. Change a
-  value once, in the console, and every place follows.
+- **One source of truth.** The phones, e-mail, address, office hours and
+  coordinates come from the console settings (`/admin/ayarlar`); the name is
+  the wordmark's (`Shell.brand` in the message catalogues, `Kalbajar City` in
+  every language). The header, footer, contact page, the structured data
+  (`ApartmentComplex` with name, address and phone, `Organization`), the
+  about page's facts block, the FAQ (its `{phone}` placeholder) and `llms.txt`
+  all read them from there (`src/lib/seo/nap.ts`). Change a value once, in the
+  console, and every place follows. `tests/unit/search-console.test.ts` fails
+  if a phone number is typed into the code anywhere else, and
+  `tests/e2e/search-console.exclusive.spec.ts` checks that the pages, the
+  structured data and `llms.txt` state the same name, address and phone.
 - **No stand-ins for machines.** The seeded stand-ins (the town as the
   address, approximate coordinates, sample hours and e-mail) show on the pages
   until replaced, as decided, but the geo meta, the structured data and
@@ -47,8 +53,10 @@ developer` (or `Apartment complex` once residents move in).
    If the sales office is elsewhere, list the sales office and set the pin on
    it. Then enter the confirmed coordinates in the console too, so the site's
    map and geo meta match the pin.
-4. **Phone**: the main line, `+994 12 434 32 32`, the first phone in the
-   console. Use the same number on Instagram.
+4. **Phone**: the main line, the first phone in `/admin/ayarlar` → contacts
+   (today `+994 12 434 32 32`). Use the same number on Instagram. If the main
+   line ever changes, change it in the console first, then here and on
+   Instagram the same day.
 5. **Website link with UTM**, so visits from the listing are counted apart in
    GA4 and in the leads module:
    `https://kalbajarcity.com/?utm_source=google&utm_medium=organic&utm_campaign=gbp`
@@ -68,16 +76,41 @@ developer` (or `Apartment complex` once residents move in).
 
 ## Search Console and Bing Webmaster Tools
 
-Verification needs the owner's accounts and access to the domain's DNS, so it
-is not done in code.
+Verification needs the owner's accounts. Either verify through DNS (a TXT
+record, for which the maintainer needs DNS access) or, without DNS, paste the
+meta tag into the console: the site then carries it in the `<head>` of every
+public page.
 
-1. [Google Search Console](https://search.google.com/search-console): add a
-   **Domain** property for `kalbajarcity.com` and verify it with the DNS TXT
-   record Google shows. Then submit `https://kalbajarcity.com/sitemap.xml`.
-2. [Bing Webmaster Tools](https://www.bing.com/webmasters): import the site
-   from Search Console (quickest), or verify with a DNS record. Submit the same
-   sitemap. Bing's index also feeds several AI assistants.
-3. Link Search Console to the GA4 property (GA4 → Admin → Product links).
+1. [Google Search Console](https://search.google.com/search-console):
+   - **With DNS (preferred):** add a **Domain** property for
+     `kalbajarcity.com` and add the TXT record Google shows.
+   - **Without DNS:** add a **URL prefix** property for
+     `https://kalbajarcity.com/`, choose **HTML tag**, and copy the whole
+     `<meta name="google-site-verification" content="…" />` tag. Paste it into
+     `/admin/ayarlar/analitika` → **Google Search Console təsdiq kodu** and
+     save (the console keeps only the `content` value and rejects anything
+     that is not a Google token). Back in Search Console, press **Verify**.
+     Leave the token in the console afterwards: Google re-checks it, and
+     removing it unverifies the property.
+   - **Check:** view the source of `https://kalbajarcity.com/` and find
+     `<meta name="google-site-verification"`.
+2. **Submit the sitemap** in Search Console → Sitemaps:
+   `https://kalbajarcity.com/sitemap.xml`. It is the sitemap index; Google
+   finds the per-locale sitemaps (`/sitemap/az.xml`, `/sitemap/en.xml`,
+   `/sitemap/ru.xml`) through it, so submit only the index. The status should
+   read **Success** with the three sitemaps discovered.
+3. [Bing Webmaster Tools](https://www.bing.com/webmasters):
+   - **Quickest:** **Import** the site from Search Console once it is verified
+     there; Bing takes the property and the sitemap with it.
+   - **Or the meta tag:** add `https://kalbajarcity.com/`, choose **HTML Meta
+     Tag**, copy `<meta name="msvalidate.01" content="…" />`, paste it into
+     `/admin/ayarlar/analitika` → **Bing Webmaster təsdiq kodu**, save, then
+     press **Verify** in Bing.
+   - Submit the same `https://kalbajarcity.com/sitemap.xml` under
+     **Sitemaps**. Bing's index also feeds several AI assistants.
+4. Link Search Console to the GA4 property (GA4 → Admin → Product links).
+5. Record the evidence in `docs/runbooks/launch.md` → 4.1: screenshots of
+   the verified properties and the sitemap status, with the date.
 
 ## GA4 and Meta Pixel
 
